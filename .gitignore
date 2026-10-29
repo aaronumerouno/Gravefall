@@ -1,0 +1,36 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor and IDE settings
+.vscode/
+.idea/
+*.swp
+*~
+
+# Secrets and local settings (never commit these)
+.env
+.env.*
+*.pem
+*.key
+.claude/settings.local.json
+
+# Dependencies and build tooling (for when a build script is added)
+node_modules/
+.cache/
+coverage/
+
+# Logs and temporary files
+*.log
+*.tmp
+.tmp/
+scratch/
+
+# Test output (for example screenshots from checks)
+screenshots/
+
+# Built file: leave this line commented out so the published
+# dist/Gravefall.html stays in the repository. Uncomment it only if
+# you decide to build the file in a pipeline instead.
+# dist/

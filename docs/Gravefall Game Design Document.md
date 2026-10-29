@@ -149,7 +149,9 @@ The game is one self-contained HTML file of about 61 KB (roughly 489 lines and 5
 
 **Accessibility.** Reduced-motion settings stop the animations, buttons have visible keyboard focus, and the story and result areas are live regions.
 
-**Hosting limits.** The page is published as a claude.ai artifact (16 MB cap). It uses no browser storage, so progress is lost on refresh.
+**Hosting limits.** The page is published as a claude.ai artifact (16 MB cap).
+
+**Saving.** Progress (scene, Vitality, a fight in progress, inventory, equipped gear, stat boosts and history) is saved to `localStorage` per chapter after every action and restored on load. Anything read back from storage is checked against the game's own scenes, items and numeric ranges before use, and a bad or tampered save falls back to a fresh start instead of crashing. A "New game" button clears saved progress. `localStorage` is per browser profile, so progress does not follow the player to another device or browser.
 
 **Testing so far.** Automated checks in a desktop browser found no script errors and screenshots confirmed the art and chapter switching at desktop and phone widths. Real phones, real voices and a full play-through of each chapter are untested.
 
@@ -236,7 +238,6 @@ No exploitable vulnerability was found, and the overall risk is low. The game ta
 
 ## Known limitations
 
-- **No saving:** a refresh loses all progress, including the gear carried between chapters.
 - **Untested balance:** enemy stats and item values are first guesses and no full run of either chapter has been played or simulated.
 - **Linear story:** most choices lead to the same next scene, so replaying changes little beyond dice results and a few stat boosts.
 - **Voice quality varies:** the narrator uses whatever voices the device has, so the sound cannot be guaranteed.

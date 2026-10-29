@@ -30,6 +30,7 @@ Ironwolf Company's Third Platoon died on the approach to the carrier *Gravefall*
 
 - **Chapters as dropdowns:** each chapter opens like an accordion and keeps its own progress. Finishing a chapter carries your gear and stat boosts into the next.
 - **Dice-driven choices:** story choices and combat actions roll a d20 plus a stat. A natural 20 is a critical hit and heals a little; a natural 1 is a fumble and costs health.
+- **Choices that echo forward:** a handful of key choices in each chapter set a flag (which door you forced, how you approached the boss, which item you took) regardless of whether the roll succeeded — the *approach*, not the outcome, is what's remembered. Later scenes, boss introductions and the victory ending reference it, so two runs of the same chapter read differently. Flags reset each chapter; they don't carry into the next.
 - **Combat:** enemy health bars, visible enemy stats, four actions (Strike, Reckless blow, Aimed shot, Guard), and a result box that shows the full damage calculation.
 - **Story text in the result:** about 60 varied result lines with spoken dialogue, so fights do not repeat. Consecutive hits continue the scene ("Again you hit for 12").
 - **Inventory:** a 10-slot pack, weak or strong loot from small or big monsters, take / leave / swap decisions (always resolved before the next scene's choices appear), equipping at any time across four gear slots (melee, gun, body armor, leg armor), and item tooltips with category, stats and lore.
@@ -189,7 +190,7 @@ The game is one self-contained HTML file of about 61 KB (roughly 489 lines and 5
 
 Most additions are one entry in a data table. Keep one rule for story text: every line of dialogue names its speaker, such as "Contact!" Quill says.
 
-1. **Scene with choices:** add an entry to `SCENES` with `title`, `text` (paragraphs) and `choices`. A choice is either `{text, goto}` or `{text, check:{stat, dc}, win:{msg, goto, fx}, lose:{msg, goto, fx}}`. Add `bg` to reuse another scene's backdrop.
+1. **Scene with choices:** add an entry to `SCENES` with `title`, `text` (paragraphs) and `choices`. A choice is either `{text, goto}` or `{text, check:{stat, dc}, win:{msg, goto, fx}, lose:{msg, goto, fx}}`. Add `bg` to reuse another scene's backdrop. `text` can also be a function of `state` (`text: s => [...]`) for a scene whose wording should change based on a flag set earlier in the run; `fx:{flag:'name'}` on a choice's `win`/`lose` sets it.
 2. **Fight:** add a scene with `fight:{name, ref, pr, pos, hp, dc, def, acc, dmg, drop, say}` and `then:'nextSceneId'`. Add `art` to reuse an existing sprite, or a new entry in `SPF` for a new look.
 3. **Item:** add it to `ITEMS` and `LORE`, then add its id to a pool in `DROPS` if monsters should drop it.
 4. **Chapter:** add a name to `CHAPTERS`, a start scene to `START`, and the scenes themselves. The new dropdown appears automatically.
@@ -269,7 +270,7 @@ No exploitable vulnerability was found, and the overall risk is low. The game ta
 ## Known limitations
 
 - **Untested balance:** enemy stats and item values are first guesses and no full run of either chapter has been played or simulated.
-- **Linear story:** most choices lead to the same next scene, so replaying changes little beyond dice results and a few stat boosts.
+- **Linear structure:** every choice still leads to the same next scene (no branching paths or alternate scene order) — only the text within a scene, and a few flags, change with replaying. The scenes themselves are not yet reordered or skipped by choices.
 - **Voice quality varies:** the narrator uses whatever voices the device has, so the sound cannot be guaranteed.
 - **Audio starts on tap:** browsers block sound until the player taps, so the opening scene is not read automatically.
 - **Reused art:** Chapter 2 reuses Chapter 1 backdrops, and Colonel Vex and the Ironback reuse the Kraag and Hullcrusher sprites with recoloring.

@@ -262,10 +262,12 @@ const SCENES={
   'The carrier <em>Gravefall</em> drifts above a dead moon, her reactor screaming toward meltdown. Ironwolf Company’s Third Platoon died on the approach. Captain Ironside alone reached the airlock. “Captain Ironside, report,” Lieutenant Quill says over the comm from the gunship <em>Wrenhawk</em>. “Still breathing, Lieutenant,” Ironside growls. “Tell Corporal Brannigan to start the clock,” he adds.',
   '“Eleven minutes to core breach, Captain,” Corporal Brannigan says, his gravel voice cutting in. “The airlock is welded shut, and something on the other side is scratching to get out,” he adds.'],
   choices:[
-   {text:'Smash through the bulkhead',check:{stat:'might',dc:14},win:{msg:'Steel buckles and the door falls inward.',goto:'c1'},lose:{msg:'The door holds. Your shoulder does not.',goto:'c1',fx:{hp:-4}}},
-   {text:'Wait for Brannigan to crack the lock',check:{stat:'resolve',dc:11},win:{msg:'The lock clicks open. Brannigan grunts, pleased.',goto:'c1'},lose:{msg:'The lock fires a shock into your gauntlet before it opens.',goto:'c1',fx:{hp:-3}}}]},
- c1:{title:'The Scraping Dark',text:[
-  'The corridor beyond is slick with black ichor. Skitterlings pour from the ceiling vents, all legs and wet clicking. “Contact!” Ironside roars, and Quill answers, “Give them hell, Captain.”',
+   {text:'Smash through the bulkhead',check:{stat:'might',dc:14},win:{msg:'Steel buckles and the door falls inward.',goto:'c1',fx:{flag:'forced_entry'}},lose:{msg:'The door holds. Your shoulder does not.',goto:'c1',fx:{hp:-4,flag:'forced_entry'}}},
+   {text:'Wait for Brannigan to crack the lock',check:{stat:'resolve',dc:11},win:{msg:'The lock clicks open. Brannigan grunts, pleased.',goto:'c1',fx:{flag:'picked_lock'}},lose:{msg:'The lock fires a shock into your gauntlet before it opens.',goto:'c1',fx:{hp:-3,flag:'picked_lock'}}}]},
+ c1:{title:'The Scraping Dark',text:s=>[
+  (s.flags.forced_entry
+   ?'The corridor beyond is slick with black ichor, and the bang of the bulkhead has already woken something. Skitterlings pour from the ceiling vents, all legs and wet clicking. “Contact!” Ironside roars, and Quill answers, “They heard that, Captain — give them hell.”'
+   :'The corridor beyond is slick with black ichor. Skitterlings pour from the ceiling vents, all legs and wet clicking. “Contact!” Ironside roars, and Quill answers, “Give them hell, Captain.”'),
   'The lead skitterling rears up. “Fresh meat,” the skitterling hisses in a stolen human voice. “Major Kraag will wear your dog tags,” it adds.'],
   fight:{name:'Skitterling',ref:'the skitterling',pr:'it',pos:'its',hp:9,dc:10,def:0,acc:6,dmg:4,drop:'small',say:['The skitterling lunges, clicking.','“Dog tags! Dog tags!” the skitterling hisses.','Claws scrape your vest as the skitterling shrieks.']},then:'relay'},
  relay:{title:'The Dead Relay',text:[
@@ -298,20 +300,31 @@ const SCENES={
  armory:{title:'The Dead Armory',text:[
   'Past the gunnery deck, a hangar holds the gutted siege tank <em>Old Bessie</em> and a sealed locker with a green light still burning. “Fleet reserve stores,” Brannigan says. “That is a Sunspear Lancer, Captain. Unstable, hungry, but it puts anything down. There is also a Lazarus kit beside it,” he adds.',
   'Ironside cannot carry both. “Choose,” Quill says. “And hurry,” she adds.'],
-  choices:[{text:'Take the Sunspear Lancer',goto:'gate',fx:{give:'plasma'}},{text:'Take the Lazarus trauma kit',goto:'gate',fx:{give:'medikit'}}]},
+  choices:[{text:'Take the Sunspear Lancer',goto:'gate',fx:{give:'plasma',flag:'took_lancer'}},{text:'Take the Lazarus trauma kit',goto:'gate',fx:{give:'medikit',flag:'took_kit'}}]},
  gate:{title:'The Reactor Gate',text:[
   'The corridor ends at the reactor gate. “I smell a soldier,” Major Kraag calls through the door, his voice like grinding iron. “Come in, little one. I have been waiting since your ship was a speck in my sky,” he adds.',
   '“That is him,” Brannigan says quietly. “Major Kraag. He will kill you, Captain,” he adds. “Then he will have to try,” Ironside says, checking his blade.'],
   choices:[
-   {text:'Slip in through the side vent',check:{stat:'guile',dc:13},win:{msg:'You drop behind him unseen. Your instincts sharpen.',goto:'boss',fx:{stat:{guile:1}}},lose:{msg:'The vent rattles. He turns, grinning, and your confidence slips.',goto:'boss',fx:{stat:{guile:-1}}}},
-   {text:'Walk in and announce yourself',check:{stat:'resolve',dc:10},win:{msg:'Your voice does not shake. He pauses, almost impressed. Your resolve hardens.',goto:'boss',fx:{stat:{resolve:1}}},lose:{msg:'A flicker of fear crosses your face. He notices, and your nerve wavers.',goto:'boss',fx:{stat:{resolve:-1}}}}]},
- boss:{title:'Major Kraag',text:[
-  'Major Kraag stands before the screaming reactor, three meters of scarred iron and borrowed flesh. He raises a blade as long as Ironside is tall. “Your platoon died begging, Captain,” Major Kraag snarls. “Will you?” he adds.',
+   {text:'Slip in through the side vent',check:{stat:'guile',dc:13},win:{msg:'You drop behind him unseen. Your instincts sharpen.',goto:'boss',fx:{stat:{guile:1},flag:'stealth'}},lose:{msg:'The vent rattles. He turns, grinning, and your confidence slips.',goto:'boss',fx:{stat:{guile:-1},flag:'stealth'}}},
+   {text:'Walk in and announce yourself',check:{stat:'resolve',dc:10},win:{msg:'Your voice does not shake. He pauses, almost impressed. Your resolve hardens.',goto:'boss',fx:{stat:{resolve:1},flag:'bold'}},lose:{msg:'A flicker of fear crosses your face. He notices, and your nerve wavers.',goto:'boss',fx:{stat:{resolve:-1},flag:'bold'}}}]},
+ boss:{title:'Major Kraag',text:s=>[
+  s.flags.stealth
+   ?'Major Kraag stands before the screaming reactor, three meters of scarred iron and borrowed flesh, head cocked at a sound he cannot place. “Something is wrong,” he mutters, and then he finds you with his eyes. “There you are, little ghost,” Major Kraag snarls. “Clever. It will not save you,” he adds.'
+   :s.flags.bold
+   ?'Major Kraag stands before the screaming reactor, three meters of scarred iron and borrowed flesh. He already turned at the sound of your voice at the gate. “No ghost, then. A soldier who walks in the front door,” Major Kraag says, almost admiring. “I will enjoy this,” he adds.'
+   :'Major Kraag stands before the screaming reactor, three meters of scarred iron and borrowed flesh. He raises a blade as long as Ironside is tall. “Your platoon died begging, Captain,” Major Kraag snarls. “Will you?” he adds.',
   '“Not today,” Ironside says, and Quill’s voice breaks. “Captain, the core has ninety seconds. Finish this,” she says.'],
   fight:{name:'Major Kraag',ref:'Major Kraag',pr:'he',pos:'his',hp:26,dc:13,def:5,acc:13,dmg:11,drop:null,say:['“Die loudly!” Major Kraag snarls.','Kraag’s blade splits the deck beside you.','“I will wear your armor,” Major Kraag growls.']},then:'victory'},
- victory:{title:'Victory',end:1,text:[
+ victory:{title:'Victory',end:1,text:s=>[
   'Kraag falls, and the reactor dies in white fire. Ironside sprints for the airlock as the carrier shatters behind him. “Captain!” Quill shouts, and Brannigan adds, “Get in the gunship, you reckless fool.”',
-  'Ironside tumbles aboard, scarred and alive. “We won, comrades,” Ironside says. Quill laughs through tears. “You did, Captain. You did,” she says.','Chapter 1 of the Gravefall Saga ends here, but the war for the dead moon has only begun.']},
+  'Ironside tumbles aboard, scarred and alive. “We won, comrades,” Ironside says. Quill laughs through tears. “You did, Captain. You did,” she says.'+
+   (s.flags.stealth?' “Still can’t believe he never heard you coming,” Brannigan says. “I will take it,” Ironside says.'
+    :s.flags.bold?' “You walked right up to him, Captain,” Quill says, half scolding, half in awe. “Worked, didn’t it,” Ironside says.'
+    :'')+
+   (s.flags.took_lancer?' The Lancer still hums warm in Ironside’s grip. “Good shooting,” Brannigan says.'
+    :s.flags.took_kit?' Quill checks the Trauma Kit in Ironside’s pack, relieved it is still there. “Keep that close, Captain,” she says.'
+    :''),
+  'Chapter 1 of the Gravefall Saga ends here, but the war for the dead moon has only begun.']},
  dead:{title:'Fallen',end:1,text:[
   'The dark takes Ironside. Quill’s voice fades to static, and Brannigan says only, “Goodbye, Captain.” Ironside’s name joins the long list on the memorial wall of Ironwolf Company.']}
 };
@@ -322,10 +335,12 @@ Object.assign(SCENES,{
   'The gunship <em>Wrenhawk</em> limps down toward the dead moon, one engine burning. “Captain, we lost the port thruster,” Quill says, her hands white on the controls. “Brace for a hard landing,” Brannigan adds.',
   'Below, a mining colony glows green in the dark. “That is Hollow Station,” Brannigan says. “Colonel Vex holds it, and Kraag’s fleet took orders from him.” “Then we pay him a visit,” Ironside says, checking his blade.'],
   choices:[
-   {text:'Ride out the crash in the cockpit',check:{stat:'resolve',dc:11},win:{msg:'The gunship slams down hard but holds together.',goto:'ch2_tunnel'},lose:{msg:'The hull buckles and throws you into the console.',goto:'ch2_tunnel',fx:{hp:-4}}},
-   {text:'Jump clear before impact',check:{stat:'might',dc:13},win:{msg:'You roll clear as the Wrenhawk burns behind you.',goto:'ch2_tunnel'},lose:{msg:'You hit the rock hard and tumble.',goto:'ch2_tunnel',fx:{hp:-5}}}]},
- ch2_tunnel:{title:'The Green Mist',bg:'c1',text:[
-  'The mine tunnels are thick with green mist. Skitterlings swarm from the ore carts. “Contact, left!” Ironside roars, and Brannigan answers, “I count a dozen, Captain.”',
+   {text:'Ride out the crash in the cockpit',check:{stat:'resolve',dc:11},win:{msg:'The gunship slams down hard but holds together.',goto:'ch2_tunnel',fx:{flag:'crash_brace'}},lose:{msg:'The hull buckles and throws you into the console.',goto:'ch2_tunnel',fx:{hp:-4,flag:'crash_brace'}}},
+   {text:'Jump clear before impact',check:{stat:'might',dc:13},win:{msg:'You roll clear as the Wrenhawk burns behind you.',goto:'ch2_tunnel',fx:{flag:'crash_jump'}},lose:{msg:'You hit the rock hard and tumble.',goto:'ch2_tunnel',fx:{hp:-5,flag:'crash_jump'}}}]},
+ ch2_tunnel:{title:'The Green Mist',bg:'c1',text:s=>[
+  (s.flags.crash_jump
+   ?'The mine tunnels are thick with green mist, and Ironside is still favoring the leg he landed on. Skitterlings swarm from the ore carts. “Contact, left!” Ironside roars, and Brannigan answers, “I count a dozen, Captain — go easy on that leg.”'
+   :'The mine tunnels are thick with green mist. Skitterlings swarm from the ore carts. “Contact, left!” Ironside roars, and Brannigan answers, “I count a dozen, Captain.”'),
   'The brood leader clicks and shrieks. “Vex wants you alive,” the brood leader hisses. “Alive, for now,” it adds.'],
   fight:{name:'Skitterling brood',art:'Skitterling',ref:'the brood leader',pr:'it',pos:'its',hp:13,dc:11,def:0,acc:7,dmg:5,drop:'small',say:['The brood leader lunges, clicking.','“Alive for now!” the brood leader hisses.','Claws scrape your vest as the brood shrieks.']},then:'ch2_lift'},
  ch2_lift:{title:'The Dead Lift',bg:'relay',text:[
@@ -343,15 +358,22 @@ Object.assign(SCENES,{
   'Beyond the pit stands the control hall. “Colonel Vex is inside,” Quill says. “Captain, my scanners show the whole station is wired to blow,” she adds.',
   '“Then we end him quickly,” Ironside says. “Brannigan, find me that detonator,” he adds.'],
   choices:[
-   {text:'Sneak through the vents',check:{stat:'guile',dc:13},win:{msg:'You drop in behind the consoles unseen. Your instincts sharpen.',goto:'ch2_boss',fx:{stat:{guile:1}}},lose:{msg:'A grate clangs loose. Your confidence slips.',goto:'ch2_boss',fx:{stat:{guile:-1}}}},
-   {text:'Kick the door in',check:{stat:'might',dc:12},win:{msg:'The door flies off its hinges. Your grip hardens.',goto:'ch2_boss',fx:{stat:{might:1}}},lose:{msg:'The door holds and your leg buckles. Your strength wavers.',goto:'ch2_boss',fx:{stat:{might:-1}}}}]},
- ch2_boss:{title:'Colonel Vex',bg:'boss',text:[
-  'Colonel Vex rises from the console, tall, green-lit and wrong. “Captain Ironside,” Colonel Vex says softly. “I have waited so long to meet you,” he adds.',
+   {text:'Sneak through the vents',check:{stat:'guile',dc:13},win:{msg:'You drop in behind the consoles unseen. Your instincts sharpen.',goto:'ch2_boss',fx:{stat:{guile:1},flag:'stealth2'}},lose:{msg:'A grate clangs loose. Your confidence slips.',goto:'ch2_boss',fx:{stat:{guile:-1},flag:'stealth2'}}},
+   {text:'Kick the door in',check:{stat:'might',dc:12},win:{msg:'The door flies off its hinges. Your grip hardens.',goto:'ch2_boss',fx:{stat:{might:1},flag:'bold2'}},lose:{msg:'The door holds and your leg buckles. Your strength wavers.',goto:'ch2_boss',fx:{stat:{might:-1},flag:'bold2'}}}]},
+ ch2_boss:{title:'Colonel Vex',bg:'boss',text:s=>[
+  s.flags.stealth2
+   ?'Colonel Vex rises from the console, tall, green-lit and wrong, and turns a beat too late to find you already behind him. “Captain Ironside,” Colonel Vex says, a flicker of surprise in the soft voice. “You are quieter than Kraag warned me,” he adds.'
+   :s.flags.bold2
+   ?'Colonel Vex rises from the console, tall, green-lit and wrong, unhurried by the door crashing in. “Captain Ironside,” Colonel Vex says softly. “Kraag said you would announce yourself. I did not expect him to be right,” he adds.'
+   :'Colonel Vex rises from the console, tall, green-lit and wrong. “Captain Ironside,” Colonel Vex says softly. “I have waited so long to meet you,” he adds.',
   '“You will wait forever,” Ironside says, and the station shakes. “Captain, thirty seconds,” Quill says. “Finish it,” she adds.'],
   fight:{name:'Colonel Vex',ref:'Colonel Vex',pr:'he',pos:'his',hp:34,dc:14,def:4,acc:14,dmg:10,drop:null,say:['“Kneel!” Colonel Vex snarls.','Vex’s blade carves a green scar across the deck.','“The Hollow remembers you,” Colonel Vex whispers.']},then:'ch2_victory'},
- ch2_victory:{title:'Victory',bg:'victory',end:1,text:[
+ ch2_victory:{title:'Victory',bg:'victory',end:1,text:s=>[
   'Vex falls, and Hollow Station dies in green fire. Ironside throws himself into the lift as the moon shakes. “Captain!” Quill shouts, and Brannigan adds, “Go, go, go!”',
-  'Ironside reaches the surface, scarred and alive. “One more down, comrades,” Ironside says. Quill laughs through tears. “One more, Captain,” she says.',
+  'Ironside reaches the surface, scarred and alive. “One more down, comrades,” Ironside says. Quill laughs through tears. “One more, Captain,” she says.'+
+   (s.flags.stealth2?' “You went through that whole station and he never saw you coming,” Brannigan says. “That is twice now,” Ironside says.'
+    :s.flags.bold2?' “You keep walking straight through the front door, Captain,” Quill says. “It keeps working,” Ironside says.'
+    :''),
   'Chapter 2 of the Gravefall Saga ends here, but the Colonel’s last signal points to something far older beneath the moon.']}
 });
 
@@ -646,7 +668,7 @@ const diff=(a,b)=>Object.keys(a).filter(k=>a[k]!==b[k]).map(k=>`${k==='hp'?'Vita
 function showResult(r,msg,before,calc){const d=diff(before,snap());renderHud();speakLine(msg,1);
  if(document.documentElement.dataset.device==='mobile')$('roll').scrollIntoView({block:'nearest'});
  $('result').innerHTML=`${r.tag}<span class="ln">${msg}</span>`+(calc?`<span class="ln calc">${calc}</span>`:'')+(d?`<span class="ln chg">${d}</span>`:'');}
-function renderText(){const sc=SCENES[state.scene];$('text').innerHTML=`<h2>${sc.title}</h2>`+(state.note?`<p class="note">${state.note}</p>`:'')+sc.text.map(p=>`<p>${p}</p>`).join('');}
+function renderText(){const sc=SCENES[state.scene],text=typeof sc.text==='function'?sc.text(state):sc.text;$('text').innerHTML=`<h2>${sc.title}</h2>`+(state.note?`<p class="note">${state.note}</p>`:'')+text.map(p=>`<p>${p}</p>`).join('');}
 function renderHist(){$('acts').innerHTML=state.acts.slice().reverse().map(t=>`<li>${t}</li>`).join('')||'<li>No actions yet.</li>';$('hist').innerHTML=state.rolls.slice().reverse().map(t=>`<li>${t}</li>`).join('')||'<li>No rolls yet.</li>';}
 function show(){
  persist();renderHud();renderArt();const sc=SCENES[state.scene],box=$('choices');box.innerHTML='';
@@ -716,7 +738,7 @@ function say(text){if(!CONFIG.voice||!('speechSynthesis' in window))return;
   const vo=voiceFor();if(vo)u.voice=vo;vpush({u,text:c});});}
 const stopVoice=()=>{vtok++;VQ=[];vplay=false;if('speechSynthesis' in window)speechSynthesis.cancel();};
 const speakLine=t=>say(t||'');
-const narrate=id=>SCENES[id].text.forEach(p=>speakLine(p));
+const narrate=id=>{const sc=SCENES[id],text=typeof sc.text==='function'?sc.text(state):sc.text;text.forEach(p=>speakLine(p));};
 /* SFX: synthesized with Web Audio, no files. Add an entry, then call sfx('name') anywhere, or set sfx:'name' on a scene choice. */
 let AC=null;
 function ac(){if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;AC=new C();}if(AC.state==='suspended')AC.resume();return AC;}

@@ -18,7 +18,7 @@ Start with balance, saving and meaningful choices; they decide whether the game 
 | --- | --- | --- | --- | --- | --- |
 | 1 | Balance by simulation | Run thousands of automated fights and runs to catch fights that are impossible or trivial, keeping dice results random | High | Small | **Done** — `scripts/balance-sim.js`, now simulated per build archetype (all-Might/Guile/Resolve/balanced); Kraag and Vex retuned twice, most recently after the equipment and stat-allocation overhaul |
 | 2 | Save progress | A refresh currently loses everything; store progress per chapter on the player's device | High | Small | **Done** — saved to `localStorage`, validated on load |
-| 3 | Make choices matter | Choices set flags that change later scenes, ally reactions and endings, so replays differ | High | Medium | Next |
+| 3 | Make choices matter | Choices set flags that change later scenes, ally reactions and endings, so replays differ | High | Medium | **Done** — forced-entry/picked-lock, stealth/bold, and the armory item choice now echo into the next scene, the boss introduction and the victory text, per chapter |
 | 4 | Add progression | Decided: the player has a level and spends stat points on each level-up; see the progression design below. A one-time stat allocation at character creation now exists (not this) — leveling still adds points *during* a chapter from XP | Medium | Medium | Next |
 | 5 | Give allies jobs | For example Quill heals once per fight and Brannigan lowers an enemy's Defense | Medium | Medium | Next |
 | 6 | Unique Chapter 2 art | New backdrops and sprites instead of reused Chapter 1 art and recolors | Medium | Medium | Later |

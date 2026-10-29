@@ -30,7 +30,7 @@ Ironwolf Company's Third Platoon died on the approach to the carrier *Gravefall*
 
 - **Chapters as dropdowns:** each chapter opens like an accordion and keeps its own progress. Finishing a chapter carries your gear and stat boosts into the next.
 - **Dice-driven choices:** story choices and combat actions roll a d20 plus a stat. A natural 20 is a critical hit and heals a little; a natural 1 is a fumble and costs health.
-- **Combat:** enemy health bars, visible enemy stats, three actions (Strike, Reckless blow, Guard), and a result box that shows the full damage calculation.
+- **Combat:** enemy health bars, visible enemy stats, four actions (Strike, Reckless blow, Aimed shot, Guard), and a result box that shows the full damage calculation.
 - **Story text in the result:** about 60 varied result lines with spoken dialogue, so fights do not repeat. Consecutive hits continue the scene ("Again you hit for 12").
 - **Inventory:** a 5-slot pack, weak or strong loot from small or big monsters, take / leave / swap decisions, equipping at any time, and item tooltips with type, stats and lore.
 - **HUD:** pixel portrait of Captain Ironside, vitality bar, stat tooltips, and two history boxes (rolls and actions) written in the past tense.
@@ -53,6 +53,7 @@ Every risky action is one d20 roll plus a stat against a target number. A natura
 | --- | --- | --- | --- | --- |
 | Strike | Might | Enemy Evasion | Weapon damage minus enemy Defense | Enemy hits you |
 | Reckless blow | Might | Enemy Evasion +3 | Double weapon damage minus Defense | Enemy hits you for 2 extra |
+| Aimed shot | Guile | Enemy Evasion +2 | Weapon damage, ignoring Defense entirely | Enemy hits you |
 | Guard and endure | Resolve | Enemy Accuracy | No damage, you recover 2 Vitality | Enemy hits you |
 
 **Damage you deal:** weapon damage (times 2 for a reckless blow) minus the enemy's Defense, never below 1. A critical hit adds the weapon damage again and ignores Defense.
@@ -83,15 +84,21 @@ Stats below are the first-pass values in the game. They have not been balanced b
 | --- | --- | --- | --- |
 | Ironwolf Cutter | Melee weapon | Damage 6, accuracy +1 | Starting |
 | Salvaged Pipe Wrench | Melee weapon | Damage 4, accuracy 0 | Weak |
+| Trench Shiv | Melee weapon | Damage 5, accuracy +1 | Weak |
 | Thunderclap Sledge | Melee weapon | Damage 10, accuracy 0 | Strong |
 | Sunspear Lancer | Ranged weapon | Damage 13, accuracy -1 | Strong |
+| Void Spike | Melee weapon | Damage 9, accuracy +2 | Strong |
 | Ironwolf Flak Vest | Armor | Defense 2 | Starting |
 | Bolted Hull Plating | Armor | Defense 1 | Weak |
+| Salvaged Legplate | Armor | Defense 2 | Weak |
 | Anvil-Class Siege Plate | Armor | Defense 4 | Strong |
+| Ablative Plating | Armor | Defense 3 | Strong |
 | Rattlesnake Stim | Consumable | Heals 6 | Weak |
+| Field Bandage | Consumable | Heals 4 | Weak |
 | Lazarus Trauma Kit | Consumable | Heals 12 | Strong |
+| Nanite Canister | Consumable | Heals 9 | Strong |
 
-Small monsters drop from the weak pool (Pipe Wrench, Hull Plating, Stim). Big monsters drop from the strong pool (Sledge, Lancer, Siege Plate, Trauma Kit). Duplicates are never offered. Scenes can also give loot directly, such as the armory choice between the Lancer and the Trauma Kit.
+Small monsters drop from the weak pool (Pipe Wrench, Shiv, Hull Plating, Legplate, Stim, Bandage). Big monsters drop from the strong pool (Sledge, Lancer, Spike, Siege Plate, Ablative Plating, Trauma Kit, Nanite Canister). Duplicates are never offered. Scenes can also give loot directly, such as the armory choice between the Lancer and the Trauma Kit.
 
 ## Chapter flow
 

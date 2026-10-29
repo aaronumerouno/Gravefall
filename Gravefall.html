@@ -148,15 +148,21 @@ const LABELS={might:'Might',guile:'Guile',resolve:'Resolve'};
 const ITEMS={
  chainblade:{n:'Ironwolf Cutter',slot:'weapon',atk:6,acc:1},
  cleaver:{n:'Salvaged Pipe Wrench',slot:'weapon',atk:4,acc:0,tier:'weak'},
+ shiv:{n:'Trench Shiv',slot:'weapon',atk:5,acc:1,tier:'weak'},
  maul:{n:'Thunderclap Sledge',slot:'weapon',atk:10,acc:0,tier:'strong'},
  plasma:{n:'Sunspear Lancer',slot:'weapon',atk:13,acc:-1,tier:'strong'},
+ spike:{n:'Void Spike',slot:'weapon',atk:9,acc:2,tier:'strong'},
  carapace:{n:'Ironwolf Flak Vest',slot:'armor',dr:2},
  scrap:{n:'Bolted Hull Plating',slot:'armor',dr:1,tier:'weak'},
+ legplate:{n:'Salvaged Legplate',slot:'armor',dr:2,tier:'weak'},
  bulwark:{n:'Anvil-Class Siege Plate',slot:'armor',dr:4,tier:'strong'},
+ ablative:{n:'Ablative Plating',slot:'armor',dr:3,tier:'strong'},
  stim:{n:'Rattlesnake Stim',slot:'use',heal:6,tier:'weak'},
- medikit:{n:'Lazarus Trauma Kit',slot:'use',heal:12,tier:'strong'}
+ bandage:{n:'Field Bandage',slot:'use',heal:4,tier:'weak'},
+ medikit:{n:'Lazarus Trauma Kit',slot:'use',heal:12,tier:'strong'},
+ nanite:{n:'Nanite Canister',slot:'use',heal:9,tier:'strong'}
 };
-const DROPS={small:['cleaver','scrap','stim'],big:['maul','plasma','bulwark','medikit']};
+const DROPS={small:['cleaver','scrap','stim','shiv','legplate','bandage'],big:['maul','plasma','bulwark','medikit','spike','ablative','nanite']};
 /* ===== LORE: [melee|ranged, story, how it behaves when used] per item id; STAT_INFO: stat tooltips ===== */
 const LORE={
  chainblade:['Melee','Standard issue to every Ironwolf officer. The edge hums when you hold it close.','Quick and reliable. Its vibrating edge finds gaps, so it is easy to land.'],
@@ -167,7 +173,13 @@ const LORE={
  scrap:['','Hull plating bolted over your ribs by a very nervous mechanic.','Better than nothing, and it rattles when you move.'],
  bulwark:['','Cut from the blast door of the siege tank Old Bessie.','Heavy, but most blows break against it.'],
  stim:['','A trooper’s trick: a cheap injector that bites like a rattlesnake.','Slammed into the thigh, it mends flesh at once and leaves your hands shaking. Used up.'],
- medikit:['','Lieutenant Quill’s favorite field kit. Real surgical glue, real morphine.','Closes deep wounds fast. Used up.']};
+ medikit:['','Lieutenant Quill’s favorite field kit. Real surgical glue, real morphine.','Closes deep wounds fast. Used up.'],
+ shiv:['Melee','A boarding knife honed to a wire edge. Fits in a boot, not a sheath.','Short and quick. It finds a gap before the enemy can react.'],
+ spike:['Melee','A railyard spike charged with a void-black current. It hums when it is close to flesh.','Punches clean through plate instead of around it.'],
+ legplate:['','Greaves stripped off a dead Rustjack and refitted in a hurry.','Covers the worst of it, though the straps never quite sit right.'],
+ ablative:['','Overlapping ceramic tiles meant to shed a glancing hit rather than stop it cold.','Sheds most of a blow, every time, without the weight of full plate.'],
+ bandage:['','A field dressing from a dead medic’s kit, torn open in a hurry.','Stops the worst of the bleeding. Used up.'],
+ nanite:['','A sealed canister of medical nanites, cold to the touch even through a glove.','Floods a wound and knits it shut in seconds. Used up.']};
 const tipText=id=>{const i=ITEMS[id],[k,l,u]=LORE[id]||['','',''];
  const t=i.slot==='weapon'?`Weapon, ${k}. Damage ${i.atk}, accuracy ${i.acc>=0?'+':''}${i.acc}.`:i.slot==='armor'?`Armor. Blocks ${i.dr} damage from each hit.`:`Consumable. Heals ${i.heal} vitality.`;
  return `<b>${i.n}</b><br>${t}<br><em>${l}</em><br>${u}`;};
@@ -571,7 +583,7 @@ function show(){
   btn('Leave it',()=>{logAct('Left '+nm(id));done();});return;}
  if(sc.end){btn('Fight again',()=>{$('roll').classList.remove('show');newGame();});return;}
  if(state.fight){const f=state.fight,g=gear(state).w;
-  [['strike','Strike',{stat:'might',dc:f.dc,vs:`Evasion ${f.dc}`},`Hit for ${g.atk}, minus ${f.def} Defense`],['wild','Reckless blow',{stat:'might',dc:f.dc+3,vs:`Evasion ${f.dc} +3 reckless = ${f.dc+3}`},`Hit for ${g.atk*2}, minus ${f.def} Defense, but costs more if you miss`],['guard','Guard and endure',{stat:'resolve',dc:f.acc,vs:`Enemy accuracy ${f.acc}`},'Block the blow and recover 2']]
+  [['strike','Strike',{stat:'might',dc:f.dc,vs:`Evasion ${f.dc}`},`Hit for ${g.atk}, minus ${f.def} Defense`],['wild','Reckless blow',{stat:'might',dc:f.dc+3,vs:`Evasion ${f.dc} +3 reckless = ${f.dc+3}`},`Hit for ${g.atk*2}, minus ${f.def} Defense, but costs more if you miss`],['aim','Aimed shot',{stat:'guile',dc:f.dc+2,vs:`Evasion ${f.dc} +2 aimed = ${f.dc+2}`},`Hit for ${g.atk}, ignoring Defense`],['guard','Guard and endure',{stat:'resolve',dc:f.acc,vs:`Enemy accuracy ${f.acc}`},'Block the blow and recover 2']]
    .forEach(([k,t,c,d])=>btn(`${t}<small>${LABELS[c.stat]}${CONFIG.showOdds?', '+odds(c)+'% to succeed':''}. ${d}</small>`,()=>act(k,c)));return;}
  sc.choices.forEach(ch=>btn(ch.text+(ch.check?`<small>${LABELS[ch.check.stat]} check${CONFIG.showOdds?', '+odds(ch.check)+'% to succeed':''}</small>`:''),()=>choose(ch)));
 }
@@ -588,13 +600,13 @@ async function choose(ch){
 async function act(kind,c){
  if(busy)return;lock(true);stopVoice();await toStory();const before=snap(),f=state.fight,fh=f.hp,w=gear(state).w,r=await rollUI(c);let m,calc;const rg=(LORE[state.eq.weapon]||[])[0]==='Ranged',F=t=>fill(pick(t),f,w);
  if(kind==='guard'){if(r.pass){apply({hp:2});m=F(TEXT.guardOk);calc='No damage taken. You recover 2 Vitality.';}else{calc=foeHit(f,0);m=F(TEXT.guardBad);}}
- else if(r.pass){const cr=r.o==='crit'?w.atk:0,ml=kind==='wild'?2:1,df=cr?0:f.def,d=Math.max(1,w.atk*ml+cr-df);f.hp=Math.max(0,f.hp-d);calc=`Damage: ${w.atk}${ml>1?' \u00d7 2 reckless':''}${cr?` + ${cr} critical`:''} \u2212 ${df} Defense${cr?' (critical ignores Defense)':''} = ${d}`;m=`${state.lp?pick(AGAIN):'You hit for'} ${d}. `+F(TEXT[kind==='wild'?'wild':'hit'][rg?'ranged':'melee']);state.lp=1;}
+ else if(r.pass){const cr=r.o==='crit'?w.atk:0,ml=kind==='wild'?2:1,df=(cr||kind==='aim')?0:f.def,d=Math.max(1,w.atk*ml+cr-df);f.hp=Math.max(0,f.hp-d);calc=`Damage: ${w.atk}${ml>1?' \u00d7 2 reckless':''}${cr?` + ${cr} critical`:''} \u2212 ${df} Defense${cr?' (critical ignores Defense)':kind==='aim'?' (aimed shot ignores Defense)':''} = ${d}`;m=`${state.lp?pick(AGAIN):'You hit for'} ${d}. `+F(TEXT[kind==='wild'?'wild':'hit'][rg?'ranged':'melee']);state.lp=1;}
  else{calc=foeHit(f,kind==='wild'?2:0);m=F(TEXT[kind==='wild'?'wildMiss':'miss']);state.lp=0;}
  if(state.hp<=0){state.scene='dead';state.fight=null;}
  else if(f.hp<=0){m+=' '+F(TEXT.fall);state.fight=null;if(f.drop)apply({give:f.drop});state.scene=SCENES[state.scene].then;}
  else if(Math.random()<.6)m+=' '+pick(f.say);
  showResult(r,m,before,calc);actSfx(kind,r);flashFoe(kind,r);
- {const L={strike:['Struck','Missed'],wild:['Landed a reckless blow on','Missed a reckless blow on'],guard:['Held a guard against','Lost a guard against']}[kind],dealt=fh-f.hp;
+ {const L={strike:['Struck','Missed'],wild:['Landed a reckless blow on','Missed a reckless blow on'],aim:['Landed an aimed shot on','Missed an aimed shot on'],guard:['Held a guard against','Lost a guard against']}[kind],dealt=fh-f.hp;
  logAct(actLine(`${L[r.pass?0:1]} ${f.name}${dealt?` for ${dealt}`:''}${f.hp<=0?', and it fell':''}`,before));}await sleep(900);lock(false);
  if(state.fight){show();}else enter(state.scene);
 }

@@ -19,15 +19,21 @@ const CONFIG = { die: 20, maxHp: 28, critHeal: 3, fumbleDmg: 2, bag: 5, stats: {
 const ITEMS = {
   chainblade: { n: 'Ironwolf Cutter', slot: 'weapon', atk: 6, acc: 1 },
   cleaver: { n: 'Salvaged Pipe Wrench', slot: 'weapon', atk: 4, acc: 0, tier: 'weak' },
+  shiv: { n: 'Trench Shiv', slot: 'weapon', atk: 5, acc: 1, tier: 'weak' },
   maul: { n: 'Thunderclap Sledge', slot: 'weapon', atk: 10, acc: 0, tier: 'strong' },
   plasma: { n: 'Sunspear Lancer', slot: 'weapon', atk: 13, acc: -1, tier: 'strong' },
+  spike: { n: 'Void Spike', slot: 'weapon', atk: 9, acc: 2, tier: 'strong' },
   carapace: { n: 'Ironwolf Flak Vest', slot: 'armor', dr: 2 },
   scrap: { n: 'Bolted Hull Plating', slot: 'armor', dr: 1, tier: 'weak' },
+  legplate: { n: 'Salvaged Legplate', slot: 'armor', dr: 2, tier: 'weak' },
   bulwark: { n: 'Anvil-Class Siege Plate', slot: 'armor', dr: 4, tier: 'strong' },
+  ablative: { n: 'Ablative Plating', slot: 'armor', dr: 3, tier: 'strong' },
   stim: { n: 'Rattlesnake Stim', slot: 'use', heal: 6, tier: 'weak' },
-  medikit: { n: 'Lazarus Trauma Kit', slot: 'use', heal: 12, tier: 'strong' }
+  bandage: { n: 'Field Bandage', slot: 'use', heal: 4, tier: 'weak' },
+  medikit: { n: 'Lazarus Trauma Kit', slot: 'use', heal: 12, tier: 'strong' },
+  nanite: { n: 'Nanite Canister', slot: 'use', heal: 9, tier: 'strong' }
 };
-const DROPS = { small: ['cleaver', 'scrap', 'stim'], big: ['maul', 'plasma', 'bulwark', 'medikit'] };
+const DROPS = { small: ['cleaver', 'scrap', 'stim', 'shiv', 'legplate', 'bandage'], big: ['maul', 'plasma', 'bulwark', 'medikit', 'spike', 'ablative', 'nanite'] };
 
 /* Story graph: only the numbers the simulator needs (stat checks, DCs, hp/stat fx, loot). */
 const CH1 = [

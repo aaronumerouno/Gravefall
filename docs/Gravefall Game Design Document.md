@@ -32,7 +32,7 @@ Ironwolf Company's Third Platoon died on the approach to the carrier *Gravefall*
 - **Dice-driven choices:** story choices and combat actions roll a d20 plus a stat. A natural 20 is a critical hit and heals a little; a natural 1 is a fumble and costs health.
 - **Combat:** enemy health bars, visible enemy stats, four actions (Strike, Reckless blow, Aimed shot, Guard), and a result box that shows the full damage calculation.
 - **Story text in the result:** about 60 varied result lines with spoken dialogue, so fights do not repeat. Consecutive hits continue the scene ("Again you hit for 12").
-- **Inventory:** a 5-slot pack, weak or strong loot from small or big monsters, take / leave / swap decisions, equipping at any time, and item tooltips with type, stats and lore.
+- **Inventory:** a 10-slot pack, weak or strong loot from small or big monsters, take / leave / swap decisions (always resolved before the next scene's choices appear), equipping at any time across four gear slots (melee, gun, body armor, leg armor), and item tooltips with category, stats and lore.
 - **HUD:** pixel portrait of Captain Ironside, vitality bar, stat tooltips, and two history boxes (rolls and actions) written in the past tense.
 - **Hidden odds:** success chances are off by default and switchable in the code (`showOdds`).
 - **Audio:** one browser narrator voice for story and results, synthesized sound effects (slash, shot, explosion, pickup, equip and more), and separate Voice and Effects toggles.
@@ -43,7 +43,11 @@ Ironwolf Company's Third Platoon died on the approach to the carrier *Gravefall*
 
 Every risky action is one d20 roll plus a stat against a target number. A natural 20 always succeeds and heals 3 Vitality; a natural 1 always fails and costs extra damage.
 
-**Starting values:** Vitality 28; Might +3, Guile +1, Resolve +2; a 5-slot pack; starting gear is the Ironwolf Cutter, Ironwolf Flak Vest and one Rattlesnake Stim.
+**Character creation.** Before Chapter 1 begins, the player spends 3 points freely across Might, Guile and Resolve (each starts at 1), choosing a build once per save file. Dying and starting the chapter over keeps that build; "New game" clears it and asks again. The game does not steer the choice — a Might-heavy build hits harder in melee, a Guile-heavy build is harder to hit and can take Aimed shot further, a Resolve-heavy build survives longer on Guard, and spreading points gives a steadier all-rounder.
+
+**Starting values:** Vitality 28; a 10-slot pack; starting gear is the Ironwolf Cutter (melee) and Ironwolf Flak Vest (body armor), plus one Rattlesnake Stim. No gun or leg armor is carried at the start — both are found as loot.
+
+**Equipment.** Four gear slots are worn at once: one melee weapon, one gun, one body armor and one leg armor. Melee and gun weapons set damage and accuracy; body and leg armor set Defense (the two add together) and may also grant a flat bonus to Might, Guile or Resolve, so armor choice is part of a build, not just a damage-reduction number. Strike and Reckless blow always use the equipped melee weapon; Aimed shot always uses the equipped gun and is unavailable without one.
 
 **Story checks.** The roll is d20 + stat + modifiers against a hidden target. A success or failure each leads to its own result text, scene and effects. Effects can change Vitality, set a flag, give loot, or raise or lower a stat for the rest of the run (for example, Guile +1 for slipping in unseen).
 
@@ -75,30 +79,49 @@ Stats below are the first-pass values in the game. They have not been balanced b
 | Skitterling | 1 | 9 | 10 | 0 | 4 | 6 | Weak |
 | Hullcrusher | 1 | 16 | 12 | 1 | 7 | 8 | Strong |
 | Rustjack gunner | 1 | 11 | 11 | 1 | 5 | 7 | Weak |
-| Major Kraag (boss) | 1 | 26 | 13 | 2 | 9 | 9 | None |
+| Major Kraag (boss) | 1 | 26 | 13 | 5 | 11 | 13 | None |
 | Skitterling brood | 2 | 13 | 11 | 0 | 5 | 7 | Weak |
 | Ironback Hullcrusher | 2 | 22 | 12 | 2 | 8 | 8 | Strong |
-| Colonel Vex (boss) | 2 | 34 | 14 | 2 | 8 | 11 | None |
+| Colonel Vex (boss) | 2 | 34 | 14 | 4 | 10 | 14 | None |
 
-| Item | Type | Stats | Tier |
+Kraag and Vex were bumped up from their first-pass numbers (Defense 2/Accuracy 9–11) once equipment, the stat-allocation build and Aimed shot were added — those systems meaningfully raise what a well-equipped player can do before ever reaching the boss, so the bosses needed to raise with them. See `scripts/balance-sim.js`.
+
+| Item | Category | Stats | Tier |
 | --- | --- | --- | --- |
 | Ironwolf Cutter | Melee weapon | Damage 6, accuracy +1 | Starting |
 | Salvaged Pipe Wrench | Melee weapon | Damage 4, accuracy 0 | Weak |
 | Trench Shiv | Melee weapon | Damage 5, accuracy +1 | Weak |
 | Thunderclap Sledge | Melee weapon | Damage 10, accuracy 0 | Strong |
-| Sunspear Lancer | Ranged weapon | Damage 13, accuracy -1 | Strong |
 | Void Spike | Melee weapon | Damage 9, accuracy +2 | Strong |
-| Ironwolf Flak Vest | Armor | Defense 2 | Starting |
-| Bolted Hull Plating | Armor | Defense 1 | Weak |
-| Salvaged Legplate | Armor | Defense 2 | Weak |
-| Anvil-Class Siege Plate | Armor | Defense 4 | Strong |
-| Ablative Plating | Armor | Defense 3 | Strong |
+| Salvaged Repeater | Gun | Damage 5, accuracy +1 | Weak |
+| Sunspear Lancer | Gun | Damage 13, accuracy -1 | Strong |
+| Ironwolf Flak Vest | Body armor | Defense 2 | Starting |
+| Bolted Hull Plating | Body armor | Defense 1 | Weak |
+| Brute-Forged Breastplate | Body armor | Defense 1, Might +1 | Weak |
+| Shadowweave Vest | Body armor | Defense 1, Guile +1 | Weak |
+| Stalwart Harness | Body armor | Defense 1, Resolve +1 | Weak |
+| Hybrid Combat Rig | Body armor | Defense 1, Guile +1, Resolve +1 | Weak |
+| Anvil-Class Siege Plate | Body armor | Defense 4 | Strong |
+| Juggernaut Plate | Body armor | Defense 3, Might +2 | Strong |
+| Phantom Weave Plate | Body armor | Defense 3, Guile +2 | Strong |
+| Bastion Plate | Body armor | Defense 3, Resolve +2 | Strong |
+| Warbound Plate | Body armor | Defense 3, Might +1, Guile +1, Resolve +1 | Strong |
+| Salvaged Legplate | Leg armor | Defense 1 | Weak |
+| Stormtrooper Greaves | Leg armor | Defense 1, Might +1 | Weak |
+| Silent Treads | Leg armor | Defense 1, Guile +1 | Weak |
+| Anchor Greaves | Leg armor | Defense 1, Resolve +1 | Weak |
+| Scavenger Leg Guards | Leg armor | Defense 1, Might +1, Resolve +1 | Weak |
+| Ablative Plating | Leg armor | Defense 3 | Strong |
+| Siegebreaker Greaves | Leg armor | Defense 2, Might +2 | Strong |
+| Nightfall Treads | Leg armor | Defense 2, Guile +2 | Strong |
+| Unbreakable Greaves | Leg armor | Defense 2, Resolve +2 | Strong |
+| Warden's Leg Plate | Leg armor | Defense 2, Might +1, Guile +1, Resolve +1 | Strong |
 | Rattlesnake Stim | Consumable | Heals 6 | Weak |
 | Field Bandage | Consumable | Heals 4 | Weak |
 | Lazarus Trauma Kit | Consumable | Heals 12 | Strong |
 | Nanite Canister | Consumable | Heals 9 | Strong |
 
-Small monsters drop from the weak pool (Pipe Wrench, Shiv, Hull Plating, Legplate, Stim, Bandage). Big monsters drop from the strong pool (Sledge, Lancer, Spike, Siege Plate, Ablative Plating, Trauma Kit, Nanite Canister). Duplicates are never offered. Scenes can also give loot directly, such as the armory choice between the Lancer and the Trauma Kit.
+Small monsters drop from the weak pool (one melee weapon, one gun, four body-armor variants, four leg-armor variants, two consumables). Big monsters drop from the matching strong pool. Duplicates are never offered, and a full pack only swaps in a drop that beats what it would replace. Scenes can also give loot directly, such as the armory choice between the Lancer and the Trauma Kit.
 
 ## Chapter flow
 

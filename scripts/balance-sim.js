@@ -2,38 +2,62 @@
 /*
  * Gravefall balance simulator (Project Plan recommendation #1: "Balance by simulation").
  *
- * Mirrors the rules engine in Gravefall.html (CONFIG, ITEMS, DROPS, the fight stat
- * blocks, and the story-check DCs/effects) and runs many thousands of simulated
- * play-throughs of each chapter, using the game's own formulas (see rollCheck,
- * act, foeHit, hurt in Gravefall.html) rather than approximations.
+ * Mirrors the rules engine in Gravefall.html (CONFIG, ITEMS, DROPS, gear(), mod(), the fight
+ * stat blocks, and the story-check DCs/effects) and runs many thousands of simulated
+ * play-throughs of each chapter, using the game's own formulas rather than approximations.
  *
- * Usage: node scripts/balance-sim.js [runsPerChapter]
+ * Also exercises the character-creation stat allocation (CONFIG.allocPoints spent across
+ * might/guile/resolve on top of a 1/1/1 base) across a few build archetypes, since the
+ * player chooses that build once per save and it should not make the game trivial or
+ * impossible regardless of how the points are spent.
+ *
+ * Usage: node scripts/balance-sim.js [runsPerBuild]
  */
 'use strict';
 
-const RUNS = parseInt(process.argv[2], 10) || 20000;
+const RUNS = parseInt(process.argv[2], 10) || 10000;
 
 /* ===== Rules, copied from Gravefall.html ===== */
-const CONFIG = { die: 20, maxHp: 28, critHeal: 3, fumbleDmg: 2, bag: 5, stats: { might: 3, guile: 1, resolve: 2 } };
+const CONFIG = { die: 20, maxHp: 28, critHeal: 3, fumbleDmg: 2, bag: 10, allocPoints: 3, stats: { might: 1, guile: 1, resolve: 1 } };
 
 const ITEMS = {
-  chainblade: { n: 'Ironwolf Cutter', slot: 'weapon', atk: 6, acc: 1 },
-  cleaver: { n: 'Salvaged Pipe Wrench', slot: 'weapon', atk: 4, acc: 0, tier: 'weak' },
-  shiv: { n: 'Trench Shiv', slot: 'weapon', atk: 5, acc: 1, tier: 'weak' },
-  maul: { n: 'Thunderclap Sledge', slot: 'weapon', atk: 10, acc: 0, tier: 'strong' },
-  plasma: { n: 'Sunspear Lancer', slot: 'weapon', atk: 13, acc: -1, tier: 'strong' },
-  spike: { n: 'Void Spike', slot: 'weapon', atk: 9, acc: 2, tier: 'strong' },
-  carapace: { n: 'Ironwolf Flak Vest', slot: 'armor', dr: 2 },
-  scrap: { n: 'Bolted Hull Plating', slot: 'armor', dr: 1, tier: 'weak' },
-  legplate: { n: 'Salvaged Legplate', slot: 'armor', dr: 2, tier: 'weak' },
-  bulwark: { n: 'Anvil-Class Siege Plate', slot: 'armor', dr: 4, tier: 'strong' },
-  ablative: { n: 'Ablative Plating', slot: 'armor', dr: 3, tier: 'strong' },
+  chainblade: { n: 'Ironwolf Cutter', slot: 'melee', atk: 6, acc: 1 },
+  cleaver: { n: 'Salvaged Pipe Wrench', slot: 'melee', atk: 4, acc: 0, tier: 'weak' },
+  shiv: { n: 'Trench Shiv', slot: 'melee', atk: 5, acc: 1, tier: 'weak' },
+  maul: { n: 'Thunderclap Sledge', slot: 'melee', atk: 10, acc: 0, tier: 'strong' },
+  spike: { n: 'Void Spike', slot: 'melee', atk: 9, acc: 2, tier: 'strong' },
+  pistol: { n: 'Salvaged Repeater', slot: 'gun', atk: 5, acc: 1, tier: 'weak' },
+  plasma: { n: 'Sunspear Lancer', slot: 'gun', atk: 13, acc: -1, tier: 'strong' },
+  carapace: { n: 'Ironwolf Flak Vest', slot: 'body', dr: 2 },
+  scrap: { n: 'Bolted Hull Plating', slot: 'body', dr: 1, tier: 'weak' },
+  bodyMight: { n: 'Brute-Forged Breastplate', slot: 'body', dr: 1, stat: { might: 1 }, tier: 'weak' },
+  bodyGuile: { n: 'Shadowweave Vest', slot: 'body', dr: 1, stat: { guile: 1 }, tier: 'weak' },
+  bodyResolve: { n: 'Stalwart Harness', slot: 'body', dr: 1, stat: { resolve: 1 }, tier: 'weak' },
+  bodyMix: { n: 'Hybrid Combat Rig', slot: 'body', dr: 1, stat: { guile: 1, resolve: 1 }, tier: 'weak' },
+  bulwark: { n: 'Anvil-Class Siege Plate', slot: 'body', dr: 4, tier: 'strong' },
+  bodyMightS: { n: 'Juggernaut Plate', slot: 'body', dr: 3, stat: { might: 2 }, tier: 'strong' },
+  bodyGuileS: { n: 'Phantom Weave Plate', slot: 'body', dr: 3, stat: { guile: 2 }, tier: 'strong' },
+  bodyResolveS: { n: 'Bastion Plate', slot: 'body', dr: 3, stat: { resolve: 2 }, tier: 'strong' },
+  bodyMixS: { n: 'Warbound Plate', slot: 'body', dr: 3, stat: { might: 1, guile: 1, resolve: 1 }, tier: 'strong' },
+  legplate: { n: 'Salvaged Legplate', slot: 'legs', dr: 1, tier: 'weak' },
+  legsMight: { n: 'Stormtrooper Greaves', slot: 'legs', dr: 1, stat: { might: 1 }, tier: 'weak' },
+  legsGuile: { n: 'Silent Treads', slot: 'legs', dr: 1, stat: { guile: 1 }, tier: 'weak' },
+  legsResolve: { n: 'Anchor Greaves', slot: 'legs', dr: 1, stat: { resolve: 1 }, tier: 'weak' },
+  legsMix: { n: 'Scavenger Leg Guards', slot: 'legs', dr: 1, stat: { might: 1, resolve: 1 }, tier: 'weak' },
+  ablative: { n: 'Ablative Plating', slot: 'legs', dr: 3, tier: 'strong' },
+  legsMightS: { n: 'Siegebreaker Greaves', slot: 'legs', dr: 2, stat: { might: 2 }, tier: 'strong' },
+  legsGuileS: { n: 'Nightfall Treads', slot: 'legs', dr: 2, stat: { guile: 2 }, tier: 'strong' },
+  legsResolveS: { n: 'Unbreakable Greaves', slot: 'legs', dr: 2, stat: { resolve: 2 }, tier: 'strong' },
+  legsMixS: { n: 'Warden’s Leg Plate', slot: 'legs', dr: 2, stat: { might: 1, guile: 1, resolve: 1 }, tier: 'strong' },
   stim: { n: 'Rattlesnake Stim', slot: 'use', heal: 6, tier: 'weak' },
   bandage: { n: 'Field Bandage', slot: 'use', heal: 4, tier: 'weak' },
   medikit: { n: 'Lazarus Trauma Kit', slot: 'use', heal: 12, tier: 'strong' },
   nanite: { n: 'Nanite Canister', slot: 'use', heal: 9, tier: 'strong' }
 };
-const DROPS = { small: ['cleaver', 'scrap', 'stim', 'shiv', 'legplate', 'bandage'], big: ['maul', 'plasma', 'bulwark', 'medikit', 'spike', 'ablative', 'nanite'] };
+const DROPS = {
+  small: ['cleaver', 'shiv', 'pistol', 'scrap', 'bodyMight', 'bodyGuile', 'bodyResolve', 'bodyMix', 'legplate', 'legsMight', 'legsGuile', 'legsResolve', 'legsMix', 'stim', 'bandage'],
+  big: ['maul', 'spike', 'plasma', 'bulwark', 'bodyMightS', 'bodyGuileS', 'bodyResolveS', 'bodyMixS', 'ablative', 'legsMightS', 'legsGuileS', 'legsResolveS', 'legsMixS', 'medikit', 'nanite']
+};
 
 /* Story graph: only the numbers the simulator needs (stat checks, DCs, hp/stat fx, loot). */
 const CH1 = [
@@ -66,7 +90,7 @@ const CH1 = [
       { check: { stat: 'guile', dc: 13 }, win: { stat: { guile: 1 } }, lose: { stat: { guile: -1 } } },
       { check: { stat: 'resolve', dc: 10 }, win: { stat: { resolve: 1 } }, lose: { stat: { resolve: -1 } } }
   ] },
-  { id: 'boss', kind: 'fight', fight: { name: 'Major Kraag', hp: 26, dc: 13, def: 2, acc: 9, dmg: 9, drop: null } }
+  { id: 'boss', kind: 'fight', fight: { name: 'Major Kraag', hp: 26, dc: 13, def: 5, acc: 13, dmg: 11, drop: null } }
 ];
 
 const CH2 = [
@@ -85,38 +109,52 @@ const CH2 = [
       { check: { stat: 'guile', dc: 13 }, win: { stat: { guile: 1 } }, lose: { stat: { guile: -1 } } },
       { check: { stat: 'might', dc: 12 }, win: { stat: { might: 1 } }, lose: { stat: { might: -1 } } }
   ] },
-  { id: 'ch2_boss', kind: 'fight', fight: { name: 'Colonel Vex', hp: 34, dc: 14, def: 2, acc: 11, dmg: 8, drop: null } }
+  { id: 'ch2_boss', kind: 'fight', fight: { name: 'Colonel Vex', hp: 34, dc: 14, def: 4, acc: 14, dmg: 10, drop: null } }
 ];
 
-/* ===== Engine, copied from Gravefall.html's act()/rollCheck()/foeHit()/hurt() ===== */
+/* ===== Engine, copied from Gravefall.html's gear()/mod()/act()/rollCheck()/foeHit()/hurt() ===== */
 const rand = () => Math.random();
 const d20 = () => 1 + Math.floor(rand() * CONFIG.die);
 const pick = a => a[Math.floor(rand() * a.length)];
 
 function gear(p) {
-  return { w: ITEMS[p.eq.weapon] || { atk: 2, acc: 0 }, a: ITEMS[p.eq.armor] || { dr: 0 } };
+  return {
+    melee: ITEMS[p.eq.melee] || { atk: 2, acc: 0 },
+    gun: ITEMS[p.eq.gun] || null,
+    body: ITEMS[p.eq.body] || { dr: 0 },
+    legs: ITEMS[p.eq.legs] || { dr: 0 }
+  };
 }
-function mod(p, stat) {
+function armorDr(p) { const g = gear(p); return g.body.dr + g.legs.dr; }
+function gearStatBonus(p, stat) {
+  const g = gear(p);
+  return ((g.body.stat && g.body.stat[stat]) || 0) + ((g.legs.stat && g.legs.stat[stat]) || 0);
+}
+function mod(p, stat, bonus) {
   const base = CONFIG.stats[stat];
-  const acc = stat === 'might' ? gear(p).w.acc : 0;
+  const acc = stat === 'might' ? gear(p).melee.acc : 0;
   const boost = (p.boost && p.boost[stat]) || 0;
-  return base + acc + boost;
+  return base + acc + boost + gearStatBonus(p, stat) + (bonus || 0);
 }
 function evasion(p) { return mod(p, 'guile'); }
-function rollCheck(p, stat, dc) {
-  const roll = d20(), m = mod(p, stat), total = roll + m;
+function rollCheck(p, stat, dc, bonus) {
+  const roll = d20(), m = mod(p, stat, bonus), total = roll + m;
   const o = roll === CONFIG.die ? 'crit' : roll === 1 ? 'fumble' : total >= dc ? 'success' : 'fail';
   return { roll, total, o, pass: o === 'crit' || o === 'success' };
 }
 function hurt(p, n) {
-  const d = Math.max(1, n - gear(p).a.dr - evasion(p));
+  const d = Math.max(1, n - armorDr(p) - evasion(p));
   p.hp = Math.max(0, p.hp - d);
   return d;
 }
 function foeHit(p, f, add) { return hurt(p, f.dmg + add); }
 function heal(p, n) { p.hp = Math.min(CONFIG.maxHp, p.hp + n); }
 
-/* Loot: take if room, else swap out the worst item of the same slot if the new one is better. */
+/* Loot: take if room, else swap out the worst item of the same slot if the new one is better (by raw dr/atk/heal). */
+function slotValue(id) {
+  const i = ITEMS[id];
+  return i.slot === 'melee' || i.slot === 'gun' ? i.atk : i.slot === 'body' || i.slot === 'legs' ? i.dr : i.heal;
+}
 function giveLoot(p, poolOrId) {
   let id = poolOrId;
   if (DROPS[poolOrId]) {
@@ -129,31 +167,36 @@ function giveLoot(p, poolOrId) {
   if (p.inv.length < CONFIG.bag) {
     p.inv.push(id);
   } else {
-    // swap out the weakest item in the same slot, if this one is better; else leave it (as a cautious player would)
     const sameSlot = p.inv.filter(x => ITEMS[x].slot === item.slot);
     if (!sameSlot.length) return;
-    const worst = sameSlot.reduce((a, b) => {
-      const va = item.slot === 'weapon' ? ITEMS[a].atk : item.slot === 'armor' ? ITEMS[a].dr : ITEMS[a].heal;
-      const vb = item.slot === 'weapon' ? ITEMS[b].atk : item.slot === 'armor' ? ITEMS[b].dr : ITEMS[b].heal;
-      return va <= vb ? a : b;
-    });
-    const value = x => item.slot === 'weapon' ? ITEMS[x].atk : item.slot === 'armor' ? ITEMS[x].dr : ITEMS[x].heal;
-    if (value(id) > value(worst)) {
+    const worst = sameSlot.reduce((a, b) => slotValue(a) <= slotValue(b) ? a : b);
+    if (slotValue(id) > slotValue(worst)) {
       p.inv = p.inv.filter(x => x !== worst);
       if (p.eq[item.slot] === worst) p.eq[item.slot] = null;
       p.inv.push(id);
-    }
+    } else return;
   }
-  // equip automatically if it's an upgrade (weapon/armor) and the slot's better or empty
-  if (item.slot === 'weapon' || item.slot === 'armor') {
-    const cur = p.eq[item.slot] ? ITEMS[p.eq[item.slot]] : null;
-    const val = i => item.slot === 'weapon' ? i.atk : i.dr;
-    if (!cur || val(item) > val(cur)) p.eq[item.slot] = id;
+  // equip automatically if it's an upgrade (or the slot is empty)
+  if (item.slot !== 'use') {
+    const curId = p.eq[item.slot], cur = curId ? ITEMS[curId] : null;
+    if (!cur || slotValue(id) > slotValue(curId)) p.eq[item.slot] = id;
   }
 }
 
-function freshPlayer() {
-  return { hp: CONFIG.maxHp, boost: {}, inv: ['chainblade', 'carapace', 'stim'], eq: { weapon: 'chainblade', armor: 'carapace' } };
+/* Character creation: CONFIG.allocPoints spent across might/guile/resolve on top of the 1/1/1 base.
+   Simulated across a few archetypes a real player might pick. */
+const BUILDS = {
+  allMight: { might: CONFIG.allocPoints, guile: 0, resolve: 0 },
+  allGuile: { might: 0, guile: CONFIG.allocPoints, resolve: 0 },
+  allResolve: { might: 0, guile: 0, resolve: CONFIG.allocPoints },
+  balanced: (() => {
+    const b = { might: 0, guile: 0, resolve: 0 }, keys = ['might', 'guile', 'resolve'];
+    for (let i = 0; i < CONFIG.allocPoints; i++) b[keys[i % 3]]++;
+    return b;
+  })()
+};
+function freshPlayer(build) {
+  return { hp: CONFIG.maxHp, boost: { ...build }, inv: ['chainblade', 'carapace', 'stim'], eq: { melee: 'chainblade', gun: null, body: 'carapace', legs: null } };
 }
 
 /* Player policy for story checks: pick the option with the best odds of passing (a reasonably played run). */
@@ -191,8 +234,9 @@ function applyFx(p, fx) {
   if (fx.give) giveLoot(p, fx.give);
 }
 
-/* Combat policy: Strike normally; use a healing item below 40% HP if one is carried;
-   otherwise Guard below 25% HP; Reckless blow when it looks likely to end the fight in one hit. */
+/* Combat policy: Strike normally (Aimed shot instead, when a gun is equipped and the enemy's Defense
+   makes ignoring it worthwhile); use a healing item below 40% HP if one is carried; Guard below 25% HP;
+   Reckless blow when it looks likely to end the fight in one hit. */
 function useBestHeal(p) {
   const heals = p.inv.filter(id => ITEMS[id].slot === 'use').sort((a, b) => ITEMS[b].heal - ITEMS[a].heal);
   if (!heals.length) return false;
@@ -207,24 +251,28 @@ function runFight(p, fightDef, log) {
   while (f.hp > 0 && p.hp > 0 && rounds < 200) {
     rounds++;
     if (p.hp / CONFIG.maxHp < 0.4 && useBestHeal(p)) continue;
-    const w = gear(p).w;
+    const g = gear(p);
     let kind = 'strike';
     if (p.hp / CONFIG.maxHp < 0.25) kind = 'guard';
-    else if (f.hp <= w.atk * 2) kind = 'wild'; // likely lethal reckless blow
+    else if (f.hp <= g.melee.atk * 2) kind = 'wild'; // likely lethal reckless blow
+    else if (g.gun && f.def >= 2) kind = 'aim'; // worth ignoring Defense
     if (kind === 'guard') {
       const r = rollCheck(p, 'resolve', f.acc);
       if (r.o === 'crit') heal(p, CONFIG.critHeal);
       if (r.o === 'fumble') hurt(p, CONFIG.fumbleDmg);
       if (r.pass) heal(p, 2); else foeHit(p, f, 0);
     } else {
-      const dc = kind === 'wild' ? f.dc + 3 : f.dc;
-      const r = rollCheck(p, 'might', dc);
+      const w = kind === 'aim' ? g.gun : g.melee;
+      const stat = kind === 'aim' ? 'guile' : 'might';
+      const dc = kind === 'wild' ? f.dc + 3 : kind === 'aim' ? f.dc + 2 : f.dc;
+      const bonus = kind === 'aim' ? g.gun.acc : 0;
+      const r = rollCheck(p, stat, dc, bonus);
       if (r.o === 'crit') heal(p, CONFIG.critHeal);
       if (r.o === 'fumble') hurt(p, CONFIG.fumbleDmg);
       if (r.pass) {
         const cr = r.o === 'crit' ? w.atk : 0;
         const ml = kind === 'wild' ? 2 : 1;
-        const df = cr ? 0 : f.def;
+        const df = (cr || kind === 'aim') ? 0 : f.def;
         const dmg = Math.max(1, w.atk * ml + cr - df);
         f.hp = Math.max(0, f.hp - dmg);
       } else {
@@ -238,10 +286,10 @@ function runFight(p, fightDef, log) {
   return won;
 }
 
-function runChapter(chapter, carriedPlayer) {
+function runChapter(chapter, carriedPlayer, build) {
   // Chapter start: full Vitality, but gear/boosts carry over if the previous chapter was finished
   // (see "Between chapters" in the Game Design Document).
-  const p = carriedPlayer ? { hp: CONFIG.maxHp, boost: { ...carriedPlayer.boost }, inv: carriedPlayer.inv.slice(), eq: { ...carriedPlayer.eq } } : freshPlayer();
+  const p = carriedPlayer ? { hp: CONFIG.maxHp, boost: { ...carriedPlayer.boost }, inv: carriedPlayer.inv.slice(), eq: { ...carriedPlayer.eq } } : freshPlayer(build);
   const log = { checks: [], fights: [] };
   for (const scene of chapter) {
     if (p.hp <= 0) break;
@@ -252,12 +300,12 @@ function runChapter(chapter, carriedPlayer) {
   return { win: p.hp > 0, hpLeft: p.hp, log, player: p };
 }
 
-/* ===== Run simulations and report per-encounter stats ===== */
-function simulate(name, chapter, runs) {
-  const encounterStats = {}; // name -> {attempts, wins, hpLeftSum}
+/* ===== Run simulations and report per-encounter stats, once per build archetype ===== */
+function simulate(label, chapter, runs, build) {
+  const encounterStats = {};
   let wins = 0, hpSum = 0;
   for (let i = 0; i < runs; i++) {
-    const result = runChapter(chapter);
+    const result = runChapter(chapter, null, build);
     if (result.win) { wins++; hpSum += result.hpLeft; }
     for (const f of result.log.fights) {
       const s = encounterStats[f.name] || (encounterStats[f.name] = { attempts: 0, wins: 0, roundsSum: 0, hpLeftSum: 0 });
@@ -265,31 +313,31 @@ function simulate(name, chapter, runs) {
       if (f.won) { s.wins++; s.roundsSum += f.rounds; s.hpLeftSum += f.hpLeft; }
     }
   }
-  console.log(`\n=== ${name} — chapter win rate: ${(wins / runs * 100).toFixed(1)}% over ${runs} runs (avg HP left on win: ${(hpSum / Math.max(1, wins)).toFixed(1)}/${CONFIG.maxHp}) ===`);
-  console.log('Encounter          attempts   win%   avgRounds(won)  avgHPleft(won)   flag');
+  console.log(`\n--- ${label} — chapter win rate: ${(wins / runs * 100).toFixed(1)}% over ${runs} runs (avg HP left on win: ${(hpSum / Math.max(1, wins)).toFixed(1)}/${CONFIG.maxHp}) ---`);
   for (const [enc, s] of Object.entries(encounterStats)) {
     const winPct = s.wins / s.attempts * 100;
     const avgRounds = s.roundsSum / Math.max(1, s.wins);
     const avgHp = s.hpLeftSum / Math.max(1, s.wins);
     let flag = '';
-    if (winPct < 50) flag = 'IMPOSSIBLE?'; // reached the fight but usually dies
+    if (winPct < 50) flag = 'IMPOSSIBLE?';
     else if (winPct > 97 && avgHp / CONFIG.maxHp > 0.75) flag = 'TRIVIAL?';
     console.log(
-      enc.padEnd(18) + String(s.attempts).padStart(8) + winPct.toFixed(1).padStart(8) + '%' +
+      '  ' + enc.padEnd(18) + String(s.attempts).padStart(8) + winPct.toFixed(1).padStart(8) + '%' +
       avgRounds.toFixed(1).padStart(16) + avgHp.toFixed(1).padStart(17) + '   ' + flag
     );
   }
 }
 
-simulate('Chapter 1: Iron in the Dark (fresh kit)', CH1, RUNS);
-simulate('Chapter 2: The Hollow Moon (fresh kit — only reachable today by skipping Ch.1)', CH2, RUNS);
+console.log(`allocPoints=${CONFIG.allocPoints} (base 1/1/1 + these, freely spent at character creation)`);
+console.log('=== Chapter 1: Iron in the Dark (fresh kit, by build) ===');
+for (const [name, build] of Object.entries(BUILDS)) simulate(name, CH1, RUNS, build);
 
 // End-to-end: Chapter 2 as actually reached by a player who finished Chapter 1 and carried gear forward.
-function simulateSaga(runs) {
+function simulateSaga(runs, build, label) {
   const encounterStats = {};
   let sagaWins = 0, ch1Wins = 0;
   for (let i = 0; i < runs; i++) {
-    const r1 = runChapter(CH1);
+    const r1 = runChapter(CH1, null, build);
     if (!r1.win) continue;
     ch1Wins++;
     const r2 = runChapter(CH2, r1.player);
@@ -300,8 +348,7 @@ function simulateSaga(runs) {
       if (f.won) { s.wins++; s.roundsSum += f.rounds; s.hpLeftSum += f.hpLeft; }
     }
   }
-  console.log(`\n=== Full saga: Chapter 2 with gear carried from a won Chapter 1 — ${runs} attempts, ${ch1Wins} reached Ch.2, saga win rate ${(sagaWins / ch1Wins * 100).toFixed(1)}% of those ===`);
-  console.log('Encounter          attempts   win%   avgRounds(won)  avgHPleft(won)   flag');
+  console.log(`\n--- ${label}: Ch.2 with gear carried from a won Ch.1 — ${runs} attempts, ${ch1Wins} reached Ch.2, saga win rate ${(sagaWins / Math.max(1, ch1Wins) * 100).toFixed(1)}% of those ---`);
   for (const [enc, s] of Object.entries(encounterStats)) {
     const winPct = s.wins / s.attempts * 100;
     const avgRounds = s.roundsSum / Math.max(1, s.wins);
@@ -310,9 +357,10 @@ function simulateSaga(runs) {
     if (winPct < 50) flag = 'IMPOSSIBLE?';
     else if (winPct > 97 && avgHp / CONFIG.maxHp > 0.75) flag = 'TRIVIAL?';
     console.log(
-      enc.padEnd(18) + String(s.attempts).padStart(8) + winPct.toFixed(1).padStart(8) + '%' +
+      '  ' + enc.padEnd(18) + String(s.attempts).padStart(8) + winPct.toFixed(1).padStart(8) + '%' +
       avgRounds.toFixed(1).padStart(16) + avgHp.toFixed(1).padStart(17) + '   ' + flag
     );
   }
 }
-simulateSaga(RUNS);
+console.log('\n=== Full saga, by build ===');
+for (const [name, build] of Object.entries(BUILDS)) simulateSaga(RUNS, build, name);

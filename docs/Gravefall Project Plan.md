@@ -6,7 +6,7 @@ Oct 29, 2026 · @Aaron
 
 Gravefall has two playable chapters, a full set of mechanics, pixel art, sound and narration, and a published link; the next step is to prove it plays well. The full design is in the Gravefall Game Design Document.
 
-**Built:** dice-driven choices and combat, enemy stats with a visible damage breakdown, a 5-slot inventory with loot, about 60 varied fight lines, pixel art for every scene and enemy, synthesized sound effects, a browser narrator, mobile and desktop layouts, and chapters as dropdowns.
+**Built:** dice-driven choices and combat with a 4th action (Aimed shot), enemy stats with a visible damage breakdown, a 10-slot inventory across four equipment slots (melee, gun, body armor, leg armor) with loot that always resolves before the next scene, a one-time character-creation stat allocation, saved progress, about 60 varied fight lines, pixel art for every scene and enemy, synthesized sound effects, a browser narrator, mobile and desktop layouts, and chapters as dropdowns.
 
 **Not yet verified:** a full play-through of either chapter, real phones, and real voices. Enemy and item numbers are first guesses.
 
@@ -16,10 +16,10 @@ Start with balance, saving and meaningful choices; they decide whether the game 
 
 | # | Recommendation | Why | Impact | Effort | Priority |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Balance by simulation | Run thousands of automated fights and runs to catch fights that are impossible or trivial, keeping dice results random | High | Small | **Done** — `scripts/balance-sim.js`; Colonel Vex rebalanced to match Major Kraag's win rate |
+| 1 | Balance by simulation | Run thousands of automated fights and runs to catch fights that are impossible or trivial, keeping dice results random | High | Small | **Done** — `scripts/balance-sim.js`, now simulated per build archetype (all-Might/Guile/Resolve/balanced); Kraag and Vex retuned twice, most recently after the equipment and stat-allocation overhaul |
 | 2 | Save progress | A refresh currently loses everything; store progress per chapter on the player's device | High | Small | **Done** — saved to `localStorage`, validated on load |
 | 3 | Make choices matter | Choices set flags that change later scenes, ally reactions and endings, so replays differ | High | Medium | Next |
-| 4 | Add progression | Decided: the player has a level and spends stat points on each level-up; see the progression design below | Medium | Medium | Next |
+| 4 | Add progression | Decided: the player has a level and spends stat points on each level-up; see the progression design below. A one-time stat allocation at character creation now exists (not this) — leveling still adds points *during* a chapter from XP | Medium | Medium | Next |
 | 5 | Give allies jobs | For example Quill heals once per fight and Brannigan lowers an enemy's Defense | Medium | Medium | Next |
 | 6 | Unique Chapter 2 art | New backdrops and sprites instead of reused Chapter 1 art and recolors | Medium | Medium | Later |
 | 7 | Settings panel | Toggles for success odds, voice speed and text size | Low | Small | Next |
@@ -39,7 +39,7 @@ Four phases, in order; no dates are set yet because the pace depends on how much
 
 ## Progression design (proposed)
 
-The player earns experience from fights and levels up, spending one stat point per level. Claude chose these numbers to give about two levels per chapter without letting one stat run away; they are untested.
+The player earns experience from fights and levels up, spending one stat point per level. Claude chose these numbers to give about two levels per chapter without letting one stat run away; they are untested. **Note:** this table still assumes the old starting stats (Might 3, Guile 1, Resolve 2) and the old single weapon/armor slots. Character creation now starts the player at Might 1, Guile 1, Resolve 1 plus 3 freely-spent points, and armor can itself grant stat bonuses — so the XP thresholds and "why this is balanced" math below need to be re-run against the current baseline (and through `scripts/balance-sim.js`) before this ships, not just copied as-is.
 
 | Source or level | XP | Reward |
 | --- | --- | --- |

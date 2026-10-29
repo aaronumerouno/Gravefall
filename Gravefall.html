@@ -139,49 +139,91 @@ aside,.play{display:contents}
 </main>
 <script>
 /* ===== RULES ===== */
-const CONFIG={die:20,maxHp:28,critHeal:3,fumbleDmg:2,bag:5,showOdds:false,voice:false,sfx:true,stats:{might:3,guile:1,resolve:2}};
-const SAVE_KEY='gravefall_save',SAVE_VER=1; /* bump SAVE_VER on any save-breaking change; old saves are then ignored, not crashed on */
+const CONFIG={die:20,maxHp:28,critHeal:3,fumbleDmg:2,bag:10,allocPoints:3,showOdds:false,voice:false,sfx:true,stats:{might:1,guile:1,resolve:1}};
+const SAVE_KEY='gravefall_save',SAVE_VER=2; /* bump SAVE_VER on any save-breaking change; old saves are then ignored, not crashed on */
 const SAGA='The Gravefall Saga',CHAPTERS={1:'Iron in the Dark',2:'The Hollow Moon'};  /* add chapters here; give a scene chapter:2 to switch */
 const LABELS={might:'Might',guile:'Guile',resolve:'Resolve'};
 
-/* ===== ITEMS: add entries here; add ids to DROPS to let monsters drop them ===== */
+/* ===== ITEMS: 4 equipment slots (melee, gun, body, legs) plus consumables (use). Add entries here;
+   add ids to DROPS to let monsters drop them. Body/legs armor may carry a stat bonus (stat:{might,guile,resolve}). ===== */
+const CAT_LABEL={melee:'Melee weapon',gun:'Ranged weapon',body:'Body armor',legs:'Leg armor',use:'Consumable'};
 const ITEMS={
- chainblade:{n:'Ironwolf Cutter',slot:'weapon',atk:6,acc:1},
- cleaver:{n:'Salvaged Pipe Wrench',slot:'weapon',atk:4,acc:0,tier:'weak'},
- shiv:{n:'Trench Shiv',slot:'weapon',atk:5,acc:1,tier:'weak'},
- maul:{n:'Thunderclap Sledge',slot:'weapon',atk:10,acc:0,tier:'strong'},
- plasma:{n:'Sunspear Lancer',slot:'weapon',atk:13,acc:-1,tier:'strong'},
- spike:{n:'Void Spike',slot:'weapon',atk:9,acc:2,tier:'strong'},
- carapace:{n:'Ironwolf Flak Vest',slot:'armor',dr:2},
- scrap:{n:'Bolted Hull Plating',slot:'armor',dr:1,tier:'weak'},
- legplate:{n:'Salvaged Legplate',slot:'armor',dr:2,tier:'weak'},
- bulwark:{n:'Anvil-Class Siege Plate',slot:'armor',dr:4,tier:'strong'},
- ablative:{n:'Ablative Plating',slot:'armor',dr:3,tier:'strong'},
+ chainblade:{n:'Ironwolf Cutter',slot:'melee',atk:6,acc:1},
+ cleaver:{n:'Salvaged Pipe Wrench',slot:'melee',atk:4,acc:0,tier:'weak'},
+ shiv:{n:'Trench Shiv',slot:'melee',atk:5,acc:1,tier:'weak'},
+ maul:{n:'Thunderclap Sledge',slot:'melee',atk:10,acc:0,tier:'strong'},
+ spike:{n:'Void Spike',slot:'melee',atk:9,acc:2,tier:'strong'},
+ pistol:{n:'Salvaged Repeater',slot:'gun',atk:5,acc:1,tier:'weak'},
+ plasma:{n:'Sunspear Lancer',slot:'gun',atk:13,acc:-1,tier:'strong'},
+ carapace:{n:'Ironwolf Flak Vest',slot:'body',dr:2},
+ scrap:{n:'Bolted Hull Plating',slot:'body',dr:1,tier:'weak'},
+ bodyMight:{n:'Brute-Forged Breastplate',slot:'body',dr:1,stat:{might:1},tier:'weak'},
+ bodyGuile:{n:'Shadowweave Vest',slot:'body',dr:1,stat:{guile:1},tier:'weak'},
+ bodyResolve:{n:'Stalwart Harness',slot:'body',dr:1,stat:{resolve:1},tier:'weak'},
+ bodyMix:{n:'Hybrid Combat Rig',slot:'body',dr:1,stat:{guile:1,resolve:1},tier:'weak'},
+ bulwark:{n:'Anvil-Class Siege Plate',slot:'body',dr:4,tier:'strong'},
+ bodyMightS:{n:'Juggernaut Plate',slot:'body',dr:3,stat:{might:2},tier:'strong'},
+ bodyGuileS:{n:'Phantom Weave Plate',slot:'body',dr:3,stat:{guile:2},tier:'strong'},
+ bodyResolveS:{n:'Bastion Plate',slot:'body',dr:3,stat:{resolve:2},tier:'strong'},
+ bodyMixS:{n:'Warbound Plate',slot:'body',dr:3,stat:{might:1,guile:1,resolve:1},tier:'strong'},
+ legplate:{n:'Salvaged Legplate',slot:'legs',dr:1,tier:'weak'},
+ legsMight:{n:'Stormtrooper Greaves',slot:'legs',dr:1,stat:{might:1},tier:'weak'},
+ legsGuile:{n:'Silent Treads',slot:'legs',dr:1,stat:{guile:1},tier:'weak'},
+ legsResolve:{n:'Anchor Greaves',slot:'legs',dr:1,stat:{resolve:1},tier:'weak'},
+ legsMix:{n:'Scavenger Leg Guards',slot:'legs',dr:1,stat:{might:1,resolve:1},tier:'weak'},
+ ablative:{n:'Ablative Plating',slot:'legs',dr:3,tier:'strong'},
+ legsMightS:{n:'Siegebreaker Greaves',slot:'legs',dr:2,stat:{might:2},tier:'strong'},
+ legsGuileS:{n:'Nightfall Treads',slot:'legs',dr:2,stat:{guile:2},tier:'strong'},
+ legsResolveS:{n:'Unbreakable Greaves',slot:'legs',dr:2,stat:{resolve:2},tier:'strong'},
+ legsMixS:{n:'Warden’s Leg Plate',slot:'legs',dr:2,stat:{might:1,guile:1,resolve:1},tier:'strong'},
  stim:{n:'Rattlesnake Stim',slot:'use',heal:6,tier:'weak'},
  bandage:{n:'Field Bandage',slot:'use',heal:4,tier:'weak'},
  medikit:{n:'Lazarus Trauma Kit',slot:'use',heal:12,tier:'strong'},
  nanite:{n:'Nanite Canister',slot:'use',heal:9,tier:'strong'}
 };
-const DROPS={small:['cleaver','scrap','stim','shiv','legplate','bandage'],big:['maul','plasma','bulwark','medikit','spike','ablative','nanite']};
-/* ===== LORE: [melee|ranged, story, how it behaves when used] per item id; STAT_INFO: stat tooltips ===== */
+const DROPS={
+ small:['cleaver','shiv','pistol','scrap','bodyMight','bodyGuile','bodyResolve','bodyMix','legplate','legsMight','legsGuile','legsResolve','legsMix','stim','bandage'],
+ big:['maul','spike','plasma','bulwark','bodyMightS','bodyGuileS','bodyResolveS','bodyMixS','ablative','legsMightS','legsGuileS','legsResolveS','legsMixS','medikit','nanite']
+};
+/* ===== LORE: [story, how it behaves when used] per item id; STAT_INFO: stat tooltips ===== */
 const LORE={
- chainblade:['Melee','Standard issue to every Ironwolf officer. The edge hums when you hold it close.','Quick and reliable. Its vibrating edge finds gaps, so it is easy to land.'],
- cleaver:['Melee','Torn off a maintenance rack in the galley. Somebody carved a name into the handle.','Light and crude. It lands often but barely scratches big targets.'],
- maul:['Melee','A dockhand’s sledgehammer rewired with a shock coil. The crew called it Thunderclap.','Slow to swing, then it crushes bone and plate in one blow.'],
- plasma:['Ranged','Prototype railcaster from the carrier’s weapons lab. It hums with stolen sunlight.','Fires a searing bolt that hits like a shell, but the kick makes it harder to aim.'],
- carapace:['','Layered ceramic plate, scarred by a dozen landings.','Steady protection that never runs out.'],
- scrap:['','Hull plating bolted over your ribs by a very nervous mechanic.','Better than nothing, and it rattles when you move.'],
- bulwark:['','Cut from the blast door of the siege tank Old Bessie.','Heavy, but most blows break against it.'],
- stim:['','A trooper’s trick: a cheap injector that bites like a rattlesnake.','Slammed into the thigh, it mends flesh at once and leaves your hands shaking. Used up.'],
- medikit:['','Lieutenant Quill’s favorite field kit. Real surgical glue, real morphine.','Closes deep wounds fast. Used up.'],
- shiv:['Melee','A boarding knife honed to a wire edge. Fits in a boot, not a sheath.','Short and quick. It finds a gap before the enemy can react.'],
- spike:['Melee','A railyard spike charged with a void-black current. It hums when it is close to flesh.','Punches clean through plate instead of around it.'],
- legplate:['','Greaves stripped off a dead Rustjack and refitted in a hurry.','Covers the worst of it, though the straps never quite sit right.'],
- ablative:['','Overlapping ceramic tiles meant to shed a glancing hit rather than stop it cold.','Sheds most of a blow, every time, without the weight of full plate.'],
- bandage:['','A field dressing from a dead medic’s kit, torn open in a hurry.','Stops the worst of the bleeding. Used up.'],
- nanite:['','A sealed canister of medical nanites, cold to the touch even through a glove.','Floods a wound and knits it shut in seconds. Used up.']};
-const tipText=id=>{const i=ITEMS[id],[k,l,u]=LORE[id]||['','',''];
- const t=i.slot==='weapon'?`Weapon, ${k}. Damage ${i.atk}, accuracy ${i.acc>=0?'+':''}${i.acc}.`:i.slot==='armor'?`Armor. Blocks ${i.dr} damage from each hit.`:`Consumable. Heals ${i.heal} vitality.`;
+ chainblade:['Standard issue to every Ironwolf officer. The edge hums when you hold it close.','Quick and reliable. Its vibrating edge finds gaps, so it is easy to land.'],
+ cleaver:['Torn off a maintenance rack in the galley. Somebody carved a name into the handle.','Light and crude. It lands often but barely scratches big targets.'],
+ shiv:['A boarding knife honed to a wire edge. Fits in a boot, not a sheath.','Short and quick. It finds a gap before the enemy can react.'],
+ maul:['A dockhand’s sledgehammer rewired with a shock coil. The crew called it Thunderclap.','Slow to swing, then it crushes bone and plate in one blow.'],
+ spike:['A railyard spike charged with a void-black current. It hums when it is close to flesh.','Punches clean through plate instead of around it.'],
+ pistol:['A cobbled-together sidearm from the ship’s small-arms locker.','Light recoil, easy to bring to bear in a hurry.'],
+ plasma:['Prototype railcaster from the carrier’s weapons lab. It hums with stolen sunlight.','Fires a searing bolt that hits like a shell, but the kick makes it harder to aim.'],
+ carapace:['Layered ceramic plate, scarred by a dozen landings.','Steady protection that never runs out.'],
+ scrap:['Hull plating bolted over your ribs by a very nervous mechanic.','Better than nothing, and it rattles when you move.'],
+ bodyMight:['Reinforced across the shoulders for throwing your full weight into a blow.','Trades coverage for leverage.'],
+ bodyGuile:['Stitched with sliding plates that move the way you do.','Light enough to barely notice you are wearing it.'],
+ bodyResolve:['A chest rig built to keep a soldier breathing through anything.','Steadies the nerves as much as it stops a blade.'],
+ bodyMix:['A scavenger’s patchwork of plate, mesh and padding.','A bit of everything, none of it wasted.'],
+ bulwark:['Cut from the blast door of the siege tank Old Bessie.','Heavy, but most blows break against it.'],
+ bodyMightS:['Full war-plate built for soldiers who lead with the shoulder.','Turns every swing into a sledgehammer.'],
+ bodyGuileS:['Ghost-pattern plate that drinks light instead of reflecting it.','Moves like it is barely there.'],
+ bodyResolveS:['A command-rank chestpiece, rated to take a direct hit and keep its wearer upright.','Makes you very hard to put down.'],
+ bodyMixS:['Veteran plate rebuilt three times over, and better for it.','Balanced in every way that matters.'],
+ legplate:['Greaves stripped off a dead Rustjack and refitted in a hurry.','Covers the worst of it, though the straps never quite sit right.'],
+ legsMight:['Heavy greaves built to anchor a charge.','Lets you put your whole body behind a hit.'],
+ legsGuile:['Soft-soled treads that leave almost no sound.','Perfect for closing a gap unseen.'],
+ legsResolve:['Braced greaves that lock your stance under fire.','Keeps you standing when the deck shakes.'],
+ legsMix:['Mismatched guards salvaged from three different corpses.','Awkward to look at, useful all the same.'],
+ ablative:['Overlapping ceramic tiles meant to shed a glancing hit rather than stop it cold.','Sheds most of a blow, every time, without the weight of full plate.'],
+ legsMightS:['Siege-rated greaves, built to plant and swing without flinching.','Turns your footing into a weapon.'],
+ legsGuileS:['Treads engineered for a ghost unit that no longer exists.','You are gone before the echo catches up.'],
+ legsResolveS:['Command-grade greaves rated against anything short of a direct hit.','Nothing short of a direct hit moves you.'],
+ legsMixS:['A warden’s field kit, rebuilt from three fallen soldiers’ gear.','No weakness anyone has found yet.'],
+ stim:['A trooper’s trick: a cheap injector that bites like a rattlesnake.','Slammed into the thigh, it mends flesh at once and leaves your hands shaking. Used up.'],
+ bandage:['A field dressing from a dead medic’s kit, torn open in a hurry.','Stops the worst of the bleeding. Used up.'],
+ medikit:['Lieutenant Quill’s favorite field kit. Real surgical glue, real morphine.','Closes deep wounds fast. Used up.'],
+ nanite:['A sealed canister of medical nanites, cold to the touch even through a glove.','Floods a wound and knits it shut in seconds. Used up.']};
+const statLine=i=>i.stat?Object.entries(i.stat).map(([k,v])=>`${LABELS[k]} ${v>=0?'+':''}${v}`).join(', '):'';
+const tipText=id=>{const i=ITEMS[id],[l,u]=LORE[id]||['',''];
+ const t=(i.slot==='melee'||i.slot==='gun')?`${CAT_LABEL[i.slot]}. Damage ${i.atk}, accuracy ${i.acc>=0?'+':''}${i.acc}.`
+  :(i.slot==='body'||i.slot==='legs')?`${CAT_LABEL[i.slot]}. Blocks ${i.dr} damage from each hit.`+(i.stat?` Also ${statLine(i)}.`:'')
+  :`Consumable. Heals ${i.heal} vitality.`;
  return `<b>${i.n}</b><br>${t}<br><em>${l}</em><br>${u}`;};
 const STAT_INFO={might:'Raw strength. Used to strike, smash doors and tear through enemies. Your weapon’s accuracy adds to it.',
  guile:'Cunning and stealth. Used to hack, search and slip past danger.',
@@ -195,10 +237,12 @@ const STAT_INFO={might:'Raw strength. Used to strike, smash doors and tear throu
  foeAcc:'How hard it is to guard against. Your Guard roll must reach this number.',
  damage:'Damage your equipped weapon deals on a hit. Critical hits add it again.'};
 const tipSpan=(t,h)=>`<span class="tip" tabindex="0" data-tip="${h}">${t}</span>`;
-const gear=s=>({w:ITEMS[s.eq.weapon]||{atk:2,acc:0},a:ITEMS[s.eq.armor]||{dr:0}});
+const gear=s=>({melee:ITEMS[s.eq.melee]||{atk:2,acc:0},gun:ITEMS[s.eq.gun]||null,body:ITEMS[s.eq.body]||{dr:0},legs:ITEMS[s.eq.legs]||{dr:0}});
+const armorDr=s=>gear(s).body.dr+gear(s).legs.dr;
+const gearStatBonus=(s,stat)=>{const g=gear(s);return((g.body.stat&&g.body.stat[stat])||0)+((g.legs.stat&&g.legs.stat[stat])||0);};
 
 /* ===== MODIFIERS: situational roll bonuses ===== */
-const MODIFIERS=[(s,c)=>c.stat==='might'?gear(s).w.acc:0,(s,c)=>(s.boost&&s.boost[c.stat])||0];
+const MODIFIERS=[(s,c)=>c.stat==='might'?gear(s).melee.acc:0,(s,c)=>(s.boost&&s.boost[c.stat])||0,(s,c)=>gearStatBonus(s,c.stat)];
 
 /* ===== EFFECTS: used in scene outcomes as fx:{hp:-3, flag:'x', give:'maul'|'small'|'big'} ===== */
 const EFFECTS={
@@ -212,6 +256,8 @@ const EFFECTS={
 /* ===== SCENES: story is data. choice={text,goto,fx} or {text,check:{stat,dc},win:{msg,goto,fx},lose:{...}}
    fight scenes: fight:{name,hp,dc,dmg,drop:'small'|'big'|null,say:[taunts]}, then:'nextScene' ===== */
 const SCENES={
+ alloc:{title:'Choose Your Soldier',text:[
+  'Before the airlock cycles, Captain Ironside checks his gear one last time. Every soldier fights differently: some lead with muscle, some with cunning, some with nerve. Spend your points, Captain — how do you fight?'],choices:[]},
  intro:{title:'The Breach',text:[
   'The carrier <em>Gravefall</em> drifts above a dead moon, her reactor screaming toward meltdown. Ironwolf Company’s Third Platoon died on the approach. Captain Ironside alone reached the airlock. “Captain Ironside, report,” Lieutenant Quill says over the comm from the gunship <em>Wrenhawk</em>. “Still breathing, Lieutenant,” Ironside growls. “Tell Corporal Brannigan to start the clock,” he adds.',
   '“Eleven minutes to core breach, Captain,” Corporal Brannigan says, his gravel voice cutting in. “The airlock is welded shut, and something on the other side is scratching to get out,” he adds.'],
@@ -262,7 +308,7 @@ const SCENES={
  boss:{title:'Major Kraag',text:[
   'Major Kraag stands before the screaming reactor, three meters of scarred iron and borrowed flesh. He raises a blade as long as Ironside is tall. “Your platoon died begging, Captain,” Major Kraag snarls. “Will you?” he adds.',
   '“Not today,” Ironside says, and Quill’s voice breaks. “Captain, the core has ninety seconds. Finish this,” she says.'],
-  fight:{name:'Major Kraag',ref:'Major Kraag',pr:'he',pos:'his',hp:26,dc:13,def:2,acc:9,dmg:9,drop:null,say:['“Die loudly!” Major Kraag snarls.','Kraag’s blade splits the deck beside you.','“I will wear your armor,” Major Kraag growls.']},then:'victory'},
+  fight:{name:'Major Kraag',ref:'Major Kraag',pr:'he',pos:'his',hp:26,dc:13,def:5,acc:13,dmg:11,drop:null,say:['“Die loudly!” Major Kraag snarls.','Kraag’s blade splits the deck beside you.','“I will wear your armor,” Major Kraag growls.']},then:'victory'},
  victory:{title:'Victory',end:1,text:[
   'Kraag falls, and the reactor dies in white fire. Ironside sprints for the airlock as the carrier shatters behind him. “Captain!” Quill shouts, and Brannigan adds, “Get in the gunship, you reckless fool.”',
   'Ironside tumbles aboard, scarred and alive. “We won, comrades,” Ironside says. Quill laughs through tears. “You did, Captain. You did,” she says.','Chapter 1 of the Gravefall Saga ends here, but the war for the dead moon has only begun.']},
@@ -302,7 +348,7 @@ Object.assign(SCENES,{
  ch2_boss:{title:'Colonel Vex',bg:'boss',text:[
   'Colonel Vex rises from the console, tall, green-lit and wrong. “Captain Ironside,” Colonel Vex says softly. “I have waited so long to meet you,” he adds.',
   '“You will wait forever,” Ironside says, and the station shakes. “Captain, thirty seconds,” Quill says. “Finish it,” she adds.'],
-  fight:{name:'Colonel Vex',ref:'Colonel Vex',pr:'he',pos:'his',hp:34,dc:14,def:2,acc:11,dmg:8,drop:null,say:['“Kneel!” Colonel Vex snarls.','Vex’s blade carves a green scar across the deck.','“The Hollow remembers you,” Colonel Vex whispers.']},then:'ch2_victory'},
+  fight:{name:'Colonel Vex',ref:'Colonel Vex',pr:'he',pos:'his',hp:34,dc:14,def:4,acc:14,dmg:10,drop:null,say:['“Kneel!” Colonel Vex snarls.','Vex’s blade carves a green scar across the deck.','“The Hollow remembers you,” Colonel Vex whispers.']},then:'ch2_victory'},
  ch2_victory:{title:'Victory',bg:'victory',end:1,text:[
   'Vex falls, and Hollow Station dies in green fire. Ironside throws himself into the lift as the moon shakes. “Captain!” Quill shouts, and Brannigan adds, “Go, go, go!”',
   'Ironside reaches the surface, scarred and alive. “One more down, comrades,” Ironside says. Quill laughs through tears. “One more, Captain,” she says.',
@@ -448,13 +494,13 @@ function drawBg(){const c=$('bgart'),w=Math.ceil(innerWidth/5),h=Math.ceil(inner
 const $=id=>document.getElementById(id);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const pick=a=>a[Math.floor(Math.random()*a.length)];
-const mod=c=>CONFIG.stats[c.stat]+MODIFIERS.reduce((n,f)=>n+f(state,c),0);
+const mod=c=>CONFIG.stats[c.stat]+MODIFIERS.reduce((n,f)=>n+f(state,c),0)+(c.bonus||0);
 let state,busy=false;
 
 const SAVES={},START={1:'intro',2:'ch2_start'};  /* SAVES: each chapter keeps its own progress; SAVES.carry = gear carried into the next chapter */
-function freshState(n){const c=n>1?SAVES.carry:null;
- return{scene:START[n],hp:CONFIG.maxHp,flags:{},inv:c?c.inv.slice():['chainblade','carapace','stim'],eq:c?{...c.eq}:{weapon:'chainblade',armor:'carapace'},fight:null,pending:null,rolls:[],acts:[],note:'',boost:c?{...c.boost}:{},chapter:n};}
-function newGame(n){stopVoice();n=n||(state&&state.chapter)||1;state=freshState(n);enter(START[n]);}
+function freshState(n){const c=n>1?SAVES.carry:null,needsAlloc=n===1&&!SAVES.build,baseBoost=c?{...c.boost}:(SAVES.build?{...SAVES.build}:{});
+ return{scene:needsAlloc?'alloc':START[n],hp:CONFIG.maxHp,flags:{},inv:c?c.inv.slice():['chainblade','carapace','stim'],eq:c?{...c.eq}:{melee:'chainblade',gun:null,body:'carapace',legs:null},fight:null,pending:null,rolls:[],acts:[],note:'',boost:baseBoost,chapter:n,allocDraft:needsAlloc?{might:0,guile:0,resolve:0}:undefined};}
+function newGame(n){stopVoice();n=n||(state&&state.chapter)||1;state=freshState(n);enter(state.scene);}
 function buildChapters(){const box=$('chapters'),all=()=>box.querySelectorAll('details');let lock=false;
  box.innerHTML=Object.keys(CHAPTERS).map(n=>`<details class="chapter" id="ch${n}"><summary><small>${SAGA}</small><b>Chapter ${n}: ${CHAPTERS[n]}</b></summary><div class="chapbody"></div></details>`).join('');
  all().forEach(d=>d.addEventListener('toggle',()=>{if(lock||!d.open)return;lock=true;
@@ -466,12 +512,20 @@ function buildChapters(){const box=$('chapters'),all=()=>box.querySelectorAll('d
 /* ===== SAVING: localStorage only, game state only (see security review S1/S2). Every value coming back
    out of storage is untrusted: scenes, item ids and numbers are checked against the game's own data before
    use, and anything unrecognized is dropped rather than trusted. Nothing here is ever run as code. ===== */
+const EQ_SLOTS=['melee','gun','body','legs'];
+function sanitizeEq(raw,inv){const eq={};for(const slot of EQ_SLOTS){const id=raw&&raw[slot];eq[slot]=(id&&ITEMS[id]&&ITEMS[id].slot===slot&&inv.includes(id))?id:null;}return eq;}
+function sanitizeBoost(raw){const boost={};if(raw&&typeof raw==='object')for(const k in raw)if(k in CONFIG.stats&&typeof raw[k]==='number'&&isFinite(raw[k]))boost[k]=Math.max(-20,Math.min(20,raw[k]));return boost;}
 function sanitizeCarry(raw){
  if(!raw||typeof raw!=='object')return null;
  const inv=Array.isArray(raw.inv)?raw.inv.filter(id=>ITEMS[id]).slice(0,CONFIG.bag):[];
- const eq={};for(const slot of['weapon','armor']){const id=raw.eq&&raw.eq[slot];eq[slot]=(id&&ITEMS[id]&&ITEMS[id].slot===slot&&inv.includes(id))?id:null;}
- const boost={};if(raw.boost&&typeof raw.boost==='object')for(const k in raw.boost)if(k in CONFIG.stats&&typeof raw.boost[k]==='number'&&isFinite(raw.boost[k]))boost[k]=Math.max(-20,Math.min(20,raw.boost[k]));
- return{inv,eq,boost};
+ return{inv,eq:sanitizeEq(raw.eq,inv),boost:sanitizeBoost(raw.boost)};
+}
+function sanitizeBuild(raw){
+ if(!raw||typeof raw!=='object')return null;
+ const out={};let sum=0;
+ for(const k of['might','guile','resolve']){const v=raw[k];if(typeof v==='number'&&isFinite(v)&&v>=0&&v<=CONFIG.allocPoints){out[k]=Math.floor(v);sum+=out[k];}else out[k]=0;}
+ if(sum>CONFIG.allocPoints)return null;
+ return out;
 }
 function sanitizeState(raw,n){
  if(!raw||typeof raw!=='object')return null;
@@ -480,16 +534,17 @@ function sanitizeState(raw,n){
  let hp=raw.hp;if(typeof hp!=='number'||!isFinite(hp))return null;
  hp=Math.max(0,Math.min(CONFIG.maxHp,hp));
  const inv=Array.isArray(raw.inv)?raw.inv.filter(id=>ITEMS[id]).slice(0,CONFIG.bag):[];
- const eq={};for(const slot of['weapon','armor']){const id=raw.eq&&raw.eq[slot];eq[slot]=(id&&ITEMS[id]&&ITEMS[id].slot===slot&&inv.includes(id))?id:null;}
+ const eq=sanitizeEq(raw.eq,inv);
  const flags={};if(raw.flags&&typeof raw.flags==='object')for(const k in raw.flags)if(typeof k==='string')flags[k]=1;
- const boost={};if(raw.boost&&typeof raw.boost==='object')for(const k in raw.boost)if(k in CONFIG.stats&&typeof raw.boost[k]==='number'&&isFinite(raw.boost[k]))boost[k]=Math.max(-20,Math.min(20,raw.boost[k]));
+ const boost=sanitizeBoost(raw.boost);
  const pending=(raw.pending&&ITEMS[raw.pending])?raw.pending:null;
  const rolls=Array.isArray(raw.rolls)?raw.rolls.filter(x=>typeof x==='string').slice(-200):[];
  const acts=Array.isArray(raw.acts)?raw.acts.filter(x=>typeof x==='string').slice(-200):[];
  const note=typeof raw.note==='string'?raw.note:'';
  const def=SCENES[scene].fight,savedFightHp=raw.fight&&typeof raw.fight.hp==='number'?raw.fight.hp:def&&def.hp;
  const fight=def?{...def,max:def.hp,hp:Math.max(0,Math.min(def.hp,savedFightHp))}:null;
- return{scene,hp,flags,inv,eq,fight,pending,rolls,acts,note,boost,chapter:n,lp:0};
+ const allocDraft=scene==='alloc'?(sanitizeBuild(raw.allocDraft)||{might:0,guile:0,resolve:0}):undefined;
+ return{scene,hp,flags,inv,eq,fight,pending,rolls,acts,note,boost,chapter:n,lp:0,allocDraft};
 }
 function persist(){try{SAVES[state.chapter]=state;localStorage.setItem(SAVE_KEY,JSON.stringify({v:SAVE_VER,chapter:state.chapter,saves:SAVES}));}catch(e){}}
 function loadSave(){
@@ -500,6 +555,7 @@ function loadSave(){
   let found=false;
   for(const k in data.saves){
    if(k==='carry'){const c=sanitizeCarry(data.saves.carry);if(c)SAVES.carry=c;continue;}
+   if(k==='build'){const b=sanitizeBuild(data.saves.build);if(b)SAVES.build=b;continue;}
    const n=+k;if(!Number.isInteger(n)||!CHAPTERS[n])continue;
    const s=sanitizeState(data.saves[k],n);if(s){SAVES[n]=s;found=true;}
   }
@@ -520,12 +576,12 @@ function rollCheck(c){const roll=1+Math.floor(Math.random()*CONFIG.die),m=mod(c)
  return{roll,m,total,o,pass:o==='crit'||o==='success'};}
 const apply=fx=>{for(const k in(fx||{}))EFFECTS[k]&&EFFECTS[k](state,fx[k]);};
 const evasion=()=>mod({stat:'guile'});
-const hurt=n=>{const d=Math.max(1,n-gear(state).a.dr-evasion());EFFECTS.hp(state,-d);return d;};
-function foeHit(f,add){const dr=gear(state).a.dr,ev=evasion(),d=hurt(f.dmg+add);
+const hurt=n=>{const d=Math.max(1,n-armorDr(state)-evasion());EFFECTS.hp(state,-d);return d;};
+function foeHit(f,add){const dr=armorDr(state),ev=evasion(),d=hurt(f.dmg+add);
  return `Enemy attack ${f.dmg}${add?` + ${add} reckless`:''} − ${dr} Defense − ${ev} Evasion = ${d} damage${f.dmg+add-dr-ev<1?' (minimum 1)':''}`;}
 
-function breakdown(r,c){const a=c.stat==='might'?gear(state).w.acc:0,b=(state.boost&&state.boost[c.stat])||0,base=CONFIG.stats[c.stat],o=r.m-base-a-b,sg=n=>n<0?'\u2212':'+';
- return `${r.roll} + ${LABELS[c.stat]} ${base}`+(a?` ${sg(a)} Accuracy ${Math.abs(a)}`:'')+(b?` ${sg(b)} Training ${Math.abs(b)}`:'')+(o?` ${sg(o)} Bonus ${Math.abs(o)}`:'')+` = ${r.total}`;}
+function breakdown(r,c){const a=c.stat==='might'?gear(state).melee.acc:(c.bonus||0),g=gearStatBonus(state,c.stat),b=(state.boost&&state.boost[c.stat])||0,base=CONFIG.stats[c.stat],o=r.m-base-a-g-b,sg=n=>n<0?'\u2212':'+';
+ return `${r.roll} + ${LABELS[c.stat]} ${base}`+(a?` ${sg(a)} Accuracy ${Math.abs(a)}`:'')+(g?` ${sg(g)} Armor ${Math.abs(g)}`:'')+(b?` ${sg(b)} Training ${Math.abs(b)}`:'')+(o?` ${sg(o)} Bonus ${Math.abs(o)}`:'')+` = ${r.total}`;}
 async function rollUI(c){
  const die=$('die');$('roll').classList.add('show');$('result').textContent='Rolling…';die.className='die spin';sfx('roll');
  const t=setInterval(()=>die.textContent=1+Math.floor(Math.random()*CONFIG.die),70);
@@ -540,13 +596,13 @@ async function rollUI(c){
 function renderHud(){hideTip();
  $('hpnum').textContent=state.hp+' / '+CONFIG.maxHp;$('hpbar').style.width=state.hp/CONFIG.maxHp*100+'%';
  const g=gear(state);
- $('stats').innerHTML=Object.keys(CONFIG.stats).map(k=>tipSpan(`${LABELS[k]} <b>+${mod({stat:k})}</b>`,STAT_INFO[k])).join('')+tipSpan(`Defense <b>${g.a.dr}</b>`,STAT_INFO.armor)+tipSpan(`Evasion <b>${evasion()}</b>`,STAT_INFO.evasion)+tipSpan(`Accuracy <b>${g.w.acc>=0?'+':''}${g.w.acc}</b>`,STAT_INFO.accuracy)+tipSpan(`Damage <b>${g.w.atk}</b>`,STAT_INFO.damage);
+ $('stats').innerHTML=Object.keys(CONFIG.stats).map(k=>tipSpan(`${LABELS[k]} <b>+${mod({stat:k})}</b>`,STAT_INFO[k])).join('')+tipSpan(`Defense <b>${armorDr(state)}</b>`,STAT_INFO.armor)+tipSpan(`Evasion <b>${evasion()}</b>`,STAT_INFO.evasion)+tipSpan(`Melee <b>${g.melee.atk} dmg, ${g.melee.acc>=0?'+':''}${g.melee.acc} acc</b>`,STAT_INFO.accuracy)+(g.gun?tipSpan(`Gun <b>${g.gun.atk} dmg, ${g.gun.acc>=0?'+':''}${g.gun.acc} acc</b>`,STAT_INFO.accuracy):tipSpan('Gun <b>none equipped</b>',STAT_INFO.accuracy));
  const f=state.fight;$('foe').classList.toggle('show',!!f);
  if(f){$('foename').textContent=f.name;$('foenum').textContent=f.hp+' / '+f.max;$('foebar').style.width=f.hp/f.max*100+'%';
   $('foestats').innerHTML=tipSpan(`Evasion <b>${f.dc}</b>`,STAT_INFO.foeEva)+tipSpan(`Defense <b>${f.def}</b>`,STAT_INFO.foeDef)+tipSpan(`Attack <b>${f.dmg}</b>`,STAT_INFO.foeAtk)+tipSpan(`Accuracy <b>${f.acc}</b>`,STAT_INFO.foeAcc);}
  renderPack();renderHist();
 }
-const info=i=>i.slot==='weapon'?`Damage ${i.atk}, accuracy ${i.acc>=0?'+':''}${i.acc}`:i.slot==='armor'?`Armor ${i.dr}`:`Heals ${i.heal}`;
+const info=i=>`${CAT_LABEL[i.slot]} — `+((i.slot==='melee'||i.slot==='gun')?`Damage ${i.atk}, accuracy ${i.acc>=0?'+':''}${i.acc}`:(i.slot==='body'||i.slot==='legs')?`Armor ${i.dr}`+(i.stat?`, ${statLine(i)}`:''):`Heals ${i.heal}`);
 const nm=id=>ITEMS[id].n+(ITEMS[id].tier?` (${ITEMS[id].tier})`:'');
 function btn(t,fn,p){const b=document.createElement('button');b.innerHTML=t;b.onclick=fn;(p||$('choices')).append(b);return b;}
 
@@ -560,6 +616,26 @@ function renderPack(){
 }
 function dropItem(id){state.inv=state.inv.filter(x=>x!==id);for(const k in state.eq)if(state.eq[k]===id)state.eq[k]=null;show();}
 function useItem(id){const b=snap();apply({hp:ITEMS[id].heal});logAct(actLine('Used '+nm(id),b));dropItem(id);}
+
+/* ===== CHARACTER CREATION: spend CONFIG.allocPoints across the 3 stats once, before Chapter 1 starts.
+   The chosen build is remembered as SAVES.build (and saved) so later deaths/restarts of Chapter 1 reuse it
+   without asking again; 'New game' clears SAVES.build and this runs again. ===== */
+function renderAlloc(box){
+ const d=state.allocDraft,spent=d.might+d.guile+d.resolve,left=CONFIG.allocPoints-spent;
+ const head=document.createElement('p');head.innerHTML=`You have <b>${left}</b> point${left===1?'':'s'} left to spend.`;box.append(head);
+ ['might','guile','resolve'].forEach(stat=>{
+  const total=CONFIG.stats[stat]+d[stat],r=document.createElement('div');r.className='slot';
+  r.innerHTML=`<span class="tip" tabindex="0" data-tip="${STAT_INFO[stat]}">${LABELS[stat]} <b>${total}</b></span>`;
+  btn('−',()=>{if(d[stat]>0){d[stat]--;show();}},r).disabled=d[stat]<=0;
+  btn('+',()=>{if(left>0){d[stat]++;show();}},r).disabled=left<=0;
+  box.append(r);
+ });
+ btn(left===0?'Begin':`Spend all ${CONFIG.allocPoints} points to begin`,()=>{
+  if(left!==0)return;
+  for(const k of['might','guile','resolve'])state.boost[k]=(state.boost[k]||0)+d[k];
+  SAVES.build={...d};state.allocDraft=undefined;state.scene=START[state.chapter];enter(state.scene);
+ },box).disabled=left!==0;
+}
 
 async function toStory(){if(document.documentElement.dataset.device!=='mobile')return;
  $('text').scrollIntoView({block:'start'});await sleep(80);}
@@ -575,6 +651,7 @@ function renderHist(){$('acts').innerHTML=state.acts.slice().reverse().map(t=>`<
 function show(){
  persist();renderHud();renderArt();const sc=SCENES[state.scene],box=$('choices');box.innerHTML='';
  renderText();
+ if(state.scene==='alloc'){renderAlloc(box);return;}
  if(state.pending){const id=state.pending,i=ITEMS[id];
   box.innerHTML=`<h3 class="tip" tabindex="0" data-tip="${tipText(id)}">Loot: ${nm(id)}</h3><p>${info(i)}. Your pack holds ${state.inv.length} of ${CONFIG.bag}.</p>`;
   const done=()=>{state.pending=null;show();};
@@ -582,9 +659,14 @@ function show(){
   else state.inv.forEach(x=>btn(`Swap for ${nm(x)}`,()=>{logAct('Dropped '+nm(x)+' and picked up '+nm(id));dropItem(x);state.inv.push(id);done();}));
   btn('Leave it',()=>{logAct('Left '+nm(id));done();});return;}
  if(sc.end){btn('Fight again',()=>{$('roll').classList.remove('show');newGame();});return;}
- if(state.fight){const f=state.fight,g=gear(state).w;
-  [['strike','Strike',{stat:'might',dc:f.dc,vs:`Evasion ${f.dc}`},`Hit for ${g.atk}, minus ${f.def} Defense`],['wild','Reckless blow',{stat:'might',dc:f.dc+3,vs:`Evasion ${f.dc} +3 reckless = ${f.dc+3}`},`Hit for ${g.atk*2}, minus ${f.def} Defense, but costs more if you miss`],['aim','Aimed shot',{stat:'guile',dc:f.dc+2,vs:`Evasion ${f.dc} +2 aimed = ${f.dc+2}`},`Hit for ${g.atk}, ignoring Defense`],['guard','Guard and endure',{stat:'resolve',dc:f.acc,vs:`Enemy accuracy ${f.acc}`},'Block the blow and recover 2']]
-   .forEach(([k,t,c,d])=>btn(`${t}<small>${LABELS[c.stat]}${CONFIG.showOdds?', '+odds(c)+'% to succeed':''}. ${d}</small>`,()=>act(k,c)));return;}
+ if(state.fight){const f=state.fight,g=gear(state);
+  const actions=[['strike','Strike',{stat:'might',dc:f.dc,vs:`Evasion ${f.dc}`},`Hit for ${g.melee.atk}, minus ${f.def} Defense`],
+   ['wild','Reckless blow',{stat:'might',dc:f.dc+3,vs:`Evasion ${f.dc} +3 reckless = ${f.dc+3}`},`Hit for ${g.melee.atk*2}, minus ${f.def} Defense, but costs more if you miss`]];
+  if(g.gun)actions.push(['aim','Aimed shot',{stat:'guile',dc:f.dc+2,bonus:g.gun.acc,vs:`Evasion ${f.dc} +2 aimed = ${f.dc+2}`},`Hit for ${g.gun.atk} with the ${g.gun.n}, ignoring Defense`]);
+  actions.push(['guard','Guard and endure',{stat:'resolve',dc:f.acc,vs:`Enemy accuracy ${f.acc}`},'Block the blow and recover 2']);
+  actions.forEach(([k,t,c,d])=>btn(`${t}<small>${LABELS[c.stat]}${CONFIG.showOdds?', '+odds(c)+'% to succeed':''}. ${d}</small>`,()=>act(k,c)));
+  if(!g.gun){const p=document.createElement('p');p.className='note';p.textContent='No ranged weapon equipped — find and equip a gun to use Aimed shot.';box.append(p);}
+  return;}
  sc.choices.forEach(ch=>btn(ch.text+(ch.check?`<small>${LABELS[ch.check.stat]} check${CONFIG.showOdds?', '+odds(ch.check)+'% to succeed':''}</small>`:''),()=>choose(ch)));
 }
 const lock=v=>{busy=v;document.querySelectorAll('#choices button').forEach(b=>b.disabled=v);};
@@ -598,7 +680,7 @@ async function choose(ch){
 }
 
 async function act(kind,c){
- if(busy)return;lock(true);stopVoice();await toStory();const before=snap(),f=state.fight,fh=f.hp,w=gear(state).w,r=await rollUI(c);let m,calc;const rg=(LORE[state.eq.weapon]||[])[0]==='Ranged',F=t=>fill(pick(t),f,w);
+ if(busy)return;lock(true);stopVoice();await toStory();const before=snap(),f=state.fight,fh=f.hp,rg=kind==='aim',w=rg?gear(state).gun:gear(state).melee,r=await rollUI(c);let m,calc;const F=t=>fill(pick(t),f,w);
  if(kind==='guard'){if(r.pass){apply({hp:2});m=F(TEXT.guardOk);calc='No damage taken. You recover 2 Vitality.';}else{calc=foeHit(f,0);m=F(TEXT.guardBad);}}
  else if(r.pass){const cr=r.o==='crit'?w.atk:0,ml=kind==='wild'?2:1,df=(cr||kind==='aim')?0:f.def,d=Math.max(1,w.atk*ml+cr-df);f.hp=Math.max(0,f.hp-d);calc=`Damage: ${w.atk}${ml>1?' \u00d7 2 reckless':''}${cr?` + ${cr} critical`:''} \u2212 ${df} Defense${cr?' (critical ignores Defense)':kind==='aim'?' (aimed shot ignores Defense)':''} = ${d}`;m=`${state.lp?pick(AGAIN):'You hit for'} ${d}. `+F(TEXT[kind==='wild'?'wild':'hit'][rg?'ranged':'melee']);state.lp=1;}
  else{calc=foeHit(f,kind==='wild'?2:0);m=F(TEXT[kind==='wild'?'wildMiss':'miss']);state.lp=0;}
@@ -663,7 +745,7 @@ const SFX={
 const sfx=n=>{if(CONFIG.sfx&&SFX[n])try{SFX[n]();}catch(e){}};
 
 
-function actSfx(kind,r){const ranged=(LORE[state.eq.weapon]||[])[0]==='Ranged';
+function actSfx(kind,r){const ranged=kind==='aim';
  sfx(kind==='guard'?(r.pass?'clang':'hit'):r.pass?(kind==='wild'?(ranged?'explosion':'smash'):ranged?'shoot':'slash'):'hit');}
 function renderOpts(){$('vtog').textContent='Voice: '+(CONFIG.voice?'On':'Off');$('stog').textContent='Effects: '+(CONFIG.sfx?'On':'Off');}
 $('vtog').onclick=()=>{CONFIG.voice=!CONFIG.voice;renderOpts();if(CONFIG.voice)narrate(state.scene);else stopVoice();};

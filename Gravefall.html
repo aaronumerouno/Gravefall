@@ -281,8 +281,9 @@ const SCENES={
   (s.flags.forced_entry
    ?'The corridor beyond is slick with black ichor, and the bang of the bulkhead has already woken something. Skitterlings pour from the ceiling vents, all legs and wet clicking. “Contact!” Ironside roars, and Quill answers, “They heard that, Captain — give them hell.”'
    :'The corridor beyond is slick with black ichor. Skitterlings pour from the ceiling vents, all legs and wet clicking. “Contact!” Ironside roars, and Quill answers, “Give them hell, Captain.”'),
+  '“Captain, suit sensors make these things Skitterlings — bred stock, not sentient on their own,” Brannigan says, reading off a scrolling report between bursts of static. “Fleet intel says the swarms answer to humanoid commanders, armored things like Major Kraag. Whatever hive spawned them, our charts call it Gravemoor, out past the Rim,” he adds. “Doesn’t matter today,” Ironside growls. “Today they are just in our way.”',
   'The lead skitterling rears up. “Fresh meat,” the skitterling hisses in a stolen human voice. “Major Kraag will wear your dog tags,” it adds.'],
-  fight:{name:'Skitterling',ref:'the skitterling',pr:'it',pos:'its',hp:9,dc:10,def:0,acc:6,dmg:4,drop:'small',say:['The skitterling lunges, clicking.','“Dog tags! Dog tags!” the skitterling hisses.','Claws scrape your vest as the skitterling shrieks.']},then:'relay'},
+  fight:{name:'Skitterling',ref:'the skitterling',pr:'it',pos:'its',hp:9,dc:10,def:0,acc:6,dmg:4,drop:'small',say:['The skitterling lunges, clicking.','“Dog tags! Dog tags!” the skitterling hisses.','Claws scrape your vest as the skitterling shrieks.','The skitterling circles, legs clicking against the deck.','“Major Kraag feeds well tonight,” the skitterling hisses.','The skitterling’s jaw opens wider than it should.']},then:'relay'},
  relay:{title:'The Dead Relay',text:[
   '“Door ahead is a blast seal,” Brannigan says. “Reactor control is on the other side. I can crack it, comrade, but I need you to hold still and keep the vermin off my line,” he adds.',
   'Ironside presses his palm to the cold metal. Somewhere behind it, a heavy body shifts. “Corporal,” Ironside mutters, “tell me that is just the pipes.” Static. “Brannigan?” Ironside calls.'],
@@ -293,7 +294,7 @@ const SCENES={
  brute:{title:'The Hullcrusher',text:[
   'The seal opens on a Hullcrusher, a mountain of fused muscle and welded plating, chained to the wall by its own hunger. It snaps the chains as Ironside steps inside. “Lieutenant, tell me you see this,” Ironside says. “I see it,” Quill answers. “Pray it bleeds,” she adds.',
   '“Little soldier!” the Hullcrusher bellows. “I have eaten better than you!” it adds.'],
-  fight:{name:'Hullcrusher',ref:'the Hullcrusher',pr:'it',pos:'its',hp:16,dc:12,def:1,acc:8,dmg:7,drop:'big',say:['The Hullcrusher swings a fist the size of a hatch.','“Crunch! Crunch!” the Hullcrusher bellows.','The deck shakes under the Hullcrusher’s tread.']},then:'medbay'},
+  fight:{name:'Hullcrusher',ref:'the Hullcrusher',pr:'it',pos:'its',hp:16,dc:12,def:1,acc:8,dmg:7,drop:'big',say:['The Hullcrusher swings a fist the size of a hatch.','“Crunch! Crunch!” the Hullcrusher bellows.','The deck shakes under the Hullcrusher’s tread.','The Hullcrusher’s chains rattle as it advances.','“More!” the Hullcrusher roars, spitting rust and blood.','The Hullcrusher plants its feet and does not yield ground.']},then:'medbay'},
  medbay:{title:'The Silent Infirmary',text:[
   'Ironside staggers into a ruined infirmary and drops to one knee. “Captain, you are bleeding through your vest,” Quill says softly. “There are supplies in the lockers, if the dead left any. Choose fast,” she adds.',
   '“We have time,” Ironside says, and Brannigan mutters, “Seven minutes, comrade. Not quite.”'],
@@ -309,7 +310,7 @@ const SCENES={
    {text:'Charge across the gantry',check:{stat:'might',dc:14},win:{msg:'You barrel through the fire and slam into them.',goto:'gunner'},lose:{msg:'A round finds the gap in your armor.',goto:'gunner',fx:{hp:-7}}}]},
  gunner:{title:'Rustjack Gunner',text:[
   'The gunner drops its rifle and draws a serrated blade. “You should have stayed dead,” the gunner rasps. Quill is praying softly over the comm.'],
-  fight:{name:'Rustjack gunner',ref:'the Rustjack gunner',pr:'it',pos:'its',hp:11,dc:11,def:1,acc:7,dmg:5,drop:'small',say:['A wet laugh rattles from the gunner’s chest.','“The Major sees you,” the gunner rasps.','The gunner’s blade scrapes your vest.']},then:'armory'},
+  fight:{name:'Rustjack gunner',ref:'the Rustjack gunner',pr:'it',pos:'its',hp:11,dc:11,def:1,acc:7,dmg:5,drop:'small',say:['A wet laugh rattles from the gunner’s chest.','“The Major sees you,” the gunner rasps.','The gunner’s blade scrapes your vest.','The gunner reloads a blade it does not need.','“Kraag remembers every face,” the gunner rasps.','The gunner spits something black onto the deck.']},then:'armory'},
  armory:{title:'The Dead Armory',text:[
   'Past the gunnery deck, a hangar holds the gutted siege tank <em>Old Bessie</em> and a sealed locker with a green light still burning. “Fleet reserve stores,” Brannigan says. “That is a Sunspear Lancer, Captain. Unstable, hungry, but it puts anything down. There is also a Lazarus kit beside it,” he adds.',
   'Ironside cannot carry both. “Choose,” Quill says. “And hurry,” she adds.'],
@@ -327,7 +328,7 @@ const SCENES={
    ?'Major Kraag stands before the screaming reactor, three meters of scarred iron and borrowed flesh. He already turned at the sound of your voice at the gate. “No ghost, then. A soldier who walks in the front door,” Major Kraag says, almost admiring. “I will enjoy this,” he adds.'
    :'Major Kraag stands before the screaming reactor, three meters of scarred iron and borrowed flesh. He raises a blade as long as Ironside is tall. “Your platoon died begging, Captain,” Major Kraag snarls. “Will you?” he adds.',
   '“Not today,” Ironside says, and Quill’s voice breaks. “Captain, the core has ninety seconds. Finish this,” she says.'],
-  fight:{name:'Major Kraag',ref:'Major Kraag',pr:'he',pos:'his',hp:26,dc:13,def:5,acc:13,dmg:11,drop:null,say:['“Die loudly!” Major Kraag snarls.','Kraag’s blade splits the deck beside you.','“I will wear your armor,” Major Kraag growls.']},then:'victory'},
+  fight:{name:'Major Kraag',ref:'Major Kraag',pr:'he',pos:'his',hp:26,dc:13,def:5,acc:13,dmg:11,drop:null,say:['“Die loudly!” Major Kraag snarls.','Kraag’s blade splits the deck beside you.','“I will wear your armor,” Major Kraag growls.','Kraag laughs, a sound like grinding iron.','“Your platoon screamed louder,” Major Kraag says.','The deck buckles under Kraag’s advance.']},then:'victory'},
  victory:{title:'Victory',end:1,text:s=>[
   'Kraag falls, and the reactor dies in white fire. Ironside sprints for the airlock as the carrier shatters behind him. “Captain!” Quill shouts, and Brannigan adds, “Get in the gunship, you reckless fool.”',
   'Ironside tumbles aboard, scarred and alive. “We won, comrades,” Ironside says. Quill laughs through tears. “You did, Captain. You did,” she says.'+
@@ -355,7 +356,7 @@ Object.assign(SCENES,{
    ?'The mine tunnels are thick with green mist, and Ironside is still favoring the leg he landed on. Skitterlings swarm from the ore carts. “Contact, left!” Ironside roars, and Brannigan answers, “I count a dozen, Captain — go easy on that leg.”'
    :'The mine tunnels are thick with green mist. Skitterlings swarm from the ore carts. “Contact, left!” Ironside roars, and Brannigan answers, “I count a dozen, Captain.”'),
   'The brood leader clicks and shrieks. “Vex wants you alive,” the brood leader hisses. “Alive, for now,” it adds.'],
-  fight:{name:'Skitterling brood',art:'Skitterling',ref:'the brood leader',pr:'it',pos:'its',hp:13,dc:11,def:0,acc:7,dmg:5,drop:'small',say:['The brood leader lunges, clicking.','“Alive for now!” the brood leader hisses.','Claws scrape your vest as the brood shrieks.']},then:'ch2_lift'},
+  fight:{name:'Skitterling brood',art:'Skitterling',ref:'the brood leader',pr:'it',pos:'its',hp:13,dc:11,def:0,acc:7,dmg:5,drop:'small',say:['The brood leader lunges, clicking.','“Alive for now!” the brood leader hisses.','Claws scrape your vest as the brood shrieks.','The brood leader shrieks and more claws answer from the dark.','“The Colonel wants you breathing,” the brood leader hisses.','The brood leader’s many eyes fix on you at once.']},then:'ch2_lift'},
  ch2_lift:{title:'The Dead Lift',bg:'relay',text:[
   'The only way down to Hollow Station is a dead mining lift. “Power is out, Captain,” Brannigan says. “I can bridge it, but it will take a minute,” he adds.',
   'Down the shaft, something heavy is climbing. “Whatever it is, it is coming up fast,” Quill says over the comm.'],
@@ -366,7 +367,7 @@ Object.assign(SCENES,{
  ch2_pit:{title:'The Ironback',bg:'brute',text:[
   'The lift opens on a pit where an Ironback Hullcrusher waits, its chains already broken. “Captain, it is bigger than the last one,” Brannigan says. “Then we hit it harder,” Ironside growls.',
   '“Meat!” the Ironback bellows. “Meat for the Colonel!” it adds.'],
-  fight:{name:'Ironback Hullcrusher',art:'Hullcrusher',ref:'the Ironback',pr:'it',pos:'its',hp:22,dc:12,def:2,acc:8,dmg:8,drop:'big',say:['The Ironback swings a fist the size of a hatch.','“Crunch! Crunch!” the Ironback bellows.','The deck shakes under the Ironback’s tread.']},then:'ch2_gate'},
+  fight:{name:'Ironback Hullcrusher',art:'Hullcrusher',ref:'the Ironback',pr:'it',pos:'its',hp:22,dc:12,def:2,acc:8,dmg:8,drop:'big',say:['The Ironback swings a fist the size of a hatch.','“Crunch! Crunch!” the Ironback bellows.','The deck shakes under the Ironback’s tread.','The Ironback’s plating grinds as it turns.','“Meat for the Colonel!” the Ironback roars again.','The Ironback does not flinch from the blow.']},then:'ch2_gate'},
  ch2_gate:{title:'The Control Hall',bg:'gate',text:[
   'Beyond the pit stands the control hall. “Colonel Vex is inside,” Quill says. “Captain, my scanners show the whole station is wired to blow,” she adds.',
   '“Then we end him quickly,” Ironside says. “Brannigan, find me that detonator,” he adds.'],
@@ -380,7 +381,7 @@ Object.assign(SCENES,{
    ?'Colonel Vex rises from the console, tall, green-lit and wrong, unhurried by the door crashing in. “Captain Ironside,” Colonel Vex says softly. “Kraag said you would announce yourself. I did not expect him to be right,” he adds.'
    :'Colonel Vex rises from the console, tall, green-lit and wrong. “Captain Ironside,” Colonel Vex says softly. “I have waited so long to meet you,” he adds.',
   '“You will wait forever,” Ironside says, and the station shakes. “Captain, thirty seconds,” Quill says. “Finish it,” she adds.'],
-  fight:{name:'Colonel Vex',ref:'Colonel Vex',pr:'he',pos:'his',hp:34,dc:14,def:4,acc:14,dmg:10,drop:null,say:['“Kneel!” Colonel Vex snarls.','Vex’s blade carves a green scar across the deck.','“The Hollow remembers you,” Colonel Vex whispers.']},then:'ch2_victory'},
+  fight:{name:'Colonel Vex',ref:'Colonel Vex',pr:'he',pos:'his',hp:34,dc:14,def:4,acc:14,dmg:10,drop:null,say:['“Kneel!” Colonel Vex snarls.','Vex’s blade carves a green scar across the deck.','“The Hollow remembers you,” Colonel Vex whispers.','Vex circles unhurried, green light trailing behind him.','“Kraag died quicker,” Colonel Vex says softly.','The air hums where Vex’s blade passes.']},then:'ch2_victory'},
  ch2_victory:{title:'Victory',bg:'victory',end:1,text:s=>[
   'Vex falls, and Hollow Station dies in green fire. Ironside throws himself into the lift as the moon shakes. “Captain!” Quill shouts, and Brannigan adds, “Go, go, go!”',
   'Ironside reaches the surface, scarred and alive. “One more down, comrades,” Ironside says. Quill laughs through tears. “One more, Captain,” she says.'+
@@ -401,7 +402,7 @@ Object.assign(SCENES,{
  ch3_den:{title:'The Writhing Dark',bg:'c1',text:[
   'Something ancient breathes beneath the dark. The walls themselves seem to shift, and a shape detaches from the rock, too many limbs, moving wrong. “Contact!” Ironside roars. “I have no reading on that thing, Captain,” Brannigan says. “None at all,” he adds.',
   'The Hive Stalker shrieks, a sound like metal tearing. “It is not alone,” Quill warns.'],
-  fight:{name:'Hive Stalker',ref:'the Hive Stalker',pr:'it',pos:'its',hp:17,dc:12,def:0,acc:8,dmg:6,drop:'small',say:['The Hive Stalker lunges from the dark, too fast to track.','A sound like tearing metal rips from the Hive Stalker.','The Hive Stalker claws at you from every angle at once.']},then:'ch3_relay'},
+  fight:{name:'Hive Stalker',ref:'the Hive Stalker',pr:'it',pos:'its',hp:17,dc:12,def:0,acc:8,dmg:6,drop:'small',say:['The Hive Stalker lunges from the dark, too fast to track.','A sound like tearing metal rips from the Hive Stalker.','The Hive Stalker claws at you from every angle at once.','The Hive Stalker skitters along the wall, never still.','Something in the Hive Stalker’s shriek sounds almost like words.','The Hive Stalker presses the attack without pause.']},then:'ch3_relay'},
  ch3_relay:{title:'The Humming Walls',bg:'relay',text:[
   'The passage splits three ways, each wall pulsing faintly, almost like a heartbeat. “Captain, this place is alive,” Brannigan says, disbelief in his voice. “Pick a path and pick it fast, it is listening,” he adds.'],
   choices:[
@@ -411,7 +412,7 @@ Object.assign(SCENES,{
  ch3_warden:{title:'The Core Warden',bg:'brute',text:[
   'The passage opens on a chamber built from fused rock and hull plate alike, and something rises to fill it, armored in overlapping plates grown rather than welded. “Lieutenant, tell me that is not what I think it is,” Ironside says. “It is bigger, Captain,” Quill answers. “It is always bigger,” she adds.',
   '“Guardian of the deep!” the Hive Warden booms, a voice built from a dozen stolen ones. “None pass!” it adds.'],
-  fight:{name:'Hive Warden',ref:'the Hive Warden',pr:'it',pos:'its',hp:28,dc:12,def:3,acc:8,dmg:9,drop:'big',say:['The Hive Warden’s plated fist crashes down like a hull breach.','“None pass!” the Hive Warden booms.','The deck cracks under the Hive Warden’s weight.']},then:'ch3_respite'},
+  fight:{name:'Hive Warden',ref:'the Hive Warden',pr:'it',pos:'its',hp:28,dc:12,def:3,acc:8,dmg:9,drop:'big',say:['The Hive Warden’s plated fist crashes down like a hull breach.','“None pass!” the Hive Warden booms.','The deck cracks under the Hive Warden’s weight.','The Hive Warden’s plating shifts and resets itself.','“Guardian stands!” the Hive Warden booms again.','The Hive Warden does not retreat, does not tire.']},then:'ch3_respite'},
  ch3_respite:{title:'The Dead Nest',bg:'medbay',text:[
   'Past the Warden’s chamber lies a hollow lined with husks, old and still. “Captain, whatever lived here is long gone,” Brannigan says. “Long gone, or long since became something else,” he adds, quieter.',
   '“We have a minute, not more,” Ironside says.'],
@@ -442,7 +443,7 @@ Object.assign(SCENES,{
    ?'The Hive Sovereign fills the chamber, a fused and ancient shape built from a thousand stolen soldiers, unhurried as your voice still echoes off its walls. “Loud,” it says, in every voice it has ever worn at once. “Kraag was loud too, at the end,” it adds.'
    :'The Hive Sovereign fills the chamber, a fused and ancient shape built from a thousand stolen soldiers. “Captain Ironside,” it says, in every voice it has ever worn at once. “I built the war that built you,” it adds.',
   '“Then I will finish what you started,” Ironside says. Quill’s voice is barely a whisper. “Captain, whatever happens — it ends here,” she says.'],
-  fight:{name:'The Hive Sovereign',ref:'the Sovereign',pr:'it',pos:'its',hp:42,dc:15,def:4,acc:14,dmg:11,drop:null,say:['“Die as they all did,” the Sovereign says, in a hundred overlapping voices.','The Sovereign’s many limbs carve the dark around you.','“I remember every one of them,” the Sovereign whispers. “I will remember you.”']},then:'ch3_victory'},
+  fight:{name:'The Hive Sovereign',ref:'the Sovereign',pr:'it',pos:'its',hp:42,dc:15,def:4,acc:14,dmg:11,drop:null,say:['“Die as they all did,” the Sovereign says, in a hundred overlapping voices.','The Sovereign’s many limbs carve the dark around you.','“I remember every one of them,” the Sovereign whispers. “I will remember you.”','The Sovereign’s voices overlap, arguing with themselves.','“Kraag. Vex. Now you,” the Sovereign says, counting.','The dark around the Sovereign seems to lean closer.']},then:'ch3_victory'},
  ch3_victory:{title:'Victory',bg:'victory',end:1,text:s=>[
   'The Hive Sovereign falls, and the ancient dark finally goes still. Ironside climbs back toward the light as the fracture seals itself behind him. “Captain!” Quill shouts, and Brannigan adds, “It is over. It is actually over.”',
   'Ironside reaches the <em>Wrenhawk</em>, scarred and alive, the war finally behind him. “We won it, comrades,” Ironside says. Quill laughs through tears. “We did, Captain. Every battle of it,” she says.'+
@@ -467,23 +468,36 @@ const TEXT={
   'Sparks fly as your blade rips along {pos} ribs. “Ironwolf does not break!” Ironside barks.',
   'You step inside {pos} reach and carve a long line across {pos} chest. “Hold still!” Ironside grunts.',
   'The {w} hums, finds a gap, and sinks home. “One more like that,” Ironside mutters, “and we are done.”',
-  'You spin and cut low, taking the legs out from under {foe}. “Stay down!” Ironside shouts.'],
+  'You spin and cut low, taking the legs out from under {foe}. “Stay down!” Ironside shouts.',
+  'You drive the {w} up under {pos} guard and twist. “That is for every one of them,” Ironside snarls.',
+  'A hard thrust catches {foe} mid-step. “Down!” Ironside barks.',
+  'You batter past {pos} defense and the {w} finds its mark. “Keep coming,” Ironside growls.'],
   ranged:[
   'The Lancer screams and a white bolt punches through {foe}. “Feel that!” Ironside shouts.',
   'You squeeze the trigger and the Lancer kicks like a mule. “Burn!” Ironside roars as the bolt sears {pos} hide.',
   'A beam of stolen sunlight tears across {pos} armor. “Right on target,” Ironside says, steadying the rifle.',
-  'The shot rings off {pos} body and leaves a glowing crater. “Again, if you dare!” Ironside calls.']},
+  'The shot rings off {pos} body and leaves a glowing crater. “Again, if you dare!” Ironside calls.',
+  'The shot catches {foe} square and throws {pr} back a step. “Scratch one!” Ironside shouts.',
+  'You lead the target and the bolt lands clean. “Good shooting,” Ironside mutters to himself.',
+  'The rifle kicks and {foe} staggers under the hit. “Stay down!” Ironside calls.',
+  'A precise shot opens {pos} side in a flash of light. “That is how it is done,” Ironside says.',
+  'You fire from the hip and the bolt still finds {foe}. “Lucky or good, does not matter,” Ironside says.',
+  'The shot punches a smoking hole through {pos} plating. “One more down,” Ironside mutters.',
+  'You track {pos} movement and squeeze off a clean hit. “Target acquired,” Ironside says grimly.',
+  'The bolt sears past {pos} guard and into {foe}. “Feel that!” Ironside shouts.',
+  'A single shot, dead center. “That is all it takes,” Ironside says.']},
  wild:{melee:[
   'You put your whole weight behind the swing and the {w} crashes down. “Break!” Ironside bellows.',
   'You leave your guard open and bring the blade around in a wide, brutal arc. “Take that!” Ironside roars.',
   'The reckless swing cleaves clean through {pos} armor. “Ironwolf!” Ironside bellows. “Hoorah!”',
   'You throw everything into one savage chop. “This ends now!” Ironside shouts as {foe} reels.',
   'Metal shrieks as the blade bites through plate and meat alike. “Is that all you have?” Ironside growls.',
-  'You tear into {foe} with a roar that shakes the deck. “For the fallen!” Ironside shouts.'],
-  ranged:[
-  'You hip-fire the Lancer and the blast hurls {foe} against the wall. “Eat light!” Ironside roars.',
-  'The Lancer overloads in a flash and the shockwave rips through {foe}. “Hoorah!” Ironside bellows.',
-  'You hold the trigger down and let the cannon scream. “Burn it all!” Ironside shouts.']},
+  'You tear into {foe} with a roar that shakes the deck. “For the fallen!” Ironside shouts.',
+  'You abandon all caution and the blow lands like a hammer. “No mercy!” Ironside roars.',
+  'The {w} comes down in a single brutal arc, and {foe} cannot get clear. “Stay down!” Ironside bellows.',
+  'You swing with everything you have left. “This is for Third Platoon!” Ironside shouts.',
+  'Momentum carries the blow clean through {pos} guard. “Hoorah!” Ironside roars.',
+  'You commit fully to the strike and it lands with bone-breaking force. “Done!” Ironside snarls.']},
  guardOk:[
   'You catch the blow on your forearm and turn it aside. “Not good enough,” Ironside grunts, catching his breath.',
   '{Foe} swings and you duck under it. “Too slow!” Ironside says.',
@@ -492,8 +506,12 @@ const TEXT={
   'You roll with the blow and come up breathing hard. “Still standing,” Ironside says.',
   'Your vest takes the hit and holds. “Ironwolf made these to last,” Ironside says.',
   'You raise your blade and the strike skids off the steel. “Nice try,” Ironside says.',
-  'You wait, watch, and let the attack spend itself. “Patience,” Ironside whispers.'],
- miss:[
+  'You wait, watch, and let the attack spend itself. “Patience,” Ironside whispers.',
+  'You twist aside and the blow skims past harmlessly. “Not today,” Ironside mutters.',
+  'Your stance holds and the strike does nothing. “Ironwolf stands,” Ironside says.',
+  'You absorb the impact through your vest and shrug it off. “Barely felt it,” Ironside grunts.',
+  'You read the attack early and are already moving. “Too obvious,” Ironside says.'],
+ miss:{melee:[
   'Your blade bites only air, and {foe} slams into you. “Blast it!” Ironside grunts.',
   '{Foe} knocks the {w} aside and rakes you across the chest. “Argh!” Ironside cries out.',
   'You overreach and {foe} punishes you for it. “Stupid,” Ironside hisses through his teeth.',
@@ -503,21 +521,46 @@ const TEXT={
   '{Foe} twists away and strikes before you can recover. “Quick one,” Ironside mutters.',
   'The blow glances off and the counterattack knocks the breath from you. “Again,” Ironside growls, spitting blood.',
   '“Stay with me, Captain!” Quill calls over the comm as {foe} hits you.',
-  'Brannigan’s warning comes too late. {Foe} strikes before you can set your feet. “Hold together,” Ironside growls.'],
+  'Brannigan’s warning comes too late. {Foe} strikes before you can set your feet. “Hold together,” Ironside growls.',
+  'Your {w} glances off {pos} plating and {foe} answers hard. “Tch,” Ironside spits.',
+  '{Foe} sidesteps your strike and drives a blow into your side. “Careless,” Ironside grunts.'],
+  ranged:[
+  'The shot goes wide and {foe} closes the gap fast. “Blast it!” Ironside snarls.',
+  'Your aim drifts at the last second and {foe} punishes the miss. “Focus!” Ironside hisses.',
+  'The bolt sparks off the deck behind {foe}, who wastes no time hitting back. “Missed!” Ironside curses.',
+  'You squeeze the trigger a half-second too soon. {Foe} is already on you. “Stupid,” Ironside mutters.',
+  'The shot goes high and {foe} closes to strike. “Reload later,” Ironside grunts, taking the hit.',
+  '{Foe} ducks under the shot and answers with a vicious blow. “Fast,” Ironside gasps.',
+  'The rifle kicks wide and the bolt sails past {foe} entirely. “Hold still!” Ironside shouts, too late.',
+  'Your shot clips {pos} cover instead of {pos} body, and {pr} makes you pay. “Argh!” Ironside grunts.',
+  'The Lancer’s kick throws your aim off, and {foe} is already closing. “Steady,” Ironside growls through the pain.',
+  'You fire wide and {foe} is inside your guard before you can recover. “Too close,” Ironside wheezes.',
+  '“Watch your angle, Captain!” Brannigan calls as the shot misses and {foe} strikes back.',
+  'The shot goes wild and {foe} seizes the opening. “Not again,” Ironside grunts.']},
  wildMiss:[
   'The wild swing hits nothing and leaves you open. {Foe} drives into you. “Reckless,” Ironside groans.',
   'You throw everything into the blow and miss. {Foe} hits you savagely as you stumble. “Argh!” Ironside cries.',
   'Your overhand chop splits the deck, not {foe}. {Foe} answers with a vicious strike. “Blast it!” Ironside snarls.',
   'The big swing carries you off balance and {foe} takes full advantage. “My mistake,” Ironside gasps.',
   'You bellow and swing wide. {Foe} dodges and hits you from the side. “Lucky!” Ironside spits.',
-  'The reckless blow whistles past. {Foe} hits you hard in return. “Never again,” Ironside mutters.'],
+  'The reckless blow whistles past. {Foe} hits you hard in return. “Never again,” Ironside mutters.',
+  'You swing with everything and hit only air. {Foe} makes you pay for it. “Careless,” Ironside gasps.',
+  'The reckless blow carries you past {foe} entirely, and {pr} strikes while you are off balance. “Fool,” Ironside snarls at himself.',
+  'Your wild swing goes wide and {foe} answers twice as hard. “That was stupid,” Ironside grunts.',
+  'You overcommit to the strike and {foe} makes you regret it. “Lesson learned,” Ironside wheezes.',
+  'The savage swing leaves you exposed, and {foe} does not waste the chance. “Argh!” Ironside cries.'],
  guardBad:[
   'You raise your guard too late and {foe} breaks through. “Hold!” Ironside cries as the hit lands.',
   'The blow shatters your guard and drives you to your knees. “Not yet!” Ironside gasps.',
   '{Foe} smashes your guard aside and hits home. “Argh!” Ironside grunts.',
   'Your arms shake and the guard collapses under the strike. “Too strong,” Ironside wheezes.',
   'The impact numbs your arm and your guard drops. “Brace, brace!” Ironside shouts.',
-  'You stumble backward as {foe} bursts through your defense. “Lieutenant, I need that medic!” Ironside barks.'],
+  'You stumble backward as {foe} bursts through your defense. “Lieutenant, I need that medic!” Ironside barks.',
+  'Your guard breaks a beat too soon and the blow lands clean. “Hold the line!” Ironside shouts.',
+  'The strike finds a gap in your stance. “Lieutenant, I could use a hand,” Ironside grunts.',
+  '{Foe} reads your guard and punishes the opening. “Clever,” Ironside hisses.',
+  'Your footing slips at the worst moment and the hit lands hard. “Up, up!” Ironside snarls at himself.',
+  'The blow gets through before you can set your stance. “Again,” Ironside growls, staggering.'],
  fall:[
   '{Foe} collapses with a final shriek.',
   '{Foe} crashes to the deck and does not move again.',
@@ -597,6 +640,17 @@ function drawBg(){const c=$('bgart'),w=Math.ceil(innerWidth/5),h=Math.ceil(inner
 const $=id=>document.getElementById(id);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const pick=a=>a[Math.floor(Math.random()*a.length)];
+/* No story line repeats within the current fight until every line in its pool has been used; once the
+   pool wraps around, the line is marked as a repeat so the caller can say "Again". Tracking lives on
+   state.fight.used, keyed by pool name, and is reset whenever a new fight starts (see enter()). */
+function pickFresh(poolKey,pool){
+ const used=state.fight.used[poolKey]||(state.fight.used[poolKey]=[]);
+ let avail=pool.map((_,i)=>i).filter(i=>!used.includes(i)),again=false;
+ if(!avail.length){state.fight.used[poolKey]=[];avail=pool.map((_,i)=>i);again=true;}
+ const idx=avail[Math.floor(Math.random()*avail.length)];
+ state.fight.used[poolKey].push(idx);
+ return{text:pool[idx],again};
+}
 const mod=c=>CONFIG.stats[c.stat]+MODIFIERS.reduce((n,f)=>n+f(state,c),0)+(c.bonus||0);
 let state,busy=false;
 
@@ -662,7 +716,7 @@ function sanitizeState(raw,n){
  const acts=Array.isArray(raw.acts)?raw.acts.filter(x=>typeof x==='string').slice(-200):[];
  const note=typeof raw.note==='string'?raw.note:'';
  const def=SCENES[scene].fight,savedFightHp=raw.fight&&typeof raw.fight.hp==='number'?raw.fight.hp:def&&def.hp;
- const fight=def?{...def,max:def.hp,hp:Math.max(0,Math.min(def.hp,savedFightHp))}:null;
+ const fight=def?{...def,max:def.hp,hp:Math.max(0,Math.min(def.hp,savedFightHp)),used:{}}:null;
  const allocDraft=scene==='alloc'?(sanitizeBuild(raw.allocDraft)||{might:0,guile:0,resolve:0}):undefined;
  const loadoutDraft=scene==='loadout'?sanitizeLoadoutDraft(raw.loadoutDraft):undefined;
  return{scene,hp,flags,inv,eq,fight,pending,rolls,acts,note,boost,chapter:n,lp:0,allocDraft,loadoutDraft};
@@ -689,7 +743,7 @@ function loadSave(){
 }
 function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
 
-function enter(id){state.scene=id;const f=SCENES[id].fight;state.fight=f?{...f,max:f.hp}:null;state.lp=0;if(SCENES[id].end&&id!=='dead')SAVES.carry={inv:state.inv.slice(),eq:{...state.eq},boost:{...state.boost}};show();
+function enter(id){state.scene=id;const f=SCENES[id].fight;state.fight=f?{...f,max:f.hp,used:{}}:null;state.lp=0;if(SCENES[id].end&&id!=='dead')SAVES.carry={inv:state.inv.slice(),eq:{...state.eq},boost:{...state.boost}};show();
  if(/victory/.test(id))sfx('victory');else if(id==='dead')sfx('death');narrate(id);}
 
 function odds(c){const m=mod(c);let k=0;for(let r=1;r<=CONFIG.die;r++)if(r===CONFIG.die||(r>1&&r+m>=c.dc))k++;return Math.round(k*100/CONFIG.die);}
@@ -829,13 +883,18 @@ async function choose(ch){
 }
 
 async function act(kind,c){
- if(busy)return;lock(true);stopVoice();await toStory();const before=snap(),f=state.fight,fh=f.hp,rg=kind==='aim',w=rg?gear(state).gun:gear(state).melee,r=await rollUI(c);let m,calc;const F=t=>fill(pick(t),f,w);
- if(kind==='guard'){if(r.pass){apply({hp:2});m=F(TEXT.guardOk);calc='No damage taken. You recover 2 Vitality.';}else{calc=foeHit(f,0);m=F(TEXT.guardBad);}}
- else if(r.pass){const cr=r.o==='crit'?w.atk:0,ml=kind==='wild'?2:1,df=(cr||kind==='aim')?0:f.def,d=Math.max(1,w.atk*ml+cr-df);f.hp=Math.max(0,f.hp-d);calc=`Damage: ${w.atk}${ml>1?' \u00d7 2 reckless':''}${cr?` + ${cr} critical`:''} \u2212 ${df} Defense${cr?' (critical ignores Defense)':kind==='aim'?' (aimed shot ignores Defense)':''} = ${d}`;m=`${state.lp?pick(AGAIN):'You hit for'} ${d}. `+F(TEXT[kind==='wild'?'wild':'hit'][rg?'ranged':'melee']);state.lp=1;}
- else{calc=foeHit(f,kind==='wild'?2:0);m=F(TEXT[kind==='wild'?'wildMiss':'miss']);state.lp=0;}
+ if(busy)return;lock(true);stopVoice();await toStory();const before=snap(),f=state.fight,fh=f.hp,rg=kind==='aim',w=rg?gear(state).gun:gear(state).melee,r=await rollUI(c);let m,calc;
+ const F=(key,pool)=>{const p=pickFresh(key,pool),filled=fill(p.text,f,w);return p.again?'Again, '+filled.charAt(0).toLowerCase()+filled.slice(1):filled;};
+ if(kind==='guard'){if(r.pass){apply({hp:2});m=F('guardOk',TEXT.guardOk);calc='No damage taken. You recover 2 Vitality.';}else{calc=foeHit(f,0);m=F('guardBad',TEXT.guardBad);}}
+ else if(r.pass){const cr=r.o==='crit'?w.atk:0,ml=kind==='wild'?2:1,df=(cr||kind==='aim')?0:f.def,d=Math.max(1,w.atk*ml+cr-df);f.hp=Math.max(0,f.hp-d);calc=`Damage: ${w.atk}${ml>1?' \u00d7 2 reckless':''}${cr?` + ${cr} critical`:''} \u2212 ${df} Defense${cr?' (critical ignores Defense)':kind==='aim'?' (aimed shot ignores Defense)':''} = ${d}`;
+  const hitKey=kind==='wild'?'wild.melee':rg?'hit.ranged':'hit.melee',hitPool=kind==='wild'?TEXT.wild.melee:rg?TEXT.hit.ranged:TEXT.hit.melee;
+  m=`${state.lp?pick(AGAIN):'You hit for'} ${d}. `+F(hitKey,hitPool);state.lp=1;}
+ else{calc=foeHit(f,kind==='wild'?2:0);
+  const missKey=kind==='wild'?'wildMiss':rg?'miss.ranged':'miss.melee',missPool=kind==='wild'?TEXT.wildMiss:rg?TEXT.miss.ranged:TEXT.miss.melee;
+  m=F(missKey,missPool);state.lp=0;}
  if(state.hp<=0){state.scene='dead';state.fight=null;}
- else if(f.hp<=0){m+=' '+F(TEXT.fall);state.fight=null;if(f.drop)apply({give:f.drop});state.scene=SCENES[state.scene].then;}
- else if(Math.random()<.6)m+=' '+pick(f.say);
+ else if(f.hp<=0){m+=' '+fill(pick(TEXT.fall),f,w);state.fight=null;if(f.drop)apply({give:f.drop});state.scene=SCENES[state.scene].then;}
+ else if(Math.random()<.6)m+=' '+fill(pickFresh('say',f.say).text,f,w);
  showResult(r,m,before,calc);actSfx(kind,r);flashFoe(kind,r);
  {const L={strike:['Struck','Missed'],wild:['Landed a reckless blow on','Missed a reckless blow on'],aim:['Landed an aimed shot on','Missed an aimed shot on'],guard:['Held a guard against','Lost a guard against']}[kind],dealt=fh-f.hp;
  logAct(actLine(`${L[r.pass?0:1]} ${f.name}${dealt?` for ${dealt}`:''}${f.hp<=0?', and it fell':''}`,before));}await sleep(900);lock(false);

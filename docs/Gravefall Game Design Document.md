@@ -27,6 +27,8 @@ Ironwolf Company's Third Platoon died on the approach to the carrier *Gravefall*
 
 **Places and machines:** the carrier *Gravefall*, the gunship *Wrenhawk*, the gutted siege tank *Old Bessie*, the dead moon, Hollow Station, and the hive beneath it.
 
+**The enemy.** Chapter 1's first fight (The Scraping Dark) gives the player a quick briefing from Brannigan: the Skitterlings are bred stock, not sentient on their own, answering to armored humanoid commanders like Major Kraag; the hive they come from is charted as Gravemoor, out past the Rim. This establishes the alien threat (creatures and commanders) and its homeworld before the player meets either in person.
+
 ## Saga arc (planned)
 
 The full saga is shaped like the *Odyssey*: a war fought and won far from home, then a long, harder road back, where each stop is a trial rather than a battle of conquest. Ten chapters total, in two acts. Chapters 1–3 (all of Act I) are built; 4–10 are a planned outline, not yet written into scenes, fights or items, and nothing in that part of the table below is final until it goes through the same loop as everything else (`scripts/balance-sim.js`, a security pass, and the roadmap's phases).
@@ -60,7 +62,7 @@ The full saga is shaped like the *Odyssey*: a war fought and won far from home, 
 - **Dice-driven choices:** story choices and combat actions roll a d20 plus a stat. A natural 20 is a critical hit and heals a little; a natural 1 is a fumble and costs health.
 - **Choices that echo forward:** a handful of key choices in each chapter set a flag (which door you forced, how you approached the boss, which item you took) regardless of whether the roll succeeded — the *approach*, not the outcome, is what's remembered. Later scenes, boss introductions and the victory ending reference it, so two runs of the same chapter read differently. Flags reset each chapter; they don't carry into the next.
 - **Combat:** enemy health bars, visible enemy stats, four actions (Strike, Reckless blow, Aimed shot, Guard), and a result box that shows the full damage calculation.
-- **Story text in the result:** about 60 varied result lines with spoken dialogue, so fights do not repeat. Consecutive hits continue the scene ("Again you hit for 12").
+- **Story text in the result:** over 100 result lines with spoken dialogue across separate melee-success, melee-failure, ranged-success and ranged-failure pools (12–13 lines each), plus Reckless blow and Guard pools and a 6-line taunt pool per enemy (60 more lines) — every fight in every chapter works this way, not just the boss fights. No line repeats within a fight until every line in its pool has been used; the pool then reshuffles and the next pick is prefixed "Again, …". Consecutive hits also continue the scene on their own ("Again you hit for 12").
 - **Inventory:** a 10-slot pack, weak or strong loot from small or big monsters, take / leave / swap decisions (always resolved before the next scene's choices appear), equipping at any time across four gear slots (melee, gun, body armor, leg armor), and item tooltips with category, stats and lore.
 - **HUD:** pixel portrait of Captain Ironside, vitality bar, stat tooltips, and two history boxes (rolls and actions) written in the past tense.
 - **Hidden odds:** success chances are off by default and switchable in the code (`showOdds`).
@@ -243,7 +245,7 @@ The game is one self-contained HTML file of about 90 KB (roughly 930 lines and 8
 Most additions are one entry in a data table. Keep one rule for story text: every line of dialogue names its speaker, such as "Contact!" Quill says.
 
 1. **Scene with choices:** add an entry to `SCENES` with `title`, `text` (paragraphs) and `choices`. A choice is either `{text, goto}` or `{text, check:{stat, dc}, win:{msg, goto, fx}, lose:{msg, goto, fx}}`. Add `bg` to reuse another scene's backdrop. `text` can also be a function of `state` (`text: s => [...]`) for a scene whose wording should change based on a flag set earlier in the run; `fx:{flag:'name'}` on a choice's `win`/`lose` sets it.
-2. **Fight:** add a scene with `fight:{name, ref, pr, pos, hp, dc, def, acc, dmg, drop, say}` and `then:'nextSceneId'`. Add `art` to reuse an existing sprite, or a new entry in `SPF` for a new look.
+2. **Fight:** add a scene with `fight:{name, ref, pr, pos, hp, dc, def, acc, dmg, drop, say}` and `then:'nextSceneId'`. Add `art` to reuse an existing sprite, or a new entry in `SPF` for a new look. Give `say` at least 5–6 lines — it's the enemy-specific taunt pool layered on top of the shared melee/ranged/guard result pools, and it follows the same no-repeat-until-exhausted rule, so a short `say` list cycles (and says "Again") sooner than a longer fight will want.
 3. **Item:** add it to `ITEMS` and `LORE`, then add its id to a pool in `DROPS` if monsters should drop it.
 4. **Chapter:** add a name to `CHAPTERS`, a start scene to `START`, and the scenes themselves. The new dropdown appears automatically.
 5. **Effect or modifier:** add a key to `EFFECTS` (then use it as `fx:{key: value}`), or a function to `MODIFIERS` for situational roll bonuses.

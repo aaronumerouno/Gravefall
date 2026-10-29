@@ -44,7 +44,10 @@ Ironwolf Company's Third Platoon died on the approach to the carrier *Gravefall*
 
 Every risky action is one d20 roll plus a stat against a target number. A natural 20 always succeeds and heals 3 Vitality; a natural 1 always fails and costs extra damage.
 
-**Character creation.** Before Chapter 1 begins, the player spends 3 points freely across Might, Guile and Resolve (each starts at 1), choosing a build once per save file. Dying and starting the chapter over keeps that build; "New game" clears it and asks again. The game does not steer the choice — a Might-heavy build hits harder in melee, a Guile-heavy build is harder to hit and can take Aimed shot further, a Resolve-heavy build survives longer on Guard, and spreading points gives a steadier all-rounder.
+**Character creation.** Before Chapter 1 begins, two screens set up a build, once per save file; dying and starting the chapter over keeps it, and "New game" clears it and asks again.
+
+1. **Stats.** The player spends 3 points freely across Might, Guile and Resolve (each starts at 1). The game does not steer the choice — a Might-heavy build hits harder in melee, a Guile-heavy build is harder to hit and can take Aimed shot further, a Resolve-heavy build survives longer on Guard, and spreading points gives a steadier all-rounder.
+2. **Opening kit.** The player picks one of two opening weapons — a melee weapon (find a gun later) or a gun (find a melee weapon later; Strike and Reckless blow fall back to bare fists, 2 damage, until one is found) — and one of four opening armors, each matching a stat: Might-forged, Guile-woven, Steadfast (Resolve) or Balanced (a small amount of two stats). These reuse the same weak-tier items a monster could drop; nothing new is created for this choice. Loot that fills a missing weapon slot is weighted somewhat more likely to appear (see Mechanics) so a gun-first or melee-first start isn't left waiting indefinitely for its other half.
 
 **Starting values:** Vitality 28; a 10-slot pack; starting gear is the Ironwolf Cutter (melee) and Ironwolf Flak Vest (body armor), plus one Rattlesnake Stim. No gun or leg armor is carried at the start — both are found as loot.
 
@@ -67,7 +70,7 @@ Every risky action is one d20 roll plus a stat against a target number. A natura
 
 **One roll per round.** There is no separate enemy roll: when your roll fails, the enemy's attack lands. The result box shows the roll breakdown, the story line, the damage calculation and any change to Vitality or stats.
 
-**Loot.** Small monsters drop weak items and big monsters drop strong ones. You may take it, leave it, or swap it for something in a full pack. Healing items are used from the pack: Rattlesnake Stim heals 6, Lazarus Trauma Kit heals 12.
+**Loot.** Small monsters drop weak items and big monsters drop strong ones. You may take it, leave it, or swap it for something in a full pack. Healing items are used from the pack: Rattlesnake Stim heals 6, Lazarus Trauma Kit heals 12. If the player doesn't yet own a melee weapon or a gun, a drop has a 60% chance of being weighted toward one that fills the gap, so an opening-kit choice isn't left waiting too long for its other weapon.
 
 **Death and restart.** Vitality 0 ends the run at the Fallen scene. "Fight again" restarts the current chapter.
 

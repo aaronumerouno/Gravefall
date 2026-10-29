@@ -160,7 +160,10 @@ function giveLoot(p, poolOrId) {
   if (DROPS[poolOrId]) {
     const pool = DROPS[poolOrId].filter(i => !p.inv.includes(i));
     if (!pool.length) return;
-    id = pick(pool);
+    // bias toward filling a missing weapon slot, matching EFFECTS.give in Gravefall.html
+    const noMelee = !p.inv.some(i => ITEMS[i].slot === 'melee'), noGun = !p.inv.some(i => ITEMS[i].slot === 'gun');
+    const priority = pool.filter(i => (noMelee && ITEMS[i].slot === 'melee') || (noGun && ITEMS[i].slot === 'gun'));
+    id = pick((priority.length && rand() < 0.6) ? priority : pool);
   }
   if (p.inv.includes(id)) return;
   const item = ITEMS[id];
@@ -195,8 +198,20 @@ const BUILDS = {
     return b;
   })()
 };
-function freshPlayer(build) {
-  return { hp: CONFIG.maxHp, boost: { ...build }, inv: ['chainblade', 'carapace', 'stim'], eq: { melee: 'chainblade', gun: null, body: 'carapace', legs: null } };
+/* Opening-kit choice (new): one weapon up front (melee or gun), the other found in play; one of 4 armor flavors. */
+const LOADOUT_ARMORS = { might: 'bodyMight', guile: 'bodyGuile', resolve: 'bodyResolve', mix: 'bodyMix' };
+const LOADOUTS = {
+  meleeMight: { weapon: 'melee', armor: 'might' },
+  meleeGuile: { weapon: 'melee', armor: 'guile' },
+  gunGuile: { weapon: 'gun', armor: 'guile' },
+  gunResolve: { weapon: 'gun', armor: 'resolve' }
+};
+function freshPlayer(build, loadout) {
+  if (!loadout) return { hp: CONFIG.maxHp, boost: { ...build }, inv: ['chainblade', 'carapace', 'stim'], eq: { melee: 'chainblade', gun: null, body: 'carapace', legs: null } };
+  const armorId = LOADOUT_ARMORS[loadout.armor];
+  const inv = loadout.weapon === 'gun' ? ['pistol', armorId, 'stim'] : ['chainblade', armorId, 'stim'];
+  const eq = loadout.weapon === 'gun' ? { melee: null, gun: 'pistol', body: armorId, legs: null } : { melee: 'chainblade', gun: null, body: armorId, legs: null };
+  return { hp: CONFIG.maxHp, boost: { ...build }, inv, eq };
 }
 
 /* Player policy for story checks: pick the option with the best odds of passing (a reasonably played run). */
@@ -286,10 +301,10 @@ function runFight(p, fightDef, log) {
   return won;
 }
 
-function runChapter(chapter, carriedPlayer, build) {
+function runChapter(chapter, carriedPlayer, build, loadout) {
   // Chapter start: full Vitality, but gear/boosts carry over if the previous chapter was finished
   // (see "Between chapters" in the Game Design Document).
-  const p = carriedPlayer ? { hp: CONFIG.maxHp, boost: { ...carriedPlayer.boost }, inv: carriedPlayer.inv.slice(), eq: { ...carriedPlayer.eq } } : freshPlayer(build);
+  const p = carriedPlayer ? { hp: CONFIG.maxHp, boost: { ...carriedPlayer.boost }, inv: carriedPlayer.inv.slice(), eq: { ...carriedPlayer.eq } } : freshPlayer(build, loadout);
   const log = { checks: [], fights: [] };
   for (const scene of chapter) {
     if (p.hp <= 0) break;
@@ -364,3 +379,23 @@ function simulateSaga(runs, build, label) {
 }
 console.log('\n=== Full saga, by build ===');
 for (const [name, build] of Object.entries(BUILDS)) simulateSaga(RUNS, build, name);
+
+// Opening-kit choice: spot-check that an early fight (before any loot) isn't impossible
+// for a build/loadout combo a real player might actually pick, especially the unarmed-melee
+// gun-first start, which has no melee weapon at all until the player finds and equips one.
+console.log('\n=== Chapter 1, by opening kit (fresh kit, Ch.1 only) ===');
+function simulateLoadout(label, build, loadout, runs) {
+  let wins = 0;
+  const first = { attempts: 0, wins: 0 }; // the very first fight (Skitterling), before any loot
+  for (let i = 0; i < runs; i++) {
+    const result = runChapter(CH1, null, build, loadout);
+    if (result.win) wins++;
+    const f = result.log.fights[0];
+    if (f) { first.attempts++; if (f.won) first.wins++; }
+  }
+  console.log(`--- ${label} — chapter win rate: ${(wins / runs * 100).toFixed(1)}% | first fight (unarmed/under-geared start) win rate: ${(first.wins / Math.max(1, first.attempts) * 100).toFixed(1)}% ---`);
+}
+simulateLoadout('melee-first + all-Might (classic)', BUILDS.allMight, LOADOUTS.meleeMight, RUNS);
+simulateLoadout('gun-first + all-Guile (sniper)', BUILDS.allGuile, LOADOUTS.gunGuile, RUNS);
+simulateLoadout('gun-first + all-Resolve (mismatched, worst case)', BUILDS.allResolve, LOADOUTS.gunResolve, RUNS);
+simulateLoadout('melee-first + balanced', BUILDS.balanced, LOADOUTS.meleeGuile, RUNS);

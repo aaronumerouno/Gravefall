@@ -69,9 +69,11 @@ h3{font:700 28px/1 var(--display);margin:0 0 4px;color:var(--brass)}
 #pf{width:96px;image-rendering:pixelated;border:2px solid var(--brass);background:#0e1014;flex:none}
 .who{font:500 20px/1 var(--display);color:var(--dim)}
 .chapter{margin:0 0 14px;padding:0;background:none;border:1px solid var(--brass)}
-.chapter>summary{display:grid;gap:2px;padding:10px 14px;font:inherit}
+.chapter>summary{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px;padding:10px 14px;font:inherit}
 .chapter>summary small{color:var(--dim);font-size:16px}
 .chapter>summary b{font:700 28px/1 var(--display);color:var(--brass)}
+.chapter>summary .chev{grid-row:1/3;justify-self:end;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:1px solid var(--brass);border-radius:50%;color:var(--brass);font-size:16px;transition:transform .2s ease;flex:none}
+.chapter[open]>summary .chev{transform:rotate(180deg)}
 .chapbody{padding:12px}
 [data-device=mobile] .chapbody{padding:8px}
 [data-device=mobile] .hud{padding:10px;gap:6px}
@@ -249,7 +251,11 @@ const EFFECTS={
  hp:(s,v)=>{s.hp=Math.max(0,Math.min(CONFIG.maxHp,s.hp+v));},
  flag:(s,v)=>{s.flags[v]=1;},
  stat:(s,v)=>{for(const k in v)s.boost[k]=(s.boost[k]||0)+v[k];},
- give:(s,v)=>{if(DROPS[v]){const p=DROPS[v].filter(i=>!s.inv.includes(i));if(!p.length)return;v=p[Math.floor(Math.random()*p.length)];}
+ give:(s,v)=>{if(DROPS[v]){const p=DROPS[v].filter(i=>!s.inv.includes(i));if(!p.length)return;
+   const noMelee=!s.inv.some(i=>ITEMS[i].slot==='melee'),noGun=!s.inv.some(i=>ITEMS[i].slot==='gun'),
+    pri=p.filter(i=>(noMelee&&ITEMS[i].slot==='melee')||(noGun&&ITEMS[i].slot==='gun')),
+    pool=(pri.length&&Math.random()<.6)?pri:p;
+   v=pool[Math.floor(Math.random()*pool.length)];}
   if(!s.inv.includes(v))s.pending=v;}
 };
 
@@ -258,6 +264,8 @@ const EFFECTS={
 const SCENES={
  alloc:{title:'Choose Your Soldier',text:[
   'Before the airlock cycles, Captain Ironside checks his gear one last time. Every soldier fights differently: some lead with muscle, some with cunning, some with nerve. Spend your points, Captain — how do you fight?'],choices:[]},
+ loadout:{title:'Opening Kit',text:[
+  'Quartermaster’s last call before the drop. “One weapon up front, Captain, the other you will have to find,” Brannigan says. “And pick an armor that matches how you fight,” he adds.'],choices:[]},
  intro:{title:'The Breach',text:[
   'The carrier <em>Gravefall</em> drifts above a dead moon, her reactor screaming toward meltdown. Ironwolf Company’s Third Platoon died on the approach. Captain Ironside alone reached the airlock. “Captain Ironside, report,” Lieutenant Quill says over the comm from the gunship <em>Wrenhawk</em>. “Still breathing, Lieutenant,” Ironside growls. “Tell Corporal Brannigan to start the clock,” he adds.',
   '“Eleven minutes to core breach, Captain,” Corporal Brannigan says, his gravel voice cutting in. “The airlock is welded shut, and something on the other side is scratching to get out,” he adds.'],
@@ -520,12 +528,16 @@ const mod=c=>CONFIG.stats[c.stat]+MODIFIERS.reduce((n,f)=>n+f(state,c),0)+(c.bon
 let state,busy=false;
 
 const SAVES={},START={1:'intro',2:'ch2_start'};  /* SAVES: each chapter keeps its own progress; SAVES.carry = gear carried into the next chapter */
-function freshState(n){const c=n>1?SAVES.carry:null,needsAlloc=n===1&&!SAVES.build,baseBoost=c?{...c.boost}:(SAVES.build?{...SAVES.build}:{});
- return{scene:needsAlloc?'alloc':START[n],hp:CONFIG.maxHp,flags:{},inv:c?c.inv.slice():['chainblade','carapace','stim'],eq:c?{...c.eq}:{melee:'chainblade',gun:null,body:'carapace',legs:null},fight:null,pending:null,rolls:[],acts:[],note:'',boost:baseBoost,chapter:n,allocDraft:needsAlloc?{might:0,guile:0,resolve:0}:undefined};}
+function freshState(n){const c=n>1?SAVES.carry:null,needsAlloc=n===1&&!SAVES.build,needsLoadout=n===1&&!needsAlloc&&!SAVES.loadout,
+  baseBoost=c?{...c.boost}:(SAVES.build?{...SAVES.build}:{}),
+  startInv=c?c.inv.slice():(SAVES.loadout?SAVES.loadout.inv.slice():['chainblade','carapace','stim']),
+  startEq=c?{...c.eq}:(SAVES.loadout?{...SAVES.loadout.eq}:{melee:'chainblade',gun:null,body:'carapace',legs:null});
+ return{scene:needsAlloc?'alloc':needsLoadout?'loadout':START[n],hp:CONFIG.maxHp,flags:{},inv:startInv,eq:startEq,fight:null,pending:null,rolls:[],acts:[],note:'',boost:baseBoost,chapter:n,
+  allocDraft:needsAlloc?{might:0,guile:0,resolve:0}:undefined,loadoutDraft:needsLoadout?{weapon:null,armor:null}:undefined};}
 function newGame(n){stopVoice();n=n||(state&&state.chapter)||1;state=freshState(n);enter(state.scene);}
 function buildChapters(){const box=$('chapters'),all=()=>box.querySelectorAll('details');let lock=false;
  const layout=$('layout');if(layout&&box.contains(layout))document.body.appendChild(layout); // buildChapters() can run more than once (e.g. 'New game'); #layout may already be nested inside box from an earlier call, and box.innerHTML would destroy it if left there — move it out (still attached, so later $('layout') lookups keep finding it) before wiping box
- box.innerHTML=Object.keys(CHAPTERS).map(n=>`<details class="chapter" id="ch${n}"><summary><small>${SAGA}</small><b>Chapter ${n}: ${CHAPTERS[n]}</b></summary><div class="chapbody"></div></details>`).join('');
+ box.innerHTML=Object.keys(CHAPTERS).map(n=>`<details class="chapter" id="ch${n}"><summary><small>${SAGA}</small><b>Chapter ${n}: ${CHAPTERS[n]}</b><span class="chev" aria-hidden="true">▾</span></summary><div class="chapbody"></div></details>`).join('');
  all().forEach(d=>d.addEventListener('toggle',()=>{if(lock||!d.open)return;lock=true;
   all().forEach(o=>{if(o!==d)o.open=false;});d.querySelector('.chapbody').append($('layout'));
   const n=+d.id.slice(2);if(n!==state.chapter){SAVES[state.chapter]=state;stopVoice();if(SAVES[n]){state=SAVES[n];show();}else{state=freshState(n);enter(START[n]);}}
@@ -550,6 +562,18 @@ function sanitizeBuild(raw){
  if(sum>CONFIG.allocPoints)return null;
  return out;
 }
+const LOADOUT_WEAPONS=['melee','gun'],LOADOUT_ARMORS={might:'bodyMight',guile:'bodyGuile',resolve:'bodyResolve',mix:'bodyMix'};
+function sanitizeLoadoutDraft(raw){
+ const weapon=raw&&LOADOUT_WEAPONS.includes(raw.weapon)?raw.weapon:null;
+ const armor=raw&&raw.armor in LOADOUT_ARMORS?raw.armor:null;
+ return{weapon,armor};
+}
+function sanitizeLoadout(raw){
+ if(!raw||typeof raw!=='object')return null;
+ const inv=Array.isArray(raw.inv)?raw.inv.filter(id=>ITEMS[id]).slice(0,CONFIG.bag):[];
+ if(!inv.length)return null;
+ return{inv,eq:sanitizeEq(raw.eq,inv)};
+}
 function sanitizeState(raw,n){
  if(!raw||typeof raw!=='object')return null;
  const scene=raw.scene;
@@ -567,7 +591,8 @@ function sanitizeState(raw,n){
  const def=SCENES[scene].fight,savedFightHp=raw.fight&&typeof raw.fight.hp==='number'?raw.fight.hp:def&&def.hp;
  const fight=def?{...def,max:def.hp,hp:Math.max(0,Math.min(def.hp,savedFightHp))}:null;
  const allocDraft=scene==='alloc'?(sanitizeBuild(raw.allocDraft)||{might:0,guile:0,resolve:0}):undefined;
- return{scene,hp,flags,inv,eq,fight,pending,rolls,acts,note,boost,chapter:n,lp:0,allocDraft};
+ const loadoutDraft=scene==='loadout'?sanitizeLoadoutDraft(raw.loadoutDraft):undefined;
+ return{scene,hp,flags,inv,eq,fight,pending,rolls,acts,note,boost,chapter:n,lp:0,allocDraft,loadoutDraft};
 }
 function persist(){try{SAVES[state.chapter]=state;localStorage.setItem(SAVE_KEY,JSON.stringify({v:SAVE_VER,chapter:state.chapter,saves:SAVES}));}catch(e){}}
 function loadSave(){
@@ -579,6 +604,7 @@ function loadSave(){
   for(const k in data.saves){
    if(k==='carry'){const c=sanitizeCarry(data.saves.carry);if(c)SAVES.carry=c;continue;}
    if(k==='build'){const b=sanitizeBuild(data.saves.build);if(b)SAVES.build=b;continue;}
+   if(k==='loadout'){const l=sanitizeLoadout(data.saves.loadout);if(l)SAVES.loadout=l;continue;}
    const n=+k;if(!Number.isInteger(n)||!CHAPTERS[n])continue;
    const s=sanitizeState(data.saves[k],n);if(s){SAVES[n]=s;found=true;}
   }
@@ -653,11 +679,37 @@ function renderAlloc(box){
   btn('+',()=>{if(left>0){d[stat]++;show();}},r).disabled=left<=0;
   box.append(r);
  });
- btn(left===0?'Begin':`Spend all ${CONFIG.allocPoints} points to begin`,()=>{
+ btn(left===0?'Next: choose your kit':`Spend all ${CONFIG.allocPoints} points to continue`,()=>{
   if(left!==0)return;
   for(const k of['might','guile','resolve'])state.boost[k]=(state.boost[k]||0)+d[k];
-  SAVES.build={...d};state.allocDraft=undefined;state.scene=START[state.chapter];enter(state.scene);
+  SAVES.build={...d};state.allocDraft=undefined;
+  state.scene='loadout';state.loadoutDraft={weapon:null,armor:null};enter(state.scene);
  },box).disabled=left!==0;
+}
+const ARMOR_LABEL={might:'Might-forged',guile:'Guile-woven',resolve:'Steadfast',mix:'Balanced'};
+function renderLoadout(box){
+ const d=state.loadoutDraft;
+ const head=document.createElement('p');head.innerHTML=d.weapon&&d.armor?'Ready to deploy, Captain.':'Pick an opening weapon and an opening armor.';box.append(head);
+ const wRow=document.createElement('div');wRow.className='slot';wRow.innerHTML='<span>Opening weapon</span>';
+ [['melee','Melee first',ITEMS.chainblade.n+' equipped; find a gun later'],['gun','Gun first',ITEMS.pistol.n+' equipped; find a melee weapon later']].forEach(([k,label,sub])=>{
+  btn(`${label}${d.weapon===k?' <b class="eq">chosen</b>':''}<small>${sub}</small>`,()=>{d.weapon=k;show();},wRow);
+ });
+ box.append(wRow);
+ const aRow=document.createElement('div');aRow.className='slot';aRow.innerHTML='<span>Opening armor</span>';
+ for(const k in ARMOR_LABEL){
+  const item=ITEMS[LOADOUT_ARMORS[k]];
+  btn(`${ARMOR_LABEL[k]}${d.armor===k?' <b class="eq">chosen</b>':''}<small>${item.n}: Defense ${item.dr}${item.stat?', '+statLine(item):''}</small>`,()=>{d.armor=k;show();},aRow);
+ }
+ box.append(aRow);
+ btn(d.weapon&&d.armor?'Deploy':'Choose a weapon and an armor to deploy',()=>{
+  if(!d.weapon||!d.armor)return;
+  const armorId=LOADOUT_ARMORS[d.armor];
+  const inv=d.weapon==='gun'?['pistol',armorId,'stim']:['chainblade',armorId,'stim'];
+  const eq=d.weapon==='gun'?{melee:null,gun:'pistol',body:armorId,legs:null}:{melee:'chainblade',gun:null,body:armorId,legs:null};
+  state.inv=inv;state.eq=eq;
+  SAVES.loadout={inv:inv.slice(),eq:{...eq}};
+  state.loadoutDraft=undefined;state.scene=START[state.chapter];enter(state.scene);
+ },box).disabled=!(d.weapon&&d.armor);
 }
 
 async function toStory(){if(document.documentElement.dataset.device!=='mobile')return;
@@ -675,6 +727,7 @@ function show(){
  persist();renderHud();renderArt();const sc=SCENES[state.scene],box=$('choices');box.innerHTML='';
  renderText();
  if(state.scene==='alloc'){renderAlloc(box);return;}
+ if(state.scene==='loadout'){renderLoadout(box);return;}
  if(state.pending){const id=state.pending,i=ITEMS[id];
   box.innerHTML=`<h3 class="tip" tabindex="0" data-tip="${tipText(id)}">Loot: ${nm(id)}</h3><p>${info(i)}. Your pack holds ${state.inv.length} of ${CONFIG.bag}.</p>`;
   const done=()=>{state.pending=null;show();};

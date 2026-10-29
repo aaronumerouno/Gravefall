@@ -75,6 +75,10 @@ h3{font:700 28px/1 var(--display);margin:0 0 4px;color:var(--brass)}
 .chapter>summary b{font:700 28px/1 var(--display);color:var(--brass)}
 .chapter>summary .chev{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:1px solid var(--brass);border-radius:50%;color:var(--brass);font-size:16px;transition:transform .2s ease;flex:none}
 .chapter[open]>summary .chev{transform:rotate(180deg)}
+.chapter.locked{opacity:.55}
+.chapter.locked>summary{cursor:default}
+.chapter.locked>summary .chev{display:none}
+.chapter.locked .lockmsg{color:var(--dim);font-style:italic}
 .chapbody{padding:12px}
 [data-device=mobile] .chapbody{padding:8px}
 [data-device=mobile] .hud{padding:10px;gap:6px}
@@ -330,14 +334,15 @@ const SCENES={
   '“Not today,” Ironside says, and Quill’s voice breaks. “Captain, the core has ninety seconds. Finish this,” she says.'],
   fight:{name:'Major Kraag',ref:'Major Kraag',pr:'he',pos:'his',hp:26,dc:13,def:5,acc:13,dmg:11,drop:null,say:['“Die loudly!” Major Kraag snarls.','Kraag’s blade splits the deck beside you.','“I will wear your armor,” Major Kraag growls.','Kraag laughs, a sound like grinding iron.','“Your platoon screamed louder,” Major Kraag says.','The deck buckles under Kraag’s advance.']},then:'victory'},
  victory:{title:'Victory',end:1,text:s=>[
-  'Kraag falls, and the reactor dies in white fire. Ironside sprints for the airlock as the carrier shatters behind him. “Captain!” Quill shouts, and Brannigan adds, “Get in the gunship, you reckless fool.”',
-  'Ironside tumbles aboard, scarred and alive. “We won, comrades,” Ironside says. Quill laughs through tears. “You did, Captain. You did,” she says.'+
+  'Kraag falls, and the reactor’s scream breaks into silence. Ironside slams the override and brings the core down by hand, one shaking breath at a time. “Core stable,” Brannigan reports, disbelief in his voice. “Gravefall is not going anywhere today, Captain.”',
+  'The <em>Wrenhawk</em> docks at Gravefall’s forward bay, clamps locking home with a shudder Ironside feels through the deck. Quill and Brannigan cross over and find him still standing in the reactor hall. “We held her,” Ironside says. Quill laughs through tears. “You held her, Captain. All of her,” she says.'+
    (s.flags.stealth?' “Still can’t believe he never heard you coming,” Brannigan says. “I will take it,” Ironside says.'
     :s.flags.bold?' “You walked right up to him, Captain,” Quill says, half scolding, half in awe. “Worked, didn’t it,” Ironside says.'
     :'')+
    (s.flags.took_lancer?' The Lancer still hums warm in Ironside’s grip. “Good shooting,” Brannigan says.'
     :s.flags.took_kit?' Quill checks the Trauma Kit in Ironside’s pack, relieved it is still there. “Keep that close, Captain,” she says.'
     :''),
+  'They share what little the galley still has — cold rations and a toast to Third Platoon — before the comm crackles with new orders. “Colonel Vex is still out there, on the dead moon,” Brannigan says. “Then we are not done,” Ironside says, already moving for the Wrenhawk.',
   'Chapter 1 of the Gravefall Saga ends here, but the war for the dead moon has only begun.']},
  dead:{title:'Fallen',end:1,text:[
   'The dark takes Ironside. Quill’s voice fades to static, and Brannigan says only, “Goodbye, Captain.” Ironside’s name joins the long list on the memorial wall of Ironwolf Company.']}
@@ -346,7 +351,7 @@ const SCENES={
 /* ===== CHAPTER 2: same format as chapter 1. bg = which scene art to reuse. fight.art = which sprite to use. ===== */
 Object.assign(SCENES,{
  ch2_start:{title:'Crash Landing',bg:'intro',text:[
-  'The gunship <em>Wrenhawk</em> limps down toward the dead moon, one engine burning. “Captain, we lost the port thruster,” Quill says, her hands white on the controls. “Brace for a hard landing,” Brannigan adds.',
+  'The <em>Wrenhawk</em> undocks from Gravefall’s bay and burns hard for the dead moon below, one engine already running hot. “Captain, we lost the port thruster,” Quill says, her hands white on the controls. “Brace for a hard landing,” Brannigan adds.',
   'Below, a mining colony glows green in the dark. “That is Hollow Station,” Brannigan says. “Colonel Vex holds it, and Kraag’s fleet took orders from him.” “Then we pay him a visit,” Ironside says, checking his blade.'],
   choices:[
    {text:'Ride out the crash in the cockpit',check:{stat:'resolve',dc:11},win:{msg:'The gunship slams down hard but holds together.',goto:'ch2_tunnel',fx:{flag:'crash_brace'}},lose:{msg:'The hull buckles and throws you into the console.',goto:'ch2_tunnel',fx:{hp:-4,flag:'crash_brace'}}},
@@ -690,13 +695,25 @@ function freshState(n){const c=n>1?SAVES.carry:null,needsAlloc=n===1&&!SAVES.bui
  return{scene:needsAlloc?'alloc':needsLoadout?'loadout':START[n],hp:CONFIG.maxHp,flags:{},inv:startInv,eq:startEq,fight:null,pending:null,rolls:[],acts:[],note:'',boost:baseBoost,chapter:n,
   allocDraft:needsAlloc?{might:0,guile:0,resolve:0}:undefined,loadoutDraft:needsLoadout?{weapon:null,armor:null}:undefined};}
 function newGame(n){stopVoice();n=n||(state&&state.chapter)||1;state=freshState(n);enter(state.scene);}
+const isUnlocked=n=>n===1||!!(SAVES.unlocked&&SAVES.unlocked[n]);
+function goToChapter(n){
+ if(!isUnlocked(n))return;
+ SAVES[state.chapter]=state;stopVoice();
+ if(SAVES[n]){state=SAVES[n];show();}else{state=freshState(n);enter(START[n]);}
+ buildChapters();
+}
 function buildChapters(){const box=$('chapters'),all=()=>box.querySelectorAll('details');let lock=false;
  const layout=$('layout');if(layout&&box.contains(layout))document.body.appendChild(layout); // buildChapters() can run more than once (e.g. 'New game'); #layout may already be nested inside box from an earlier call, and box.innerHTML would destroy it if left there — move it out (still attached, so later $('layout') lookups keep finding it) before wiping box
- box.innerHTML=Object.keys(CHAPTERS).map(n=>`<details class="chapter" id="ch${n}"><summary><span class="chev" aria-hidden="true">▾</span><div class="chaptext"><small>${SAGA}</small><b>Chapter ${n}: ${CHAPTERS[n]}</b></div></summary><div class="chapbody"></div></details>`).join('');
- all().forEach(d=>d.addEventListener('toggle',()=>{if(lock||!d.open)return;lock=true;
-  all().forEach(o=>{if(o!==d)o.open=false;});d.querySelector('.chapbody').append($('layout'));
-  const n=+d.id.slice(2);if(n!==state.chapter){SAVES[state.chapter]=state;stopVoice();if(SAVES[n]){state=SAVES[n];show();}else{state=freshState(n);enter(START[n]);}}
-  setTimeout(()=>{lock=false;},0);}));
+ box.innerHTML=Object.keys(CHAPTERS).map(n=>{const u=isUnlocked(+n);
+  return `<details class="chapter${u?'':' locked'}" id="ch${n}"><summary><span class="chev" aria-hidden="true">▾</span><div class="chaptext"><small>${SAGA}</small><b>Chapter ${n}: ${CHAPTERS[n]}</b>${u?'':'<small class="lockmsg">Locked — finish the previous chapter first</small>'}</div></summary><div class="chapbody"></div></details>`;
+ }).join('');
+ all().forEach(d=>{
+  d.querySelector('summary').addEventListener('click',e=>{if(!isUnlocked(+d.id.slice(2)))e.preventDefault();});
+  d.addEventListener('toggle',()=>{if(lock||!d.open)return;lock=true;
+   all().forEach(o=>{if(o!==d)o.open=false;});d.querySelector('.chapbody').append($('layout'));
+   const n=+d.id.slice(2);if(n!==state.chapter){SAVES[state.chapter]=state;stopVoice();if(SAVES[n]){state=SAVES[n];show();}else{state=freshState(n);enter(START[n]);}}
+   setTimeout(()=>{lock=false;},0);});
+ });
  $('ch'+state.chapter).open=true;}
 
 /* ===== SAVING: localStorage only, game state only (see security review S1/S2). Every value coming back
@@ -729,6 +746,11 @@ function sanitizeLoadout(raw){
  if(!inv.length)return null;
  return{inv,eq:sanitizeEq(raw.eq,inv)};
 }
+function sanitizeUnlocked(raw){
+ const out={1:1};
+ if(raw&&typeof raw==='object')for(const k in raw){const n=+k;if(Number.isInteger(n)&&CHAPTERS[n])out[n]=1;}
+ return out;
+}
 function sanitizeState(raw,n){
  if(!raw||typeof raw!=='object')return null;
  const scene=raw.scene;
@@ -760,6 +782,7 @@ function loadSave(){
    if(k==='carry'){const c=sanitizeCarry(data.saves.carry);if(c)SAVES.carry=c;continue;}
    if(k==='build'){const b=sanitizeBuild(data.saves.build);if(b)SAVES.build=b;continue;}
    if(k==='loadout'){const l=sanitizeLoadout(data.saves.loadout);if(l)SAVES.loadout=l;continue;}
+   if(k==='unlocked'){SAVES.unlocked=sanitizeUnlocked(data.saves.unlocked);continue;}
    const n=+k;if(!Number.isInteger(n)||!CHAPTERS[n])continue;
    const s=sanitizeState(data.saves[k],n);if(s){SAVES[n]=s;found=true;}
   }
@@ -771,7 +794,10 @@ function loadSave(){
 }
 function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
 
-function enter(id){state.scene=id;const f=SCENES[id].fight;state.fight=f?{...f,max:f.hp,used:{}}:null;state.lp=0;if(SCENES[id].end&&id!=='dead')SAVES.carry={inv:state.inv.slice(),eq:{...state.eq},boost:{...state.boost}};show();
+function enter(id){state.scene=id;const f=SCENES[id].fight;state.fight=f?{...f,max:f.hp,used:{}}:null;state.lp=0;
+ if(SCENES[id].end&&id!=='dead'){SAVES.carry={inv:state.inv.slice(),eq:{...state.eq},boost:{...state.boost}};
+  if(!SAVES.unlocked)SAVES.unlocked={1:1};SAVES.unlocked[state.chapter+1]=1;buildChapters();}
+ show();
  if(/victory/.test(id))sfx('victory');else if(id==='dead')sfx('death');narrate(id);}
 
 function odds(c){const m=mod(c);let k=0;for(let r=1;r<=CONFIG.die;r++)if(r===CONFIG.die||(r>1&&r+m>=c.dc))k++;return Math.round(k*100/CONFIG.die);}
@@ -889,7 +915,11 @@ function show(){
   if(state.inv.length<CONFIG.bag)btn('Take it',()=>{state.inv.push(id);logAct('Picked up '+nm(id));done();});
   else state.inv.forEach(x=>btn(`Swap for ${nm(x)}`,()=>{logAct('Dropped '+nm(x)+' and picked up '+nm(id));dropItem(x);state.inv.push(id);done();}));
   btn('Leave it',()=>{logAct('Left '+nm(id));done();});return;}
- if(sc.end){btn('Fight again',()=>{$('roll').classList.remove('show');newGame();});return;}
+ if(sc.end){
+  const next=state.chapter+1;
+  if(state.scene!=='dead'&&CHAPTERS[next])btn(`Continue to Chapter ${next}: ${CHAPTERS[next]}`,()=>{$('roll').classList.remove('show');goToChapter(next);});
+  btn('Fight again',()=>{$('roll').classList.remove('show');newGame();});
+  return;}
  if(state.fight){const f=state.fight,g=gear(state);
   const actions=[['strike','Strike',{stat:'might',dc:f.dc,vs:`Evasion ${f.dc}`},`Hit for ${g.melee.atk}, minus ${f.def} Defense`],
    ['wild','Reckless blow',{stat:'might',dc:f.dc+3,vs:`Evasion ${f.dc} +3 reckless = ${f.dc+3}`},`Hit for ${g.melee.atk*2}, minus ${f.def} Defense, but costs more if you miss`]];

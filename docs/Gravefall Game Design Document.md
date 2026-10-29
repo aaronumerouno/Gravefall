@@ -58,7 +58,7 @@ The full saga is shaped like the *Odyssey*: a war fought and won far from home, 
 
 ## Features
 
-- **Chapters as dropdowns:** each chapter opens like an accordion and keeps its own progress. Finishing a chapter carries your gear and stat boosts into the next.
+- **Chapters as dropdowns:** each chapter opens like an accordion and keeps its own progress. A chapter is locked (dimmed, cannot be opened) until the one before it is finished — only Chapter 1 starts unlocked. Finishing a chapter carries your gear and stat boosts into the next and unlocks it; its Victory screen offers a "Continue to Chapter N" button straight there.
 - **Dice-driven choices:** story choices and combat actions roll a d20 plus a stat. A natural 20 is a critical hit and heals a little; a natural 1 is a fumble and costs health.
 - **Choices that echo forward:** a handful of key choices in each chapter set a flag (which door you forced, how you approached the boss, which item you took) regardless of whether the roll succeeded — the *approach*, not the outcome, is what's remembered. Later scenes, boss introductions and the victory ending reference it, so two runs of the same chapter read differently. Flags reset each chapter; they don't carry into the next.
 - **Combat:** enemy health bars, visible enemy stats, four actions (Strike, Reckless blow, Aimed shot, Guard), and a result box that shows the full damage calculation.
@@ -180,7 +180,7 @@ Each chapter is a straight run of scenes where story choices alternate with figh
 | 8 | The Dead Armory | Choice | Take the Sunspear Lancer or the Lazarus Trauma Kit (no roll) | Choose one item |
 | 9 | The Reactor Gate | Choice | Slip in through the vent (Guile 13) or announce yourself (Resolve 10) | Stat +1 on success, -1 on failure; no Vitality change |
 | 10 | Major Kraag | Boss fight | Major Kraag | No loot |
-| 11 | Victory | Ending | The reactor dies; gear and stat boosts carry to Chapter 2 | Chapter 1 complete |
+| 11 | Victory | Ending | The reactor is stabilized by hand and Gravefall is saved; the Wrenhawk docks and the crew has a brief reunion before departing for the moon; gear and stat boosts carry to Chapter 2 | Chapter 1 complete, Chapter 2 unlocked |
 | 12 | Fallen | Ending | Vitality reached 0 | Restart the chapter |
 
 **Chapter 2: The Hollow Moon** (8 scenes including the two endings)
@@ -212,7 +212,7 @@ Each chapter is a straight run of scenes where story choices alternate with figh
 
 Victory ends Act I: Ironside and crew set course for home, and Quill's closing line ("Something is wrong down there too, Captain") is the hook into Act II.
 
-**Between chapters.** Finishing a chapter saves your pack, equipped gear and stat boosts. Opening the next chapter starts it at full Vitality with that gear. If you open it without finishing the previous chapter, you start with the standard kit (this will change; see Planned changes).
+**Between chapters.** Finishing a chapter (reaching its Victory ending, not Fallen) saves your pack, equipped gear and stat boosts, and unlocks the next chapter — its accordion entry is locked and cannot be opened until then. The Victory screen offers "Continue to Chapter N" alongside "Fight again," taking you straight there at full Vitality with that gear. Unlock state is saved and survives a reload; "New game" relocks everything back to Chapter 1 only.
 
 ## Technical specs
 
@@ -276,7 +276,6 @@ The game's code will live in a private Git repository on GitHub, which is the ma
 
 These decisions come from the [Gravefall: Project Plan](https://claude.ai/artifact/4SA2ZmqyRVmsT6ifEtvZSJ). None of them is built yet; the sections above describe the game as it plays today.
 
-- **Chapter locking:** the next chapter stays locked until the current one is finished. Gear, level and stat points carry over, and Vitality resets to full when a chapter starts.
 - **Levels and stat points:** the player earns experience from fights, levels up, and spends one stat point per level.
 - **Random dice:** there is no target win rate. Outcomes stay random, and a balance simulation only checks for fights that are impossible or trivial.
 - **Narration:** no recorded narration; the browser voices already on a device are fine.

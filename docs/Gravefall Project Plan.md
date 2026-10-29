@@ -32,7 +32,7 @@ Four phases, in order; no dates are set yet because the pace depends on how much
 
 | Phase | Delivers | Done when |
 | --- | --- | --- |
-| 1. Stabilize | Real-phone test pass, balance simulation, saving, chapter locking, settings panel | A typical player can finish Chapter 1, and progress survives a refresh |
+| 1. Stabilize | Real-phone test pass, balance simulation, saving, chapter locking (done), settings panel | A typical player can finish Chapter 1, and progress survives a refresh |
 | 2. Depth | Meaningful choices and endings, progression, ally abilities | Two runs of one chapter can differ in story and in build |
 | 3. Polish | Unique Chapter 2 art | Chapter 2 no longer reuses Chapter 1 art |
 | 4. Expand | The full ten-chapter saga, built one chapter at a time from the chapter template. Chapter 3 is done and closes Act I (the alien war). Chapters 4–10 are Act II — seven chapters on an Earth-like homeworld, each themed to one of the seven deadly sins with its own demon-lord boss. See the Game Design Document's **Saga arc** section for the planned chapter list, order and status | Each new chapter opens as a dropdown and carries gear forward; each chapter's enemy stats go through `scripts/balance-sim.js` before it ships, the same as Chapters 1–3 |

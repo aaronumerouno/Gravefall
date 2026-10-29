@@ -35,7 +35,7 @@ Four phases, in order; no dates are set yet because the pace depends on how much
 | 1. Stabilize | Real-phone test pass, balance simulation, saving, chapter locking, settings panel | A typical player can finish Chapter 1, and progress survives a refresh |
 | 2. Depth | Meaningful choices and endings, progression, ally abilities | Two runs of one chapter can differ in story and in build |
 | 3. Polish | Unique Chapter 2 art | Chapter 2 no longer reuses Chapter 1 art |
-| 4. Expand | Chapter 3 and later, built from the chapter template | Each new chapter opens as a dropdown and carries gear forward |
+| 4. Expand | The full ten-chapter saga, built one chapter at a time from the chapter template: Chapter 3 closes Act I (the alien war), then Chapters 4–10 are Act II — seven chapters on an Earth-like homeworld, each themed to one of the seven deadly sins with its own demon-lord boss. See the Game Design Document's **Saga arc** section for the planned chapter list, order and status | Each new chapter opens as a dropdown and carries gear forward; each chapter's enemy stats go through `scripts/balance-sim.js` before it ships, the same as Chapters 1–2 |
 
 ## Progression design (proposed)
 
@@ -68,3 +68,4 @@ The player earns experience from fights and levels up, spending one stat point p
 - **Single file:** everything lives in one HTML file of about 61 KB; it will get harder to edit as chapters, art and audio grow, though the 16 MB hosting limit is far away.
 - **Untested on real devices:** problems may only show on real phones or browsers other than the one used for checks.
 - **Reused art and stats:** Chapter 2 content shares Chapter 1 art, so it may feel repetitive until it gets its own.
+- **Ten-chapter scope:** the saga is now planned at ten chapters across two tonally different acts (an alien war, then seven demon-lord chapters on an Earth-like world). That is a large amount of unwritten story, art and balancing work; building it one chapter at a time, in order, with each one playtested and simulated before the next starts, keeps any single step small even though the total is not.

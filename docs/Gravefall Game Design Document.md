@@ -9,7 +9,7 @@ Gravefall is a single-page browser RPG where you play Captain Dax Ironside, figh
 - **Genre:** text-driven tactical RPG with pixel art, sound effects and optional narration.
 - **Tone:** grim military sci-fi with ranks, comrades and hard fighting. The setting is original and does not use Warhammer 40k names.
 - **Platform:** any modern browser on a phone or a monitor, delivered as one HTML file at a published link.
-- **Content today:** two chapters, Chapter 1 (Iron in the Dark) and Chapter 2 (The Hollow Moon).
+- **Content today:** two chapters, Chapter 1 (Iron in the Dark) and Chapter 2 (The Hollow Moon), out of a planned ten-chapter saga (see **Saga arc**, below).
 - **Outcome:** the hero can win a chapter or die. Every action rests on a d20 roll.
 
 ## Story and setting
@@ -25,6 +25,33 @@ Ironwolf Company's Third Platoon died on the approach to the carrier *Gravefall*
 | Colonel Vex | Chapter 2 boss, commands Kraag's fleet | Green-lit and soft-spoken |
 
 **Places and machines:** the carrier *Gravefall*, the gunship *Wrenhawk*, the gutted siege tank *Old Bessie*, the dead moon, and Hollow Station.
+
+## Saga arc (planned)
+
+The full saga is shaped like the *Odyssey*: a war fought and won far from home, then a long, harder road back, where each stop is a trial rather than a battle of conquest. Ten chapters total, in two acts. Only Chapters 1–2 are built; 3–10 are a planned outline, not yet written into scenes, fights or items, and nothing below is final until it goes through the same loop as everything else (`scripts/balance-sim.js`, a security pass, and the roadmap's phases).
+
+**Act I: The War (Chapters 1–3).** Ironwolf Company fights and wins a war against an alien hive intelligence — Major Kraag and Colonel Vex are its field commanders, not the true enemy. Chapter 3 ends the war by reaching the hive's command core (the "something far older beneath the moon" Colonel Vex's last signal points to) and kills what is behind it. Having won, the survivors turn the *Wrenhawk* toward home.
+
+**Act II: The Return (Chapters 4–10).** Home is an Earth-like world, but the voyage back is not a victory lap — seven stops, each ruled by a demon lord embodying one of the seven deadly sins, each standing between Ironwolf Company and the ground. Tone shifts here: Act I's enemies are alien and mechanical (hives, gunners, iron); Act II's are infernal and personal (temptation, hunger, rage), and every chapter's setting, dialogue and (eventually) mechanics should say which sin it is about before the boss ever appears. The order below climbs in severity, ending on Pride as the final boss of the saga — fitting, since pride is traditionally the root sin, and the chapter's twist is that the Fallen Sovereign orchestrated the alien war in Act I as well.
+
+| # | Chapter | Act | Enemy / theme | Boss | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Iron in the Dark | I: The War | Alien hive, shipboard | Major Kraag | Built |
+| 2 | The Hollow Moon | I: The War | Alien hive, mining colony | Colonel Vex | Built |
+| 3 | *(working title)* The Hive's End | I: The War | Alien hive command core | *(working title)* The Hive Sovereign | Planned |
+| 4 | *(working title)* The Drowning Fields | II: The Return | Sloth — a bog world where nothing moves fast enough to matter | The Slack Lord | Planned |
+| 5 | *(working title)* The Feeding Grounds | II: The Return | Gluttony — a ruined farmland consumed by endless hunger | The Maw | Planned |
+| 6 | *(working title)* The Siren Reaches | II: The Return | Lust — beautiful ruins that lure and lie | The Temptress | Planned |
+| 7 | *(working title)* The Mirrored City | II: The Return | Envy — a city of doubles and reflections | The Envious One | Planned |
+| 8 | *(working title)* The Hoarder's Vault | II: The Return | Greed — a treasury of cursed gold | The Hoarder | Planned |
+| 9 | *(working title)* The Burning Line | II: The Return | Wrath — an endless battlefield | The Wrathbound | Planned |
+| 10 | *(working title)* The Throne of Ash | II: The Return | Pride — the demon capital, final chapter | The Fallen Sovereign | Planned |
+
+**Design notes for Act II, once it's built:**
+- Each boss's *mechanics*, not just its name, should carry the sin: a rough starting idea for each is in the table above's "enemy / theme" column, e.g. Wrath growing stronger as it loses Health, Envy mirroring the player's own stats, Greed stealing or hoarding loot mid-fight. These are concepts to prototype and balance-test, not committed numbers.
+- Quill and Brannigan stay with the Captain for the whole saga — the *Wrenhawk* is the throughline between chapters, same as today.
+- Chapter 3 needs its own enemy stat block (an alien, not a demon) and should close out Act I's visual palette (see **Planned changes**: unique Chapter 2 art is still owed before Act I is visually finished). Chapters 4–10 need a new palette and sprite set per chapter, since Act II is a tonal break from Act I by design.
+- This outline does not yet set per-chapter XP, enemy stats or item tiers; those get designed (and simulated) chapter by chapter as each one is actually built, the same way Chapters 1–2 were.
 
 ## Features
 

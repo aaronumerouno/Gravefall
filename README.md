@@ -27,7 +27,7 @@ Open `Gravefall.html` in a modern browser. There is nothing to install or build.
 ## Documentation
 
 - [Game design document](docs/Gravefall Game Design Document.md): story, mechanics, enemies, items and chapter flow
-- [Project plan](docs/project-plan.md): roadmap, decisions and source control
+- [Project plan](docs/Gravefall Project Plan.md): roadmap, decisions and source control
 
 ## Working on it
 

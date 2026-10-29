@@ -52,11 +52,13 @@ const ITEMS = {
   stim: { n: 'Rattlesnake Stim', slot: 'use', heal: 6, tier: 'weak' },
   bandage: { n: 'Field Bandage', slot: 'use', heal: 4, tier: 'weak' },
   medikit: { n: 'Lazarus Trauma Kit', slot: 'use', heal: 12, tier: 'strong' },
-  nanite: { n: 'Nanite Canister', slot: 'use', heal: 9, tier: 'strong' }
+  nanite: { n: 'Nanite Canister', slot: 'use', heal: 9, tier: 'strong' },
+  hiveblade: { n: 'Hivebreaker Gauntlet', slot: 'melee', atk: 11, acc: 1, tier: 'strong' },
+  elixir: { n: 'Sovereign’s Elixir', slot: 'use', heal: 15, tier: 'strong' }
 };
 const DROPS = {
   small: ['cleaver', 'shiv', 'pistol', 'scrap', 'bodyMight', 'bodyGuile', 'bodyResolve', 'bodyMix', 'legplate', 'legsMight', 'legsGuile', 'legsResolve', 'legsMix', 'stim', 'bandage'],
-  big: ['maul', 'spike', 'plasma', 'bulwark', 'bodyMightS', 'bodyGuileS', 'bodyResolveS', 'bodyMixS', 'ablative', 'legsMightS', 'legsGuileS', 'legsResolveS', 'legsMixS', 'medikit', 'nanite']
+  big: ['maul', 'spike', 'plasma', 'bulwark', 'bodyMightS', 'bodyGuileS', 'bodyResolveS', 'bodyMixS', 'ablative', 'legsMightS', 'legsGuileS', 'legsResolveS', 'legsMixS', 'medikit', 'nanite', 'hiveblade', 'elixir']
 };
 
 /* Story graph: only the numbers the simulator needs (stat checks, DCs, hp/stat fx, loot). */
@@ -110,6 +112,38 @@ const CH2 = [
       { check: { stat: 'might', dc: 12 }, win: { stat: { might: 1 } }, lose: { stat: { might: -1 } } }
   ] },
   { id: 'ch2_boss', kind: 'fight', fight: { name: 'Colonel Vex', hp: 34, dc: 14, def: 4, acc: 14, dmg: 10, drop: null } }
+];
+
+const CH3 = [
+  { id: 'ch3_start', kind: 'choice', options: [
+      { check: { stat: 'resolve', dc: 11 }, lose: { hp: -4 } },
+      { check: { stat: 'might', dc: 14 }, lose: { hp: -5 } }
+  ] },
+  { id: 'ch3_den', kind: 'fight', fight: { name: 'Hive Stalker', hp: 17, dc: 12, def: 0, acc: 8, dmg: 6, drop: 'small' } },
+  { id: 'ch3_relay', kind: 'choice', options: [
+      { check: { stat: 'guile', dc: 12 }, lose: { hp: -4 } },
+      { check: { stat: 'might', dc: 14 }, lose: { hp: -6 } },
+      { check: { stat: 'resolve', dc: 11 }, lose: { hp: -5 } }
+  ] },
+  { id: 'ch3_warden', kind: 'fight', fight: { name: 'Hive Warden', hp: 28, dc: 12, def: 3, acc: 8, dmg: 9, drop: 'big' } },
+  { id: 'ch3_respite', kind: 'choice', options: [
+      { check: { stat: 'resolve', dc: 9 }, win: { hp: 10 }, lose: { hp: 3 } },
+      { check: { stat: 'guile', dc: 12 }, win: { give: 'small' }, lose: { hp: -3 } },
+      { noCheck: true }
+  ] },
+  { id: 'ch3_descent', kind: 'choice', options: [
+      { check: { stat: 'resolve', dc: 12 }, lose: { hp: -5 } },
+      { check: { stat: 'might', dc: 15 }, lose: { hp: -7 } }
+  ] },
+  { id: 'ch3_relic', kind: 'choice', options: [
+      { noCheck: true, win: { give: 'hiveblade' } },
+      { noCheck: true, win: { give: 'elixir' } }
+  ] },
+  { id: 'ch3_threshold', kind: 'choice', options: [
+      { check: { stat: 'guile', dc: 14 }, win: { stat: { guile: 1 } }, lose: { stat: { guile: -1 } } },
+      { check: { stat: 'resolve', dc: 11 }, win: { stat: { resolve: 1 } }, lose: { stat: { resolve: -1 } } }
+  ] },
+  { id: 'ch3_boss', kind: 'fight', fight: { name: 'The Hive Sovereign', hp: 42, dc: 15, def: 4, acc: 14, dmg: 11, drop: null } }
 ];
 
 /* ===== Engine, copied from Gravefall.html's gear()/mod()/act()/rollCheck()/foeHit()/hurt() ===== */
@@ -346,24 +380,34 @@ function simulate(label, chapter, runs, build) {
 console.log(`allocPoints=${CONFIG.allocPoints} (base 1/1/1 + these, freely spent at character creation)`);
 console.log('=== Chapter 1: Iron in the Dark (fresh kit, by build) ===');
 for (const [name, build] of Object.entries(BUILDS)) simulate(name, CH1, RUNS, build);
+console.log('\n=== Chapter 3: The Hive’s End (fresh kit — only reachable today by skipping Ch.1/2) ===');
+for (const [name, build] of Object.entries(BUILDS)) simulate(name, CH3, RUNS, build);
 
-// End-to-end: Chapter 2 as actually reached by a player who finished Chapter 1 and carried gear forward.
+// End-to-end: Chapters 2 and 3 as actually reached by a player who won each chapter before it and carried gear forward.
 function simulateSaga(runs, build, label) {
   const encounterStats = {};
-  let sagaWins = 0, ch1Wins = 0;
+  let ch1Wins = 0, ch2Wins = 0, ch3Wins = 0;
   for (let i = 0; i < runs; i++) {
     const r1 = runChapter(CH1, null, build);
     if (!r1.win) continue;
     ch1Wins++;
     const r2 = runChapter(CH2, r1.player);
-    if (r2.win) sagaWins++;
     for (const f of r2.log.fights) {
       const s = encounterStats[f.name] || (encounterStats[f.name] = { attempts: 0, wins: 0, roundsSum: 0, hpLeftSum: 0 });
       s.attempts++;
       if (f.won) { s.wins++; s.roundsSum += f.rounds; s.hpLeftSum += f.hpLeft; }
     }
+    if (!r2.win) continue;
+    ch2Wins++;
+    const r3 = runChapter(CH3, r2.player);
+    if (r3.win) ch3Wins++;
+    for (const f of r3.log.fights) {
+      const s = encounterStats[f.name] || (encounterStats[f.name] = { attempts: 0, wins: 0, roundsSum: 0, hpLeftSum: 0 });
+      s.attempts++;
+      if (f.won) { s.wins++; s.roundsSum += f.rounds; s.hpLeftSum += f.hpLeft; }
+    }
   }
-  console.log(`\n--- ${label}: Ch.2 with gear carried from a won Ch.1 — ${runs} attempts, ${ch1Wins} reached Ch.2, saga win rate ${(sagaWins / Math.max(1, ch1Wins) * 100).toFixed(1)}% of those ---`);
+  console.log(`\n--- ${label}: ${runs} attempts, ${ch1Wins} reached Ch.2 (${(ch1Wins / runs * 100).toFixed(1)}%), ${ch2Wins} reached Ch.3 (${(ch2Wins / Math.max(1, ch1Wins) * 100).toFixed(1)}% of those), ${ch3Wins} finished the saga (${(ch3Wins / Math.max(1, ch2Wins) * 100).toFixed(1)}% of those) ---`);
   for (const [enc, s] of Object.entries(encounterStats)) {
     const winPct = s.wins / s.attempts * 100;
     const avgRounds = s.roundsSum / Math.max(1, s.wins);

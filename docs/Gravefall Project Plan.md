@@ -6,9 +6,9 @@ Oct 29, 2026 · @Aaron
 
 Gravefall has two playable chapters, a full set of mechanics, pixel art, sound and narration, and a published link; the next step is to prove it plays well. The full design is in the Gravefall Game Design Document.
 
-**Built:** dice-driven choices and combat with a 4th action (Aimed shot), enemy stats with a visible damage breakdown, a 10-slot inventory across four equipment slots (melee, gun, body armor, leg armor) with loot that always resolves before the next scene, a one-time character-creation stat allocation, saved progress, about 60 varied fight lines, pixel art for every scene and enemy, synthesized sound effects, a browser narrator, mobile and desktop layouts, and chapters as dropdowns.
+**Built:** three chapters (Chapter 3 closes Act I, the alien war — see the Game Design Document's **Saga arc**), dice-driven choices and combat with a 4th action (Aimed shot), enemy stats with a visible damage breakdown, a 10-slot inventory across four equipment slots (melee, gun, body armor, leg armor) with loot that always resolves before the next scene, a one-time character-creation stat allocation plus an opening-kit choice (starting weapon and armor flavor), saved progress, choices that echo into later scenes and endings, about 60+ varied fight lines, pixel art for every scene and enemy (Chapter 3's enemies reuse Chapter 1/2's sprites with a new palette), synthesized sound effects, a browser narrator, mobile and desktop layouts, and chapters as dropdowns.
 
-**Not yet verified:** a full play-through of either chapter, real phones, and real voices. Enemy and item numbers are first guesses.
+**Not yet verified:** a full play-through of any chapter on a real device, real phones, and real voices. Enemy and item numbers are simulated (`scripts/balance-sim.js`) but not human-playtested.
 
 ## Recommendations
 
@@ -35,7 +35,7 @@ Four phases, in order; no dates are set yet because the pace depends on how much
 | 1. Stabilize | Real-phone test pass, balance simulation, saving, chapter locking, settings panel | A typical player can finish Chapter 1, and progress survives a refresh |
 | 2. Depth | Meaningful choices and endings, progression, ally abilities | Two runs of one chapter can differ in story and in build |
 | 3. Polish | Unique Chapter 2 art | Chapter 2 no longer reuses Chapter 1 art |
-| 4. Expand | The full ten-chapter saga, built one chapter at a time from the chapter template: Chapter 3 closes Act I (the alien war), then Chapters 4–10 are Act II — seven chapters on an Earth-like homeworld, each themed to one of the seven deadly sins with its own demon-lord boss. See the Game Design Document's **Saga arc** section for the planned chapter list, order and status | Each new chapter opens as a dropdown and carries gear forward; each chapter's enemy stats go through `scripts/balance-sim.js` before it ships, the same as Chapters 1–2 |
+| 4. Expand | The full ten-chapter saga, built one chapter at a time from the chapter template. Chapter 3 is done and closes Act I (the alien war). Chapters 4–10 are Act II — seven chapters on an Earth-like homeworld, each themed to one of the seven deadly sins with its own demon-lord boss. See the Game Design Document's **Saga arc** section for the planned chapter list, order and status | Each new chapter opens as a dropdown and carries gear forward; each chapter's enemy stats go through `scripts/balance-sim.js` before it ships, the same as Chapters 1–3 |
 
 ## Progression design (proposed)
 
@@ -65,7 +65,7 @@ The player earns experience from fights and levels up, spending one stat point p
 **Risks.**
 
 - **Voice differs by device:** the narrator uses whatever voices a device has, so the sound cannot be guaranteed (accepted).
-- **Single file:** everything lives in one HTML file of about 61 KB; it will get harder to edit as chapters, art and audio grow, though the 16 MB hosting limit is far away.
+- **Single file:** everything lives in one HTML file, now about 90 KB after Chapter 3. The Game Design Document's own stated trigger for splitting the source into modules (Chapter 3 starting, or ~100 KB) has now been reached and this hasn't been done yet; it should happen before Chapter 4 adds more. The 16 MB hosting limit is still far away.
 - **Untested on real devices:** problems may only show on real phones or browsers other than the one used for checks.
-- **Reused art and stats:** Chapter 2 content shares Chapter 1 art, so it may feel repetitive until it gets its own.
-- **Ten-chapter scope:** the saga is now planned at ten chapters across two tonally different acts (an alien war, then seven demon-lord chapters on an Earth-like world). That is a large amount of unwritten story, art and balancing work; building it one chapter at a time, in order, with each one playtested and simulated before the next starts, keeps any single step small even though the total is not.
+- **Reused art and stats:** Chapters 2 and 3 share Chapter 1's art (Chapter 3's enemies are Chapter 1/2 sprites recolored), so Act I may feel repetitive until it gets its own.
+- **Ten-chapter scope:** the saga is planned at ten chapters across two tonally different acts; Act I (the alien war, Chapters 1–3) is now complete, leaving seven demon-lord chapters on an Earth-like world still unwritten. That is still a large amount of story, art and balancing work ahead; building it one chapter at a time, with each one playtested and simulated before the next starts, kept Act I's steps small, and the same approach should hold for Act II.

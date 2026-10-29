@@ -144,7 +144,7 @@ aside,.play{display:contents}
 /* ===== RULES ===== */
 const CONFIG={die:20,maxHp:28,critHeal:3,fumbleDmg:2,bag:10,allocPoints:3,showOdds:false,voice:false,sfx:true,stats:{might:1,guile:1,resolve:1}};
 const SAVE_KEY='gravefall_save',SAVE_VER=2; /* bump SAVE_VER on any save-breaking change; old saves are then ignored, not crashed on */
-const SAGA='The Gravefall Saga',CHAPTERS={1:'Iron in the Dark',2:'The Hollow Moon'};  /* add chapters here; give a scene chapter:2 to switch */
+const SAGA='The Gravefall Saga',CHAPTERS={1:'Iron in the Dark',2:'The Hollow Moon',3:'The Hive’s End'};  /* add chapters here; give a scene chapter:2 to switch */
 const LABELS={might:'Might',guile:'Guile',resolve:'Resolve'};
 
 /* ===== ITEMS: 4 equipment slots (melee, gun, body, legs) plus consumables (use). Add entries here;
@@ -182,11 +182,13 @@ const ITEMS={
  stim:{n:'Rattlesnake Stim',slot:'use',heal:6,tier:'weak'},
  bandage:{n:'Field Bandage',slot:'use',heal:4,tier:'weak'},
  medikit:{n:'Lazarus Trauma Kit',slot:'use',heal:12,tier:'strong'},
- nanite:{n:'Nanite Canister',slot:'use',heal:9,tier:'strong'}
+ nanite:{n:'Nanite Canister',slot:'use',heal:9,tier:'strong'},
+ hiveblade:{n:'Hivebreaker Gauntlet',slot:'melee',atk:11,acc:1,tier:'strong'},
+ elixir:{n:'Sovereign’s Elixir',slot:'use',heal:15,tier:'strong'}
 };
 const DROPS={
  small:['cleaver','shiv','pistol','scrap','bodyMight','bodyGuile','bodyResolve','bodyMix','legplate','legsMight','legsGuile','legsResolve','legsMix','stim','bandage'],
- big:['maul','spike','plasma','bulwark','bodyMightS','bodyGuileS','bodyResolveS','bodyMixS','ablative','legsMightS','legsGuileS','legsResolveS','legsMixS','medikit','nanite']
+ big:['maul','spike','plasma','bulwark','bodyMightS','bodyGuileS','bodyResolveS','bodyMixS','ablative','legsMightS','legsGuileS','legsResolveS','legsMixS','medikit','nanite','hiveblade','elixir']
 };
 /* ===== LORE: [story, how it behaves when used] per item id; STAT_INFO: stat tooltips ===== */
 const LORE={
@@ -221,7 +223,9 @@ const LORE={
  stim:['A trooper’s trick: a cheap injector that bites like a rattlesnake.','Slammed into the thigh, it mends flesh at once and leaves your hands shaking. Used up.'],
  bandage:['A field dressing from a dead medic’s kit, torn open in a hurry.','Stops the worst of the bleeding. Used up.'],
  medikit:['Lieutenant Quill’s favorite field kit. Real surgical glue, real morphine.','Closes deep wounds fast. Used up.'],
- nanite:['A sealed canister of medical nanites, cold to the touch even through a glove.','Floods a wound and knits it shut in seconds. Used up.']};
+ nanite:['A sealed canister of medical nanites, cold to the touch even through a glove.','Floods a wound and knits it shut in seconds. Used up.'],
+ hiveblade:['Grown rather than forged, torn from something that does not have a name yet. It still twitches.','Closes on a target like a trap and does not let go easily.'],
+ elixir:['A vial of something the hive kept at its very center, warm and faintly luminous.','Mends flesh so completely it almost feels wrong. Used up.']};
 const statLine=i=>i.stat?Object.entries(i.stat).map(([k,v])=>`${LABELS[k]} ${v>=0?'+':''}${v}`).join(', '):'';
 const tipText=id=>{const i=ITEMS[id],[l,u]=LORE[id]||['',''];
  const t=(i.slot==='melee'||i.slot==='gun')?`${CAT_LABEL[i.slot]}. Damage ${i.atk}, accuracy ${i.acc>=0?'+':''}${i.acc}.`
@@ -386,6 +390,71 @@ Object.assign(SCENES,{
   'Chapter 2 of the Gravefall Saga ends here, but the Colonel’s last signal points to something far older beneath the moon.']}
 });
 
+/* ===== CHAPTER 3: closes Act I (the alien war). bg = which scene art to reuse; new enemies reuse existing sprite rows with a new palette (see SPF). ===== */
+Object.assign(SCENES,{
+ ch3_start:{title:'Into the Dark Below',bg:'intro',text:[
+  'Colonel Vex’s last signal traces to a fracture far beneath Hollow Station, a wound in the rock that should not be there. “Captain, I am reading something enormous down there,” Brannigan says, his voice tight. “Old. Older than the Colonel, older than the war,” he adds.',
+  '“Then we go down and end it,” Ironside says. Quill eases the <em>Wrenhawk</em> over the open chasm. “Say the word, Captain,” she says.'],
+  choices:[
+   {text:'Rappel down the open chasm',check:{stat:'resolve',dc:11},win:{msg:'You drop through the dark and land steady.',goto:'ch3_den',fx:{flag:'chasm'}},lose:{msg:'The line jerks and you hit the deck hard.',goto:'ch3_den',fx:{hp:-4,flag:'chasm'}}},
+   {text:'Force the sealed airlock nearby',check:{stat:'might',dc:14},win:{msg:'The old seal groans and gives way.',goto:'ch3_den',fx:{flag:'airlock'}},lose:{msg:'The airlock holds, and the recoil nearly breaks your wrist.',goto:'ch3_den',fx:{hp:-5,flag:'airlock'}}}]},
+ ch3_den:{title:'The Writhing Dark',bg:'c1',text:[
+  'Something ancient breathes beneath the dark. The walls themselves seem to shift, and a shape detaches from the rock, too many limbs, moving wrong. “Contact!” Ironside roars. “I have no reading on that thing, Captain,” Brannigan says. “None at all,” he adds.',
+  'The Hive Stalker shrieks, a sound like metal tearing. “It is not alone,” Quill warns.'],
+  fight:{name:'Hive Stalker',ref:'the Hive Stalker',pr:'it',pos:'its',hp:17,dc:12,def:0,acc:8,dmg:6,drop:'small',say:['The Hive Stalker lunges from the dark, too fast to track.','A sound like tearing metal rips from the Hive Stalker.','The Hive Stalker claws at you from every angle at once.']},then:'ch3_relay'},
+ ch3_relay:{title:'The Humming Walls',bg:'relay',text:[
+  'The passage splits three ways, each wall pulsing faintly, almost like a heartbeat. “Captain, this place is alive,” Brannigan says, disbelief in his voice. “Pick a path and pick it fast, it is listening,” he adds.'],
+  choices:[
+   {text:'Read the pulses and follow the quiet one',check:{stat:'guile',dc:12},win:{msg:'You find the dead patch and slip through it.',goto:'ch3_warden'},lose:{msg:'The wall shudders under your hand before you find the way.',goto:'ch3_warden',fx:{hp:-4}}},
+   {text:'Push through the weakest-looking wall',check:{stat:'might',dc:14},win:{msg:'The wall caves inward in a shower of dust.',goto:'ch3_warden'},lose:{msg:'The wall holds, and something behind it hits back.',goto:'ch3_warden',fx:{hp:-6}}},
+   {text:'Hold steady while Quill gets a bearing',check:{stat:'resolve',dc:11},win:{msg:'Quill calls the path, calm and certain.',goto:'ch3_warden'},lose:{msg:'The pulse rises to a shriek before Quill can be sure.',goto:'ch3_warden',fx:{hp:-5}}}]},
+ ch3_warden:{title:'The Core Warden',bg:'brute',text:[
+  'The passage opens on a chamber built from fused rock and hull plate alike, and something rises to fill it, armored in overlapping plates grown rather than welded. “Lieutenant, tell me that is not what I think it is,” Ironside says. “It is bigger, Captain,” Quill answers. “It is always bigger,” she adds.',
+  '“Guardian of the deep!” the Hive Warden booms, a voice built from a dozen stolen ones. “None pass!” it adds.'],
+  fight:{name:'Hive Warden',ref:'the Hive Warden',pr:'it',pos:'its',hp:28,dc:12,def:3,acc:8,dmg:9,drop:'big',say:['The Hive Warden’s plated fist crashes down like a hull breach.','“None pass!” the Hive Warden booms.','The deck cracks under the Hive Warden’s weight.']},then:'ch3_respite'},
+ ch3_respite:{title:'The Dead Nest',bg:'medbay',text:[
+  'Past the Warden’s chamber lies a hollow lined with husks, old and still. “Captain, whatever lived here is long gone,” Brannigan says. “Long gone, or long since became something else,” he adds, quieter.',
+  '“We have a minute, not more,” Ironside says.'],
+  choices:[
+   {text:'Patch yourself up properly',check:{stat:'resolve',dc:9},win:{msg:'Your hands stay steady. The wounds close.',goto:'ch3_descent',fx:{hp:10}},lose:{msg:'Pain blurs your vision, but you seal the worst of it.',goto:'ch3_descent',fx:{hp:3}}},
+   {text:'Search the husks for anything useful',check:{stat:'guile',dc:12},win:{msg:'Something intact, still faintly warm.',goto:'ch3_descent',fx:{give:'small'}},lose:{msg:'One of the husks is not as dead as it looked.',goto:'ch3_descent',fx:{hp:-3}}},
+   {text:'Press on, no time to waste',goto:'ch3_descent'}]},
+ ch3_descent:{title:'The Last Descent',text:[
+  'Below the nest, a shaft drops straight down toward a light that should not exist this deep. “That is the core, Captain,” Brannigan says. “Whatever is down there, it is close now,” he adds.',
+  '“Then let’s finish it,” Ironside says, checking his blade one last time.'],
+  choices:[
+   {text:'Take the narrow service shaft',check:{stat:'resolve',dc:12},win:{msg:'You keep your footing on the long drop down.',goto:'ch3_relic'},lose:{msg:'You slip and ride the last ten meters on your back.',goto:'ch3_relic',fx:{hp:-5}}},
+   {text:'Blast through the sealed floor',check:{stat:'might',dc:15},win:{msg:'The floor gives way clean, and you drop through.',goto:'ch3_relic'},lose:{msg:'The charge goes wrong and the blast catches you too.',goto:'ch3_relic',fx:{hp:-7}}}]},
+ ch3_relic:{title:'The Relic Chamber',bg:'armory',text:[
+  'A chamber of grown bone-white pillars holds two things that do not belong to the hive at all: a gauntlet fused from something that still twitches, and a vial of light sealed in old human glass. “Captain, those were not made down here,” Brannigan says. “Salvage, maybe. Or bait,” he adds.',
+  'Ironside can only carry one. “Choose fast,” Quill says. “It knows we are here now,” she adds.'],
+  choices:[{text:'Take the Hivebreaker Gauntlet',goto:'ch3_threshold',fx:{give:'hiveblade'}},{text:'Take the Sovereign’s Elixir',goto:'ch3_threshold',fx:{give:'elixir'}}]},
+ ch3_threshold:{title:'The Sovereign’s Threshold',bg:'gate',text:[
+  'The last passage opens on a vast dark chamber, and something vast stirs within it, half-seen. “It knows your name, Captain,” Brannigan says, and for the first time he sounds afraid. “It has known it since Kraag,” he adds.',
+  '“Then it has had long enough to get used to it,” Ironside says.'],
+  choices:[
+   {text:'Slip along the chamber wall unseen',check:{stat:'guile',dc:14},win:{msg:'You reach the center before it turns.  Your instincts sharpen.',goto:'ch3_boss',fx:{stat:{guile:1},flag:'stealth3'}},lose:{msg:'Something vast shifts toward the sound of your boots. Your confidence slips.',goto:'ch3_boss',fx:{stat:{guile:-1},flag:'stealth3'}}},
+   {text:'Walk straight into the dark and call it out',check:{stat:'resolve',dc:11},win:{msg:'Your voice does not waver, and the dark answers. Your resolve hardens.',goto:'ch3_boss',fx:{stat:{resolve:1},flag:'bold3'}},lose:{msg:'Your voice cracks on the last word. Your nerve wavers.',goto:'ch3_boss',fx:{stat:{resolve:-1},flag:'bold3'}}}]},
+ ch3_boss:{title:'The Hive Sovereign',bg:'boss',text:s=>[
+  s.flags.stealth3
+   ?'The Hive Sovereign fills the chamber, a fused and ancient shape built from a thousand stolen soldiers, and it is still turning to find you when you are already close. “Quiet,” it says, in every voice it has ever worn at once. “Kraag said you were not. He was wrong about many things,” it adds.'
+   :s.flags.bold3
+   ?'The Hive Sovereign fills the chamber, a fused and ancient shape built from a thousand stolen soldiers, unhurried as your voice still echoes off its walls. “Loud,” it says, in every voice it has ever worn at once. “Kraag was loud too, at the end,” it adds.'
+   :'The Hive Sovereign fills the chamber, a fused and ancient shape built from a thousand stolen soldiers. “Captain Ironside,” it says, in every voice it has ever worn at once. “I built the war that built you,” it adds.',
+  '“Then I will finish what you started,” Ironside says. Quill’s voice is barely a whisper. “Captain, whatever happens — it ends here,” she says.'],
+  fight:{name:'The Hive Sovereign',ref:'the Sovereign',pr:'it',pos:'its',hp:42,dc:15,def:4,acc:14,dmg:11,drop:null,say:['“Die as they all did,” the Sovereign says, in a hundred overlapping voices.','The Sovereign’s many limbs carve the dark around you.','“I remember every one of them,” the Sovereign whispers. “I will remember you.”']},then:'ch3_victory'},
+ ch3_victory:{title:'Victory',bg:'victory',end:1,text:s=>[
+  'The Hive Sovereign falls, and the ancient dark finally goes still. Ironside climbs back toward the light as the fracture seals itself behind him. “Captain!” Quill shouts, and Brannigan adds, “It is over. It is actually over.”',
+  'Ironside reaches the <em>Wrenhawk</em>, scarred and alive, the war finally behind him. “We won it, comrades,” Ironside says. Quill laughs through tears. “We did, Captain. Every battle of it,” she says.'+
+   (s.flags.stealth3?' “Three for three, Captain,” Brannigan says. “It never once saw you coming.”'
+    :s.flags.bold3?' “You walked up to the biggest thing in this saga and introduced yourself,” Quill says. “Worked every time,” Ironside says.'
+    :'')+
+   (s.flags.chasm?' “Still cannot believe you jumped first and asked questions never,” Brannigan mutters.'
+    :s.flags.airlock?' “That airlock never stood a chance against you, Captain,” Quill says, smiling.'
+    :''),
+  'Chapter 3 of the Gravefall Saga ends here, and with it, the war. Brannigan plots a long course home, to a world none of them have seen in years — and Quill says what none of them want to: “Something is wrong down there too, Captain. I can feel it.”']}
+});
+
 /* ===== COMBAT TEXT: pools of results so fights never repeat. Placeholders: {foe} {Foe} = enemy, {pos} = its/his, {pr} = it/he, {w} = your weapon. Add lines freely. ===== */
 const TEXT={
  hit:{melee:[
@@ -502,6 +571,9 @@ const SPF={
  'Major Kraag':{rows:['..o.......','..oo......','...okkkkkk','....kddddd','....kdoddd','....kddddd','..kkkkddss','.kssdddddd',...KG_T,...KG_T,'..kdddsddd','..kddddddd','..kddsdddd','..kddd....',...KG_L,...KG_L,'..kddd....','..kkkk....'],o:{mirror:1,scale:1.5}}
 };
 SPF['Colonel Vex']={rows:SPF['Major Kraag'].rows,o:{...SPF['Major Kraag'].o,pal:{o:'#7d9a5a',s:'#2f4a2a'}}};
+SPF['Hive Stalker']={rows:SPF['Skitterling'].rows,o:{...SPF['Skitterling'].o,pal:{g:'#7a4fa0'}}};
+SPF['Hive Warden']={rows:SPF['Hullcrusher'].rows,o:{...SPF['Hullcrusher'].o,pal:{o:'#9b6fb0',s:'#342440'}}};
+SPF['The Hive Sovereign']={rows:SPF['Major Kraag'].rows,o:{...SPF['Major Kraag'].o,pal:{o:'#c08fe0',s:'#241a30'}}};
 function sprite(id,rows,o){o=o||{};const R=o.mirror?rows.map(r=>r+[...r].reverse().join('')):rows,w=Math.max(...R.map(r=>r.length)),c=$(id),P={...PAL,...(o.pal||{})};
  c.width=w;c.height=R.length;const x=c.getContext('2d');
  R.forEach((r,y)=>[...r].forEach((ch,i)=>{if(ch!=='.'&&P[ch]){x.fillStyle=P[ch];x.fillRect(o.flip?w-1-i:i,y,1,1);}}));c.style.width=(w/160*100*(o.scale||1))+'%';}
@@ -528,7 +600,7 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 const mod=c=>CONFIG.stats[c.stat]+MODIFIERS.reduce((n,f)=>n+f(state,c),0)+(c.bonus||0);
 let state,busy=false;
 
-const SAVES={},START={1:'intro',2:'ch2_start'};  /* SAVES: each chapter keeps its own progress; SAVES.carry = gear carried into the next chapter */
+const SAVES={},START={1:'intro',2:'ch2_start',3:'ch3_start'};  /* SAVES: each chapter keeps its own progress; SAVES.carry = gear carried into the next chapter */
 function freshState(n){const c=n>1?SAVES.carry:null,needsAlloc=n===1&&!SAVES.build,needsLoadout=n===1&&!needsAlloc&&!SAVES.loadout,
   baseBoost=c?{...c.boost}:(SAVES.build?{...SAVES.build}:{}),
   startInv=c?c.inv.slice():(SAVES.loadout?SAVES.loadout.inv.slice():['chainblade','carapace','stim']),

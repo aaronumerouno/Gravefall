@@ -9,7 +9,7 @@ Gravefall is a single-page browser RPG where you play Captain Dax Ironside, figh
 - **Genre:** text-driven tactical RPG with pixel art, sound effects and optional narration.
 - **Tone:** grim military sci-fi with ranks, comrades and hard fighting. The setting is original and does not use Warhammer 40k names.
 - **Platform:** any modern browser on a phone or a monitor, delivered as one HTML file at a published link.
-- **Content today:** two chapters, Chapter 1 (Iron in the Dark) and Chapter 2 (The Hollow Moon), out of a planned ten-chapter saga (see **Saga arc**, below).
+- **Content today:** three chapters — Chapter 1 (Iron in the Dark), Chapter 2 (The Hollow Moon) and Chapter 3 (The Hive's End), which closes Act I — out of a planned ten-chapter saga (see **Saga arc**, below).
 - **Outcome:** the hero can win a chapter or die. Every action rests on a d20 roll.
 
 ## Story and setting
@@ -23,14 +23,15 @@ Ironwolf Company's Third Platoon died on the approach to the carrier *Gravefall*
 | Corporal Brannigan | Tech and hacker, on the comm | Dry, gravel-voiced, reports enemy counts |
 | Major Kraag | Chapter 1 boss | Three meters of scarred iron and borrowed flesh |
 | Colonel Vex | Chapter 2 boss, commands Kraag's fleet | Green-lit and soft-spoken |
+| The Hive Sovereign | Chapter 3 boss, Act I finale | An ancient, fused intelligence built from a thousand stolen soldiers; commanded Vex, and Kraag before him |
 
-**Places and machines:** the carrier *Gravefall*, the gunship *Wrenhawk*, the gutted siege tank *Old Bessie*, the dead moon, and Hollow Station.
+**Places and machines:** the carrier *Gravefall*, the gunship *Wrenhawk*, the gutted siege tank *Old Bessie*, the dead moon, Hollow Station, and the hive beneath it.
 
 ## Saga arc (planned)
 
-The full saga is shaped like the *Odyssey*: a war fought and won far from home, then a long, harder road back, where each stop is a trial rather than a battle of conquest. Ten chapters total, in two acts. Only Chapters 1–2 are built; 3–10 are a planned outline, not yet written into scenes, fights or items, and nothing below is final until it goes through the same loop as everything else (`scripts/balance-sim.js`, a security pass, and the roadmap's phases).
+The full saga is shaped like the *Odyssey*: a war fought and won far from home, then a long, harder road back, where each stop is a trial rather than a battle of conquest. Ten chapters total, in two acts. Chapters 1–3 (all of Act I) are built; 4–10 are a planned outline, not yet written into scenes, fights or items, and nothing in that part of the table below is final until it goes through the same loop as everything else (`scripts/balance-sim.js`, a security pass, and the roadmap's phases).
 
-**Act I: The War (Chapters 1–3).** Ironwolf Company fights and wins a war against an alien hive intelligence — Major Kraag and Colonel Vex are its field commanders, not the true enemy. Chapter 3 ends the war by reaching the hive's command core (the "something far older beneath the moon" Colonel Vex's last signal points to) and kills what is behind it. Having won, the survivors turn the *Wrenhawk* toward home.
+**Act I: The War (Chapters 1–3, built).** Ironwolf Company fights and wins a war against an alien hive intelligence — Major Kraag and Colonel Vex are its field commanders, not the true enemy. Chapter 3 ends the war by descending beneath Hollow Station (the "something far older beneath the moon" Colonel Vex's last signal points to) to reach the hive's ancient command core, the Hive Sovereign, and kill what has been directing the war all along. Having won, the survivors turn the *Wrenhawk* toward home — and Quill's last line of the chapter ("Something is wrong down there too, Captain") is the hook into Act II.
 
 **Act II: The Return (Chapters 4–10).** Home is an Earth-like world, but the voyage back is not a victory lap — seven stops, each ruled by a demon lord embodying one of the seven deadly sins, each standing between Ironwolf Company and the ground. Tone shifts here: Act I's enemies are alien and mechanical (hives, gunners, iron); Act II's are infernal and personal (temptation, hunger, rage), and every chapter's setting, dialogue and (eventually) mechanics should say which sin it is about before the boss ever appears. The order below climbs in severity, ending on Pride as the final boss of the saga — fitting, since pride is traditionally the root sin, and the chapter's twist is that the Fallen Sovereign orchestrated the alien war in Act I as well.
 
@@ -38,7 +39,7 @@ The full saga is shaped like the *Odyssey*: a war fought and won far from home, 
 | --- | --- | --- | --- | --- | --- |
 | 1 | Iron in the Dark | I: The War | Alien hive, shipboard | Major Kraag | Built |
 | 2 | The Hollow Moon | I: The War | Alien hive, mining colony | Colonel Vex | Built |
-| 3 | *(working title)* The Hive's End | I: The War | Alien hive command core | *(working title)* The Hive Sovereign | Planned |
+| 3 | The Hive's End | I: The War | Alien hive command core, beneath Hollow Station | The Hive Sovereign | Built |
 | 4 | *(working title)* The Drowning Fields | II: The Return | Sloth — a bog world where nothing moves fast enough to matter | The Slack Lord | Planned |
 | 5 | *(working title)* The Feeding Grounds | II: The Return | Gluttony — a ruined farmland consumed by endless hunger | The Maw | Planned |
 | 6 | *(working title)* The Siren Reaches | II: The Return | Lust — beautiful ruins that lure and lie | The Temptress | Planned |
@@ -50,7 +51,7 @@ The full saga is shaped like the *Odyssey*: a war fought and won far from home, 
 **Design notes for Act II, once it's built:**
 - Each boss's *mechanics*, not just its name, should carry the sin: a rough starting idea for each is in the table above's "enemy / theme" column, e.g. Wrath growing stronger as it loses Health, Envy mirroring the player's own stats, Greed stealing or hoarding loot mid-fight. These are concepts to prototype and balance-test, not committed numbers.
 - Quill and Brannigan stay with the Captain for the whole saga — the *Wrenhawk* is the throughline between chapters, same as today.
-- Chapter 3 needs its own enemy stat block (an alien, not a demon) and should close out Act I's visual palette (see **Planned changes**: unique Chapter 2 art is still owed before Act I is visually finished). Chapters 4–10 need a new palette and sprite set per chapter, since Act II is a tonal break from Act I by design.
+- Chapter 3 is built: three new alien enemies (Hive Stalker, Hive Warden, the Hive Sovereign) reusing the Skitterling/Hullcrusher/Kraag sprite rows with a new violet palette, per the sprite-reuse approach the game already uses for Chapter 2 — unique art per chapter is still owed (see **Planned changes**). Chapters 4–10 need a new palette and sprite set per chapter, since Act II is a tonal break from Act I by design.
 - This outline does not yet set per-chapter XP, enemy stats or item tiers; those get designed (and simulated) chapter by chapter as each one is actually built, the same way Chapters 1–2 were.
 
 ## Features
@@ -114,8 +115,11 @@ Stats below are the first-pass values in the game. They have not been balanced b
 | Skitterling brood | 2 | 13 | 11 | 0 | 5 | 7 | Weak |
 | Ironback Hullcrusher | 2 | 22 | 12 | 2 | 8 | 8 | Strong |
 | Colonel Vex (boss) | 2 | 34 | 14 | 4 | 10 | 14 | None |
+| Hive Stalker | 3 | 17 | 12 | 0 | 6 | 8 | Weak |
+| Hive Warden | 3 | 28 | 12 | 3 | 9 | 8 | Strong |
+| The Hive Sovereign (boss) | 3 | 42 | 15 | 4 | 11 | 14 | None |
 
-Kraag and Vex were bumped up from their first-pass numbers (Defense 2/Accuracy 9–11) once equipment, the stat-allocation build and Aimed shot were added — those systems meaningfully raise what a well-equipped player can do before ever reaching the boss, so the bosses needed to raise with them. See `scripts/balance-sim.js`.
+Kraag and Vex were bumped up from their first-pass numbers (Defense 2/Accuracy 9–11) once equipment, the stat-allocation build and Aimed shot were added — those systems meaningfully raise what a well-equipped player can do before ever reaching the boss, so the bosses needed to raise with them. Chapter 3's numbers continue that same curve (small/big enemies step up roughly the same amount Chapter 1 to 2 did; the Sovereign lands at a similar win rate to Kraag and Vex for a balanced build with gear carried from both earlier chapters). See `scripts/balance-sim.js`.
 
 | Item | Category | Stats | Tier |
 | --- | --- | --- | --- |
@@ -151,8 +155,10 @@ Kraag and Vex were bumped up from their first-pass numbers (Defense 2/Accuracy 9
 | Field Bandage | Consumable | Heals 4 | Weak |
 | Lazarus Trauma Kit | Consumable | Heals 12 | Strong |
 | Nanite Canister | Consumable | Heals 9 | Strong |
+| Hivebreaker Gauntlet | Melee weapon | Damage 11, accuracy +1 | Strong |
+| Sovereign's Elixir | Consumable | Heals 15 | Strong |
 
-Small monsters drop from the weak pool (one melee weapon, one gun, four body-armor variants, four leg-armor variants, two consumables). Big monsters drop from the matching strong pool. Duplicates are never offered, and a full pack only swaps in a drop that beats what it would replace. Scenes can also give loot directly, such as the armory choice between the Lancer and the Trauma Kit.
+Small monsters drop from the weak pool (one melee weapon, one gun, four body-armor variants, four leg-armor variants, two consumables). Big monsters drop from the matching strong pool, which now also includes the Hivebreaker Gauntlet and Sovereign's Elixir from Chapter 3's relic chamber — items are shared across the whole saga's loot pools, not locked to the chapter that introduces them. Duplicates are never offered, and a full pack only swaps in a drop that beats what it would replace. Scenes can also give loot directly, such as the armory choice between the Lancer and the Trauma Kit, or Chapter 3's relic-chamber choice between the Hivebreaker Gauntlet and the Elixir.
 
 ## Chapter flow
 
@@ -188,11 +194,27 @@ Each chapter is a straight run of scenes where story choices alternate with figh
 | 7 | Victory | Ending | Hollow Station is destroyed; Chapter 2 complete | Hint at a deeper threat for Chapter 3 |
 | 8 | Fallen | Ending | Vitality reached 0 | Restart the chapter |
 
+**Chapter 3: The Hive's End** (9 scenes, sharing the Fallen ending with the other chapters)
+
+| # | Scene | Type | What the player does | Consequence |
+| --- | --- | --- | --- | --- |
+| 1 | Into the Dark Below | Choice | Rappel down the chasm (Resolve 11) or force the sealed airlock (Might 14) | Failure costs 4 to 5 Vitality |
+| 2 | The Writhing Dark | Fight | Hive Stalker | Weak loot |
+| 3 | The Humming Walls | Choice | Read the pulses (Guile 12), push through (Might 14) or hold steady (Resolve 11) | Failure costs 4 to 6 Vitality |
+| 4 | The Core Warden | Fight | Hive Warden | Strong loot |
+| 5 | The Dead Nest | Choice | Patch up (Resolve 9), search the husks (Guile 12) or press on with no roll | Patch-up heals 10 or 3; a failed search costs 3 |
+| 6 | The Last Descent | Choice | Take the narrow shaft (Resolve 12) or blast through the floor (Might 15) | Failure costs 5 to 7 Vitality |
+| 7 | The Relic Chamber | Choice | Take the Hivebreaker Gauntlet or the Sovereign's Elixir (no roll) | Choose one item |
+| 8 | The Sovereign's Threshold | Choice | Slip along the wall (Guile 14) or walk in and call it out (Resolve 11) | Stat +1 on success, -1 on failure; no Vitality change |
+| 9 | The Hive Sovereign | Boss fight | The Hive Sovereign | No loot |
+
+Victory ends Act I: Ironside and crew set course for home, and Quill's closing line ("Something is wrong down there too, Captain") is the hook into Act II.
+
 **Between chapters.** Finishing a chapter saves your pack, equipped gear and stat boosts. Opening the next chapter starts it at full Vitality with that gear. If you open it without finishing the previous chapter, you start with the standard kit (this will change; see Planned changes).
 
 ## Technical specs
 
-The game is one self-contained HTML file of about 61 KB (roughly 489 lines and 51 KB of JavaScript), with 19 scenes and 7 fights. It loads no images or audio files; only two Google Fonts (Teko and Crimson Pro) come from outside, with system fallbacks.
+The game is one self-contained HTML file of about 90 KB (roughly 930 lines and 80 KB of JavaScript), with 31 scenes (including character creation) and 10 fights. It loads no images or audio files; only two Google Fonts (Teko and Crimson Pro) come from outside, with system fallbacks.
 
 **Code layout.** The script is split into labelled sections so features can be added without rewrites:
 
@@ -246,7 +268,7 @@ The game's code will live in a private Git repository on GitHub, which is the ma
 - **Releases:** tagged `MAJOR.MINOR.PATCH`, starting at `v0.1.0`. A new chapter or a save format that breaks old saves bumps MAJOR; features and content bump MINOR; fixes and balance tweaks bump PATCH. The game stays on 0.x until Chapters 1 to 3, saving and levels exist.
 - **In the game:** the version is shown in the page and in saved data, with a separate save-format number so old saves can be upgraded.
 - **Changes:** every release gets a `CHANGELOG.md` entry, and `main` always stays playable.
-- **File structure:** one HTML file now; once it passes about 100 KB or Chapter 3 starts, the source is split into modules and a build script produces the single published file.
+- **File structure:** still one HTML file. Chapter 3 has now started (its own stated trigger for this), and the file is about 90 KB, approaching the other stated trigger (~100 KB) — the module split and build script are not done yet and should be picked up as their own piece of work before Chapter 4 adds more weight.
 
 ## Planned changes
 

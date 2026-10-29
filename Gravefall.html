@@ -787,6 +787,10 @@ function loadSave(){
    const s=sanitizeState(data.saves[k],n);if(s){SAVES[n]=s;found=true;}
   }
   if(!found)return false;
+  // Migration: a save from before chapter locking existed has no 'unlocked' key, but reaching a
+  // chapter's state at all already meant the player had gotten there under the old (unlocked) rules
+  // — treat that as already-unlocked rather than silently re-locking chapters they could already play.
+  if(!('unlocked' in data.saves)){SAVES.unlocked={1:1};for(const k in SAVES){const n=+k;if(Number.isInteger(n))SAVES.unlocked[n]=1;}}
   const want=+data.chapter,startChapter=SAVES[want]?want:Object.keys(SAVES).map(Number).find(x=>!isNaN(x)&&CHAPTERS[x]&&SAVES[x]);
   if(!SAVES[startChapter])return false;
   state=SAVES[startChapter];return true;

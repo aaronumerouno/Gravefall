@@ -11,11 +11,17 @@
  * player chooses that build once per save and it should not make the game trivial or
  * impossible regardless of how the points are spent.
  *
- * Usage: node scripts/balance-sim.js [runsPerBuild]
+ * --level previews the proposed leveling system from the Project Plan's Progression design
+ * (recommendation #4 — NOT YET BUILT into Gravefall.html). It runs the same engine, same loot,
+ * same everything, with XP/level-ups layered on top, purely to validate the design on paper
+ * before it's implemented; it changes no committed behavior when omitted.
+ *
+ * Usage: node scripts/balance-sim.js [runsPerBuild] [--level]
  */
 'use strict';
 
 const RUNS = parseInt(process.argv[2], 10) || 10000;
+const LEVELING = process.argv.includes('--level');
 
 /* ===== Rules, copied from Gravefall.html ===== */
 const CONFIG = { die: 20, maxHp: 28, critHeal: 3, fumbleDmg: 2, bag: 10, allocPoints: 3, stats: { might: 1, guile: 1, resolve: 1 } };
@@ -67,13 +73,13 @@ const CH1 = [
       { check: { stat: 'might', dc: 14 }, lose: { hp: -4 } },
       { check: { stat: 'resolve', dc: 11 }, lose: { hp: -3 } }
   ] },
-  { id: 'c1', kind: 'fight', fight: { name: 'Skitterling', hp: 9, dc: 10, def: 0, acc: 6, dmg: 4, drop: 'small' } },
+  { id: 'c1', kind: 'fight', fight: { name: 'Skitterling', hp: 9, dc: 10, def: 0, acc: 6, dmg: 4, drop: 'small', xp: 10 } },
   { id: 'relay', kind: 'choice', options: [
       { check: { stat: 'resolve', dc: 11 }, lose: { hp: -4 } },
       { check: { stat: 'guile', dc: 12 }, lose: { hp: -5 } },
       { check: { stat: 'might', dc: 14 }, lose: { hp: -6 } }
   ] },
-  { id: 'brute', kind: 'fight', fight: { name: 'Hullcrusher', hp: 16, dc: 12, def: 1, acc: 8, dmg: 7, drop: 'big' } },
+  { id: 'brute', kind: 'fight', fight: { name: 'Hullcrusher', hp: 16, dc: 12, def: 1, acc: 8, dmg: 7, drop: 'big', xp: 25 } },
   { id: 'medbay', kind: 'choice', options: [
       { check: { stat: 'resolve', dc: 9 }, win: { hp: 10 }, lose: { hp: 3 } },
       { check: { stat: 'guile', dc: 12 }, win: { give: 'small' }, lose: { hp: -3 } },
@@ -83,7 +89,7 @@ const CH1 = [
       { check: { stat: 'resolve', dc: 11 }, lose: { hp: -5 } },
       { check: { stat: 'might', dc: 14 }, lose: { hp: -7 } }
   ] },
-  { id: 'gunner', kind: 'fight', fight: { name: 'Rustjack gunner', hp: 11, dc: 11, def: 1, acc: 7, dmg: 5, drop: 'small' } },
+  { id: 'gunner', kind: 'fight', fight: { name: 'Rustjack gunner', hp: 11, dc: 11, def: 1, acc: 7, dmg: 5, drop: 'small', xp: 10 } },
   { id: 'armory', kind: 'choice', options: [
       { noCheck: true, win: { give: 'plasma' } },
       { noCheck: true, win: { give: 'medikit' } }
@@ -92,7 +98,7 @@ const CH1 = [
       { check: { stat: 'guile', dc: 13 }, win: { stat: { guile: 1 } }, lose: { stat: { guile: -1 } } },
       { check: { stat: 'resolve', dc: 10 }, win: { stat: { resolve: 1 } }, lose: { stat: { resolve: -1 } } }
   ] },
-  { id: 'boss', kind: 'fight', fight: { name: 'Major Kraag', hp: 26, dc: 13, def: 5, acc: 13, dmg: 11, drop: null } }
+  { id: 'boss', kind: 'fight', fight: { name: 'Major Kraag', hp: 26, dc: 13, def: 5, acc: 13, dmg: 11, drop: null, xp: 50 } }
 ];
 
 const CH2 = [
@@ -100,18 +106,18 @@ const CH2 = [
       { check: { stat: 'resolve', dc: 11 }, lose: { hp: -4 } },
       { check: { stat: 'might', dc: 13 }, lose: { hp: -5 } }
   ] },
-  { id: 'ch2_tunnel', kind: 'fight', fight: { name: 'Skitterling brood', hp: 13, dc: 11, def: 0, acc: 7, dmg: 5, drop: 'small' } },
+  { id: 'ch2_tunnel', kind: 'fight', fight: { name: 'Skitterling brood', hp: 13, dc: 11, def: 0, acc: 7, dmg: 5, drop: 'small', xp: 10 } },
   { id: 'ch2_lift', kind: 'choice', options: [
       { check: { stat: 'guile', dc: 12 }, win: { stat: { guile: 1 } }, lose: { stat: { guile: -1 } } },
       { check: { stat: 'might', dc: 13 }, win: { stat: { might: 1 } }, lose: { stat: { might: -1 } } },
       { check: { stat: 'resolve', dc: 10 }, win: { stat: { resolve: 1 } }, lose: { stat: { resolve: -1 } } }
   ] },
-  { id: 'ch2_pit', kind: 'fight', fight: { name: 'Ironback Hullcrusher', hp: 22, dc: 12, def: 2, acc: 8, dmg: 8, drop: 'big' } },
+  { id: 'ch2_pit', kind: 'fight', fight: { name: 'Ironback Hullcrusher', hp: 22, dc: 12, def: 2, acc: 8, dmg: 8, drop: 'big', xp: 25 } },
   { id: 'ch2_gate', kind: 'choice', options: [
       { check: { stat: 'guile', dc: 13 }, win: { stat: { guile: 1 } }, lose: { stat: { guile: -1 } } },
       { check: { stat: 'might', dc: 12 }, win: { stat: { might: 1 } }, lose: { stat: { might: -1 } } }
   ] },
-  { id: 'ch2_boss', kind: 'fight', fight: { name: 'Colonel Vex', hp: 34, dc: 14, def: 4, acc: 14, dmg: 10, drop: null } }
+  { id: 'ch2_boss', kind: 'fight', fight: { name: 'Colonel Vex', hp: 34, dc: 14, def: 4, acc: 14, dmg: 10, drop: null, xp: 50 } }
 ];
 
 const CH3 = [
@@ -119,13 +125,13 @@ const CH3 = [
       { check: { stat: 'resolve', dc: 11 }, lose: { hp: -4 } },
       { check: { stat: 'might', dc: 14 }, lose: { hp: -5 } }
   ] },
-  { id: 'ch3_den', kind: 'fight', fight: { name: 'Hive Stalker', hp: 17, dc: 12, def: 0, acc: 8, dmg: 6, drop: 'small' } },
+  { id: 'ch3_den', kind: 'fight', fight: { name: 'Hive Stalker', hp: 17, dc: 12, def: 0, acc: 8, dmg: 6, drop: 'small', xp: 10 } },
   { id: 'ch3_relay', kind: 'choice', options: [
       { check: { stat: 'guile', dc: 12 }, lose: { hp: -4 } },
       { check: { stat: 'might', dc: 14 }, lose: { hp: -6 } },
       { check: { stat: 'resolve', dc: 11 }, lose: { hp: -5 } }
   ] },
-  { id: 'ch3_warden', kind: 'fight', fight: { name: 'Hive Warden', hp: 28, dc: 12, def: 3, acc: 8, dmg: 9, drop: 'big' } },
+  { id: 'ch3_warden', kind: 'fight', fight: { name: 'Hive Warden', hp: 28, dc: 12, def: 3, acc: 8, dmg: 9, drop: 'big', xp: 25 } },
   { id: 'ch3_respite', kind: 'choice', options: [
       { check: { stat: 'resolve', dc: 9 }, win: { hp: 10 }, lose: { hp: 3 } },
       { check: { stat: 'guile', dc: 12 }, win: { give: 'small' }, lose: { hp: -3 } },
@@ -143,7 +149,7 @@ const CH3 = [
       { check: { stat: 'guile', dc: 14 }, win: { stat: { guile: 1 } }, lose: { stat: { guile: -1 } } },
       { check: { stat: 'resolve', dc: 11 }, win: { stat: { resolve: 1 } }, lose: { stat: { resolve: -1 } } }
   ] },
-  { id: 'ch3_boss', kind: 'fight', fight: { name: 'The Hive Sovereign', hp: 42, dc: 15, def: 4, acc: 14, dmg: 11, drop: null } }
+  { id: 'ch3_boss', kind: 'fight', fight: { name: 'The Hive Sovereign', hp: 42, dc: 15, def: 4, acc: 14, dmg: 11, drop: null, xp: 50 } }
 ];
 
 /* ===== Engine, copied from Gravefall.html's gear()/mod()/act()/rollCheck()/foeHit()/hurt() ===== */
@@ -182,7 +188,7 @@ function hurt(p, n) {
   return d;
 }
 function foeHit(p, f, add) { return hurt(p, f.dmg + add); }
-function heal(p, n) { p.hp = Math.min(CONFIG.maxHp, p.hp + n); }
+function heal(p, n) { p.hp = Math.min(p.maxHp || CONFIG.maxHp, p.hp + n); }
 
 /* Loot: take if room, else swap out the worst item of the same slot if the new one is better (by raw dr/atk/heal). */
 function slotValue(id) {
@@ -240,12 +246,35 @@ const LOADOUTS = {
   gunGuile: { weapon: 'gun', armor: 'guile' },
   gunResolve: { weapon: 'gun', armor: 'resolve' }
 };
+function dominantStat(build) {
+  const entries = Object.entries(build || {});
+  if (!entries.length) return 'might';
+  return entries.sort((a, b) => b[1] - a[1])[0][0];
+}
 function freshPlayer(build, loadout) {
-  if (!loadout) return { hp: CONFIG.maxHp, boost: { ...build }, inv: ['chainblade', 'carapace', 'stim'], eq: { melee: 'chainblade', gun: null, body: 'carapace', legs: null } };
+  const statFocus = dominantStat(build);
+  if (!loadout) return { hp: CONFIG.maxHp, maxHp: CONFIG.maxHp, xp: 0, level: 1, statFocus, boost: { ...build }, inv: ['chainblade', 'carapace', 'stim'], eq: { melee: 'chainblade', gun: null, body: 'carapace', legs: null } };
   const armorId = LOADOUT_ARMORS[loadout.armor];
   const inv = loadout.weapon === 'gun' ? ['pistol', armorId, 'stim'] : ['chainblade', armorId, 'stim'];
   const eq = loadout.weapon === 'gun' ? { melee: null, gun: 'pistol', body: armorId, legs: null } : { melee: 'chainblade', gun: null, body: armorId, legs: null };
-  return { hp: CONFIG.maxHp, boost: { ...build }, inv, eq };
+  return { hp: CONFIG.maxHp, maxHp: CONFIG.maxHp, xp: 0, level: 1, statFocus, boost: { ...build }, inv, eq };
+}
+/* Proposed leveling (Project Plan recommendation #4, not yet built): XP per fight tier, and the
+   total-XP thresholds at which a level grants +1 free stat point and +3 max Vitality. Levels do
+   not heal, matching the Project Plan's stated rule; Vitality still resets full at chapter start. */
+const XP_REWARD = { small: 10, big: 25, boss: 50 };
+const LEVEL_XP = [0, 0, 30, 70, 120, 180, 250];
+const STAT_CAP = parseInt((process.argv.find(a => a.startsWith('--cap=')) || '').slice(6), 10) || Infinity;
+function maybeLevelUp(p, statFocus) {
+  while (p.level < LEVEL_XP.length - 1 && p.xp >= LEVEL_XP[p.level + 1]) {
+    p.level++;
+    const stats = ['might', 'guile', 'resolve'];
+    const total = s => CONFIG.stats[s] + (p.boost[s] || 0);
+    // put the point in statFocus unless that stat is already at the cap; then the lowest stat instead
+    const target = total(statFocus) < STAT_CAP ? statFocus : stats.slice().sort((a, b) => total(a) - total(b))[0];
+    if (total(target) < STAT_CAP) p.boost[target] = (p.boost[target] || 0) + 1;
+    p.maxHp += 3;
+  }
 }
 
 /* Player policy for story checks: pick the option with the best odds of passing (a reasonably played run). */
@@ -278,7 +307,7 @@ function runChoice(p, scene, log) {
 }
 function applyFx(p, fx) {
   if (!fx) return;
-  if (fx.hp) p.hp = Math.max(0, Math.min(CONFIG.maxHp, p.hp + fx.hp)); // matches EFFECTS.hp in Gravefall.html
+  if (fx.hp) p.hp = Math.max(0, Math.min(p.maxHp || CONFIG.maxHp, p.hp + fx.hp)); // matches EFFECTS.hp in Gravefall.html
   if (fx.stat) for (const k in fx.stat) p.boost[k] = (p.boost[k] || 0) + fx.stat[k];
   if (fx.give) giveLoot(p, fx.give);
 }
@@ -299,10 +328,10 @@ function runFight(p, fightDef, log) {
   let rounds = 0;
   while (f.hp > 0 && p.hp > 0 && rounds < 200) {
     rounds++;
-    if (p.hp / CONFIG.maxHp < 0.4 && useBestHeal(p)) continue;
+    if (p.hp / (p.maxHp || CONFIG.maxHp) < 0.4 && useBestHeal(p)) continue;
     const g = gear(p);
     let kind = 'strike';
-    if (p.hp / CONFIG.maxHp < 0.25) kind = 'guard';
+    if (p.hp / (p.maxHp || CONFIG.maxHp) < 0.25) kind = 'guard';
     else if (f.hp <= g.melee.atk * 2) kind = 'wild'; // likely lethal reckless blow
     else if (g.gun && f.def >= 2) kind = 'aim'; // worth ignoring Defense
     if (kind === 'guard') {
@@ -332,13 +361,17 @@ function runFight(p, fightDef, log) {
   const won = f.hp <= 0 && p.hp > 0;
   log.fights.push({ name: f.name, won, rounds, hpLeft: p.hp });
   if (won && fightDef.drop) giveLoot(p, fightDef.drop);
+  if (won && LEVELING && fightDef.xp) { p.xp += fightDef.xp; maybeLevelUp(p, p.statFocus || 'might'); }
   return won;
 }
 
 function runChapter(chapter, carriedPlayer, build, loadout) {
-  // Chapter start: full Vitality, but gear/boosts carry over if the previous chapter was finished
-  // (see "Between chapters" in the Game Design Document).
-  const p = carriedPlayer ? { hp: CONFIG.maxHp, boost: { ...carriedPlayer.boost }, inv: carriedPlayer.inv.slice(), eq: { ...carriedPlayer.eq } } : freshPlayer(build, loadout);
+  // Chapter start: full Vitality (to each player's own max, which leveling can raise), but
+  // gear/boosts carry over if the previous chapter was finished (see "Between chapters" in the
+  // Game Design Document); xp/level carry over the same way once leveling exists.
+  const p = carriedPlayer
+    ? { hp: carriedPlayer.maxHp || CONFIG.maxHp, maxHp: carriedPlayer.maxHp || CONFIG.maxHp, xp: carriedPlayer.xp || 0, level: carriedPlayer.level || 1, statFocus: carriedPlayer.statFocus, boost: { ...carriedPlayer.boost }, inv: carriedPlayer.inv.slice(), eq: { ...carriedPlayer.eq } }
+    : freshPlayer(build, loadout);
   const log = { checks: [], fights: [] };
   for (const scene of chapter) {
     if (p.hp <= 0) break;
@@ -377,6 +410,7 @@ function simulate(label, chapter, runs, build) {
   }
 }
 
+if (LEVELING) console.log('*** --level: previewing the proposed leveling system (recommendation #4) on top of everything else. This is NOT built into Gravefall.html yet. ***\n');
 console.log(`allocPoints=${CONFIG.allocPoints} (base 1/1/1 + these, freely spent at character creation)`);
 console.log('=== Chapter 1: Iron in the Dark (fresh kit, by build) ===');
 for (const [name, build] of Object.entries(BUILDS)) simulate(name, CH1, RUNS, build);

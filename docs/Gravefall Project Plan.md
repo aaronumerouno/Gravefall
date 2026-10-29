@@ -19,7 +19,7 @@ Start with balance, saving and meaningful choices; they decide whether the game 
 | 1 | Balance by simulation | Run thousands of automated fights and runs to catch fights that are impossible or trivial, keeping dice results random | High | Small | **Done** — `scripts/balance-sim.js`, now simulated per build archetype (all-Might/Guile/Resolve/balanced); Kraag and Vex retuned twice, most recently after the equipment and stat-allocation overhaul |
 | 2 | Save progress | A refresh currently loses everything; store progress per chapter on the player's device | High | Small | **Done** — saved to `localStorage`, validated on load |
 | 3 | Make choices matter | Choices set flags that change later scenes, ally reactions and endings, so replays differ | High | Medium | **Done** — forced-entry/picked-lock, stealth/bold, and the armory item choice now echo into the next scene, the boss introduction and the victory text, per chapter |
-| 4 | Add progression | Decided: the player has a level and spends stat points on each level-up; see the progression design below. A one-time stat allocation at character creation now exists (not this) — leveling still adds points *during* a chapter from XP | Medium | Medium | Next |
+| 4 | Add progression | Decided: the player has a level and spends stat points on each level-up; see the progression design below, now revised and simulated against the real 3-chapter game, not just estimated. A one-time stat allocation at character creation already exists (not this) — leveling still adds points *during* a chapter from XP. Not yet implemented, and the simulation found a real stat-balance issue (Guile) to fix first | Medium | Medium | Next |
 | 5 | Give allies jobs | For example Quill heals once per fight and Brannigan lowers an enemy's Defense | Medium | Medium | Next |
 | 6 | Unique Chapter 2 art | New backdrops and sprites instead of reused Chapter 1 art and recolors | Medium | Medium | Later |
 | 7 | Settings panel | Toggles for success odds, voice speed and text size | Low | Small | Next |
@@ -37,23 +37,39 @@ Four phases, in order; no dates are set yet because the pace depends on how much
 | 3. Polish | Unique Chapter 2 art | Chapter 2 no longer reuses Chapter 1 art |
 | 4. Expand | The full ten-chapter saga, built one chapter at a time from the chapter template. Chapter 3 is done and closes Act I (the alien war). Chapters 4–10 are Act II — seven chapters on an Earth-like homeworld, each themed to one of the seven deadly sins with its own demon-lord boss. See the Game Design Document's **Saga arc** section for the planned chapter list, order and status | Each new chapter opens as a dropdown and carries gear forward; each chapter's enemy stats go through `scripts/balance-sim.js` before it ships, the same as Chapters 1–3 |
 
-## Progression design (proposed)
+## Progression design (recommendation #4, revised and simulated — still not built)
 
-The player earns experience from fights and levels up, spending one stat point per level. Claude chose these numbers to give about two levels per chapter without letting one stat run away; they are untested. **Note:** this table still assumes the old starting stats (Might 3, Guile 1, Resolve 2) and the old single weapon/armor slots. Character creation now starts the player at Might 1, Guile 1, Resolve 1 plus 3 freely-spent points, and armor can itself grant stat bonuses — so the XP thresholds and "why this is balanced" math below need to be re-run against the current baseline (and through `scripts/balance-sim.js`) before this ships, not just copied as-is.
+The old version of this section assumed the pre-overhaul baseline (Might 3/Guile 1/Resolve 2, one weapon slot) and said plainly it needed to be re-run against the current game before shipping. It has now been re-run, for real, through `scripts/balance-sim.js --level` (a new flag added for exactly this: it layers the design below on top of the actual engine — same gear, same loot, same 4 build archetypes, same 3 built chapters — without changing anything when the flag is omitted). The numbers below are simulated outcomes, not estimates. **Still not implemented in Gravefall.html** — this is the validated design to build from next, including one real problem it surfaced.
+
+**The proposal.** The player earns XP from fights (not story checks) and levels up, spending one free stat point per level, the same way character-creation points are spent.
 
 | Source or level | XP | Reward |
 | --- | --- | --- |
-| Small enemy (Skitterling, Rustjack gunner, brood) | 10 | None |
-| Big enemy (Hullcrusher, Ironback) | 25 | None |
-| Boss (Kraag, Vex) | 50 | None |
+| Small enemy (Skitterling, Rustjack gunner, brood, Hive Stalker) | 10 | None |
+| Big enemy (Hullcrusher, Ironback, Hive Warden) | 25 | None |
+| Boss (Kraag, Vex, the Hive Sovereign) | 50 | None |
 | Level 2 | 30 total | +1 stat point, +3 max Vitality |
 | Level 3 | 70 total | +1 stat point, +3 max Vitality |
 | Level 4 | 120 total | +1 stat point, +3 max Vitality |
 | Level 5 | 180 total | +1 stat point, +3 max Vitality |
+| Level 6 | 250 total | +1 stat point, +3 max Vitality |
 
-**Rules.** A stat point adds +1 to Might, Guile or Resolve, and level-ups can raise any one stat by at most 3. Scene bonuses and weapon accuracy stack on top. Leveling does not heal; Vitality resets to full only when a new chapter starts. Gear, level and stat points carry into the next chapter, which unlocks when the current one is finished.
+**Rules.** Leveling does not heal (Vitality resets to full only when a new chapter starts, same as today). XP, level and stat points carry into the next chapter the same way gear already does. A full, careful run clears 95 XP in Chapter 1, 85 more in Chapter 2, 85 more in Chapter 3 — 265 total, enough to reach level 6 with 15 XP to spare, so a level cap isn't being hit mid-fight; room for Chapters 4+ to extend the table later.
 
-**Why this is balanced.** Chapter 1 gives 95 XP (level 3) and Chapter 2 gives 85 more (level 5 at 180). Each stat point is +5 percentage points of success on that stat's rolls, so a player who puts everything in one stat gains at most 15 points, while Chapter 2 enemies are already 1 to 2 Evasion higher than their Chapter 1 counterparts. By level 5 Vitality is 40 (28 plus 12). Later chapters should raise enemy numbers by 1 or 2 each to keep pace, and the balance simulation should check these figures before they ship.
+**Simulated effect (25,000 runs/build, the Hive Sovereign — the hardest fight in the game today):**
+
+| Build | Without leveling | With leveling |
+| --- | --- | --- |
+| All-Might | 49.6% (flagged impossible) | 68.5% |
+| All-Guile | 88.0% | **99.8% (flagged trivial)** |
+| All-Resolve | 48.2% (flagged impossible) | 76.8% |
+| Balanced | 63.1% | 81.3% |
+
+**The good news:** leveling does what it's supposed to. It lifts the weakest build (all-Resolve) the most — from the worst performer today to comfortably ahead of where "balanced" starts — because the flat +3 Vitality per level compounds nicely with a tanky, Guard-heavy playstyle. All-Might and balanced both land in healthy, clearly-winnable territory.
+
+**The problem it surfaced:** all-Guile, already the strongest build without any leveling at all, gets pushed into trivial by Chapter 3. Capping *where level-up points go* (tried at `--cap=6/7/8`, i.e. no single stat allowed past that total from level-ups) made no real difference (99.7–99.8% regardless) — because gear alone already pushes Guile past any level-based cap; a single strong Guile-flavored body or leg armor piece grants +2 on its own. The real cause isn't leveling, it's pre-existing: Guile is a hybrid stat (it lowers Evasion damage on *every* hit taken, in every fight, *and* unlocks Aimed shot's Defense-ignoring offense once a gun is found), so it was already the strongest single-stat investment in the game before this feature — leveling just gives more points to pour into it. **This should be fixed before or alongside implementing leveling, not worked around by the level curve.** Two candidate fixes, neither simulated yet: cap each stat's *total* bonus (base + alloc + gear + levels combined, enforced in code the way the security review already calls for), or revisit Evasion's math so it has diminishing returns instead of a flat 1-for-1 reduction per point. Either is a small, targeted change — this is a flag for the next balance pass, not a rewrite.
+
+**What's still open:** whether the player picks which stat each level-up point goes to (same agency as character creation, but doesn't stop deliberate stacking) versus the game auto-assigning it; whether level-ups should unlock anything beyond stat points and Vitality (an extra pack slot? a 5th combat action?); and the UI for it (a level-up notification + a mini version of the character-creation stat screen is the obvious fit, reusing `renderAlloc()`'s pattern).
 
 ## Open questions and risks
 

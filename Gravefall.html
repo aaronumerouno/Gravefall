@@ -524,6 +524,7 @@ function freshState(n){const c=n>1?SAVES.carry:null,needsAlloc=n===1&&!SAVES.bui
  return{scene:needsAlloc?'alloc':START[n],hp:CONFIG.maxHp,flags:{},inv:c?c.inv.slice():['chainblade','carapace','stim'],eq:c?{...c.eq}:{melee:'chainblade',gun:null,body:'carapace',legs:null},fight:null,pending:null,rolls:[],acts:[],note:'',boost:baseBoost,chapter:n,allocDraft:needsAlloc?{might:0,guile:0,resolve:0}:undefined};}
 function newGame(n){stopVoice();n=n||(state&&state.chapter)||1;state=freshState(n);enter(state.scene);}
 function buildChapters(){const box=$('chapters'),all=()=>box.querySelectorAll('details');let lock=false;
+ const layout=$('layout');if(layout&&box.contains(layout))document.body.appendChild(layout); // buildChapters() can run more than once (e.g. 'New game'); #layout may already be nested inside box from an earlier call, and box.innerHTML would destroy it if left there — move it out (still attached, so later $('layout') lookups keep finding it) before wiping box
  box.innerHTML=Object.keys(CHAPTERS).map(n=>`<details class="chapter" id="ch${n}"><summary><small>${SAGA}</small><b>Chapter ${n}: ${CHAPTERS[n]}</b></summary><div class="chapbody"></div></details>`).join('');
  all().forEach(d=>d.addEventListener('toggle',()=>{if(lock||!d.open)return;lock=true;
   all().forEach(o=>{if(o!==d)o.open=false;});d.querySelector('.chapbody').append($('layout'));

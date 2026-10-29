@@ -102,7 +102,7 @@ Every risky action is one d20 roll plus a stat against a target number. A natura
 
 **Loot.** Small monsters drop weak items and big monsters drop strong ones. You may take it, leave it, or swap it for something in a full pack. Healing items are used from the pack: Rattlesnake Stim heals 6, Lazarus Trauma Kit heals 12. If the player doesn't yet own a melee weapon or a gun, a drop has a 60% chance of being weighted toward one that fills the gap, so an opening-kit choice isn't left waiting too long for its other weapon.
 
-**Death and restart.** Vitality 0 ends the run at the Fallen scene. "Fight again" restarts the current chapter.
+**Death and restart.** Vitality 0 ends the run at the Fallen scene, opening with one of 10 varied death lines (combat or a failed story check both use the same pool, since neither needs to name an enemy). An enemy's own death also now has 11 varied lines, up from 7. Both pools follow the same no-repeat-until-exhausted rule as combat results, but track across the whole session (`SAVES.textUsed`) rather than resetting per fight, since each only fires once per fight or once per death. "Fight again" restarts the current chapter.
 
 ## Enemies and items
 

@@ -568,7 +568,22 @@ const TEXT={
   '{Foe} sways, then topples with a crash that echoes down the corridor.',
   '“Target down,” Brannigan reports over the comm as {foe} falls.',
   '{Foe} twitches once and lies still. “One less,” Ironside says.',
-  'The fight leaves {foe} all at once, and {pr} drops.']
+  'The fight leaves {foe} all at once, and {pr} drops.',
+  '{Foe} folds and does not rise again.',
+  'The light goes out of {pos} eyes as {foe} falls still.',
+  '{Foe} crumples, and the corridor goes quiet.',
+  'A last shudder runs through {foe}, and then nothing.'],
+ playerFall:[
+  'The dark takes you all at once.',
+  'Your legs give out, and you do not rise again.',
+  'Everything goes white, then silent.',
+  'The pain fades, and so do you.',
+  'Your vision tunnels to nothing.',
+  'The deck rushes up to meet you, and then there is nothing at all.',
+  'You do not feel the next blow land.',
+  'Ironside’s strength finally runs out.',
+  'The cold reaches you before the dark does.',
+  'Your grip loosens, and the blade falls from your hand.']
 };
 const AGAIN=['Again you hit for','Once more you hit for','Another blow lands for'];
 const fill=(t,f,w)=>t.replace(/\{(\w+)\}/g,(_,k)=>({foe:f.ref,Foe:f.ref[0].toUpperCase()+f.ref.slice(1),pr:f.pr,pos:f.pos,w:(w&&w.n)||'blade'})[k]);
@@ -651,6 +666,19 @@ function pickFresh(poolKey,pool){
  state.fight.used[poolKey].push(idx);
  return{text:pool[idx],again};
 }
+/* Same no-repeat-until-exhausted rule as pickFresh(), but for lines that only ever fire once per fight
+   (an enemy's death, the Captain's own death) — tracked on SAVES.textUsed instead of the current fight,
+   so variety carries across every fight and every death this session, not just within one. */
+function pickGlobal(poolKey,pool){
+ if(!SAVES.textUsed)SAVES.textUsed={};
+ const used=SAVES.textUsed[poolKey]||(SAVES.textUsed[poolKey]=[]);
+ let avail=pool.map((_,i)=>i).filter(i=>!used.includes(i)),again=false;
+ if(!avail.length){SAVES.textUsed[poolKey]=[];avail=pool.map((_,i)=>i);again=true;}
+ const idx=avail[Math.floor(Math.random()*avail.length)];
+ SAVES.textUsed[poolKey].push(idx);
+ return{text:pool[idx],again};
+}
+const againify=t=>'Again, '+t.charAt(0).toLowerCase()+t.slice(1);
 const mod=c=>CONFIG.stats[c.stat]+MODIFIERS.reduce((n,f)=>n+f(state,c),0)+(c.bonus||0);
 let state,busy=false;
 
@@ -878,13 +906,14 @@ async function choose(ch){
  if(busy)return;lock(true);stopVoice();await toStory();let br=ch,rr=null;const before=snap();
  if(ch.check){rr=await rollUI(ch.check);br=rr.pass?ch.win:ch.lose;}
  apply(br.fx);if(rr){showResult(rr,br.msg,before);sfx(rr.pass?(ch.sfx||{might:'smash',guile:'click',resolve:'chime'}[ch.check.stat]):'hit');}
- logAct(actLine((ch.past||`Chose to ${ch.text.charAt(0).toLowerCase()+ch.text.slice(1)}`)+(rr?(rr.pass?' and succeeded':' and failed'):''),before));if(state.hp<=0)state.scene='dead';else state.scene=br.goto||state.scene;
+ logAct(actLine((ch.past||`Chose to ${ch.text.charAt(0).toLowerCase()+ch.text.slice(1)}`)+(rr?(rr.pass?' and succeeded':' and failed'):''),before));
+ if(state.hp<=0){const p=pickGlobal('playerFall',TEXT.playerFall);state.note=p.again?againify(p.text):p.text;state.scene='dead';}else state.scene=br.goto||state.scene;
  await sleep(ch.check?1100:0);lock(false);enter(state.scene);
 }
 
 async function act(kind,c){
  if(busy)return;lock(true);stopVoice();await toStory();const before=snap(),f=state.fight,fh=f.hp,rg=kind==='aim',w=rg?gear(state).gun:gear(state).melee,r=await rollUI(c);let m,calc;
- const F=(key,pool)=>{const p=pickFresh(key,pool),filled=fill(p.text,f,w);return p.again?'Again, '+filled.charAt(0).toLowerCase()+filled.slice(1):filled;};
+ const F=(key,pool)=>{const p=pickFresh(key,pool),filled=fill(p.text,f,w);return p.again?againify(filled):filled;};
  if(kind==='guard'){if(r.pass){apply({hp:2});m=F('guardOk',TEXT.guardOk);calc='No damage taken. You recover 2 Vitality.';}else{calc=foeHit(f,0);m=F('guardBad',TEXT.guardBad);}}
  else if(r.pass){const cr=r.o==='crit'?w.atk:0,ml=kind==='wild'?2:1,df=(cr||kind==='aim')?0:f.def,d=Math.max(1,w.atk*ml+cr-df);f.hp=Math.max(0,f.hp-d);calc=`Damage: ${w.atk}${ml>1?' \u00d7 2 reckless':''}${cr?` + ${cr} critical`:''} \u2212 ${df} Defense${cr?' (critical ignores Defense)':kind==='aim'?' (aimed shot ignores Defense)':''} = ${d}`;
   const hitKey=kind==='wild'?'wild.melee':rg?'hit.ranged':'hit.melee',hitPool=kind==='wild'?TEXT.wild.melee:rg?TEXT.hit.ranged:TEXT.hit.melee;
@@ -892,8 +921,8 @@ async function act(kind,c){
  else{calc=foeHit(f,kind==='wild'?2:0);
   const missKey=kind==='wild'?'wildMiss':rg?'miss.ranged':'miss.melee',missPool=kind==='wild'?TEXT.wildMiss:rg?TEXT.miss.ranged:TEXT.miss.melee;
   m=F(missKey,missPool);state.lp=0;}
- if(state.hp<=0){state.scene='dead';state.fight=null;}
- else if(f.hp<=0){m+=' '+fill(pick(TEXT.fall),f,w);state.fight=null;if(f.drop)apply({give:f.drop});state.scene=SCENES[state.scene].then;}
+ if(state.hp<=0){const p=pickGlobal('playerFall',TEXT.playerFall);state.note=p.again?againify(p.text):p.text;state.scene='dead';state.fight=null;}
+ else if(f.hp<=0){const p=pickGlobal('fall',TEXT.fall),fallText=fill(p.text,f,w);m+=' '+(p.again?againify(fallText):fallText);state.fight=null;if(f.drop)apply({give:f.drop});state.scene=SCENES[state.scene].then;}
  else if(Math.random()<.6)m+=' '+fill(pickFresh('say',f.say).text,f,w);
  showResult(r,m,before,calc);actSfx(kind,r);flashFoe(kind,r);
  {const L={strike:['Struck','Missed'],wild:['Landed a reckless blow on','Missed a reckless blow on'],aim:['Landed an aimed shot on','Missed an aimed shot on'],guard:['Held a guard against','Lost a guard against']}[kind],dealt=fh-f.hp;

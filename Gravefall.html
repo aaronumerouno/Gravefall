@@ -125,7 +125,7 @@ aside,.play{display:contents}
 <section class="hud" aria-label="Status">
  <div class="hudhead"><canvas id="pf" width="24" height="22"></canvas><div class="hudmain"><div class="who">Captain Dax Ironside</div><div class="row"><span>Vitality</span><span id="hpnum"></span></div><div class="bar"><i id="hpbar"></i></div></div></div>
  <div class="stats" id="stats"></div>
- <div class="opts"><button id="vtog"></button><button id="stog"></button><button id="vrep">Replay voice</button></div>
+ <div class="opts"><button id="vtog"></button><button id="stog"></button><button id="vrep">Replay voice</button><button id="nsave">New game</button></div>
 </section>
 <section id="foe" aria-live="polite"><div class="row"><span id="foename"></span><span id="foenum"></span></div><div class="bar"><i id="foebar"></i></div><div class="stats" id="foestats"></div></section>
 <details id="packbox"><summary id="packsum"></summary><div id="pack"></div></details>
@@ -140,6 +140,7 @@ aside,.play{display:contents}
 <script>
 /* ===== RULES ===== */
 const CONFIG={die:20,maxHp:28,critHeal:3,fumbleDmg:2,bag:5,showOdds:false,voice:false,sfx:true,stats:{might:3,guile:1,resolve:2}};
+const SAVE_KEY='gravefall_save',SAVE_VER=1; /* bump SAVE_VER on any save-breaking change; old saves are then ignored, not crashed on */
 const SAGA='The Gravefall Saga',CHAPTERS={1:'Iron in the Dark',2:'The Hollow Moon'};  /* add chapters here; give a scene chapter:2 to switch */
 const LABELS={might:'Might',guile:'Guile',resolve:'Resolve'};
 
@@ -446,6 +447,55 @@ function buildChapters(){const box=$('chapters'),all=()=>box.querySelectorAll('d
   const n=+d.id.slice(2);if(n!==state.chapter){SAVES[state.chapter]=state;stopVoice();if(SAVES[n]){state=SAVES[n];show();}else{state=freshState(n);enter(START[n]);}}
   setTimeout(()=>{lock=false;},0);}));
  $('ch'+state.chapter).open=true;}
+
+/* ===== SAVING: localStorage only, game state only (see security review S1/S2). Every value coming back
+   out of storage is untrusted: scenes, item ids and numbers are checked against the game's own data before
+   use, and anything unrecognized is dropped rather than trusted. Nothing here is ever run as code. ===== */
+function sanitizeCarry(raw){
+ if(!raw||typeof raw!=='object')return null;
+ const inv=Array.isArray(raw.inv)?raw.inv.filter(id=>ITEMS[id]).slice(0,CONFIG.bag):[];
+ const eq={};for(const slot of['weapon','armor']){const id=raw.eq&&raw.eq[slot];eq[slot]=(id&&ITEMS[id]&&ITEMS[id].slot===slot&&inv.includes(id))?id:null;}
+ const boost={};if(raw.boost&&typeof raw.boost==='object')for(const k in raw.boost)if(k in CONFIG.stats&&typeof raw.boost[k]==='number'&&isFinite(raw.boost[k]))boost[k]=Math.max(-20,Math.min(20,raw.boost[k]));
+ return{inv,eq,boost};
+}
+function sanitizeState(raw,n){
+ if(!raw||typeof raw!=='object')return null;
+ const scene=raw.scene;
+ if(typeof scene!=='string'||!SCENES[scene])return null;
+ let hp=raw.hp;if(typeof hp!=='number'||!isFinite(hp))return null;
+ hp=Math.max(0,Math.min(CONFIG.maxHp,hp));
+ const inv=Array.isArray(raw.inv)?raw.inv.filter(id=>ITEMS[id]).slice(0,CONFIG.bag):[];
+ const eq={};for(const slot of['weapon','armor']){const id=raw.eq&&raw.eq[slot];eq[slot]=(id&&ITEMS[id]&&ITEMS[id].slot===slot&&inv.includes(id))?id:null;}
+ const flags={};if(raw.flags&&typeof raw.flags==='object')for(const k in raw.flags)if(typeof k==='string')flags[k]=1;
+ const boost={};if(raw.boost&&typeof raw.boost==='object')for(const k in raw.boost)if(k in CONFIG.stats&&typeof raw.boost[k]==='number'&&isFinite(raw.boost[k]))boost[k]=Math.max(-20,Math.min(20,raw.boost[k]));
+ const pending=(raw.pending&&ITEMS[raw.pending])?raw.pending:null;
+ const rolls=Array.isArray(raw.rolls)?raw.rolls.filter(x=>typeof x==='string').slice(-200):[];
+ const acts=Array.isArray(raw.acts)?raw.acts.filter(x=>typeof x==='string').slice(-200):[];
+ const note=typeof raw.note==='string'?raw.note:'';
+ const def=SCENES[scene].fight,savedFightHp=raw.fight&&typeof raw.fight.hp==='number'?raw.fight.hp:def&&def.hp;
+ const fight=def?{...def,max:def.hp,hp:Math.max(0,Math.min(def.hp,savedFightHp))}:null;
+ return{scene,hp,flags,inv,eq,fight,pending,rolls,acts,note,boost,chapter:n,lp:0};
+}
+function persist(){try{SAVES[state.chapter]=state;localStorage.setItem(SAVE_KEY,JSON.stringify({v:SAVE_VER,chapter:state.chapter,saves:SAVES}));}catch(e){}}
+function loadSave(){
+ try{
+  const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;
+  const data=JSON.parse(raw);
+  if(!data||data.v!==SAVE_VER||!data.saves||typeof data.saves!=='object')return false;
+  let found=false;
+  for(const k in data.saves){
+   if(k==='carry'){const c=sanitizeCarry(data.saves.carry);if(c)SAVES.carry=c;continue;}
+   const n=+k;if(!Number.isInteger(n)||!CHAPTERS[n])continue;
+   const s=sanitizeState(data.saves[k],n);if(s){SAVES[n]=s;found=true;}
+  }
+  if(!found)return false;
+  const want=+data.chapter,startChapter=SAVES[want]?want:Object.keys(SAVES).map(Number).find(x=>!isNaN(x)&&CHAPTERS[x]&&SAVES[x]);
+  if(!SAVES[startChapter])return false;
+  state=SAVES[startChapter];return true;
+ }catch(e){return false;}
+}
+function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
+
 function enter(id){state.scene=id;const f=SCENES[id].fight;state.fight=f?{...f,max:f.hp}:null;state.lp=0;if(SCENES[id].end&&id!=='dead')SAVES.carry={inv:state.inv.slice(),eq:{...state.eq},boost:{...state.boost}};show();
  if(/victory/.test(id))sfx('victory');else if(id==='dead')sfx('death');narrate(id);}
 
@@ -508,7 +558,7 @@ function showResult(r,msg,before,calc){const d=diff(before,snap());renderHud();s
 function renderText(){const sc=SCENES[state.scene];$('text').innerHTML=`<h2>${sc.title}</h2>`+(state.note?`<p class="note">${state.note}</p>`:'')+sc.text.map(p=>`<p>${p}</p>`).join('');}
 function renderHist(){$('acts').innerHTML=state.acts.slice().reverse().map(t=>`<li>${t}</li>`).join('')||'<li>No actions yet.</li>';$('hist').innerHTML=state.rolls.slice().reverse().map(t=>`<li>${t}</li>`).join('')||'<li>No rolls yet.</li>';}
 function show(){
- renderHud();renderArt();const sc=SCENES[state.scene],box=$('choices');box.innerHTML='';
+ persist();renderHud();renderArt();const sc=SCENES[state.scene],box=$('choices');box.innerHTML='';
  renderText();
  if(state.pending){const id=state.pending,i=ITEMS[id];
   box.innerHTML=`<h3 class="tip" tabindex="0" data-tip="${tipText(id)}">Loot: ${nm(id)}</h3><p>${info(i)}. Your pack holds ${state.inv.length} of ${CONFIG.bag}.</p>`;
@@ -604,6 +654,7 @@ function renderOpts(){$('vtog').textContent='Voice: '+(CONFIG.voice?'On':'Off');
 $('vtog').onclick=()=>{CONFIG.voice=!CONFIG.voice;renderOpts();if(CONFIG.voice)narrate(state.scene);else stopVoice();};
 $('stog').onclick=()=>{CONFIG.sfx=!CONFIG.sfx;renderOpts();sfx('equip');};
 $('vrep').onclick=()=>{stopVoice();narrate(state.scene);};
+$('nsave').onclick=()=>{if(!confirm('Erase your saved progress in every chapter and start over?'))return;clearSave();for(const k in SAVES)delete SAVES[k];newGame(1);buildChapters();};
 renderOpts();
 /* ===== TOOLTIPS: any element with data-tip. Hover on monitors, tap to open and tap again to close on touch ===== */
 const tipEl=document.createElement('div');tipEl.id='tip';document.body.append(tipEl);
@@ -624,7 +675,8 @@ function detectDevice(){const d=mqTouch.matches||mqNarrow.matches?'mobile':'desk
  if(h.dataset.device!==d){h.dataset.device=d;$('packbox').open=$('histbox').open=$('actbox').open=d==='desktop';}}
 detectDevice();mqNarrow.addEventListener('change',detectDevice);mqTouch.addEventListener('change',detectDevice);
 drawBg();addEventListener('resize',drawBg);drawPortrait();
-newGame();buildChapters();
+if(loadSave())show();else newGame();
+buildChapters();
 </script>
 </body>
 </html>

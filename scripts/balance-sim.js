@@ -79,7 +79,7 @@ const CH2 = [
       { check: { stat: 'guile', dc: 13 }, win: { stat: { guile: 1 } }, lose: { stat: { guile: -1 } } },
       { check: { stat: 'might', dc: 12 }, win: { stat: { might: 1 } }, lose: { stat: { might: -1 } } }
   ] },
-  { id: 'ch2_boss', kind: 'fight', fight: { name: 'Colonel Vex', hp: 34, dc: 14, def: 2, acc: 10, dmg: 10, drop: null } }
+  { id: 'ch2_boss', kind: 'fight', fight: { name: 'Colonel Vex', hp: 34, dc: 14, def: 2, acc: 11, dmg: 8, drop: null } }
 ];
 
 /* ===== Engine, copied from Gravefall.html's act()/rollCheck()/foeHit()/hurt() ===== */

@@ -77,7 +77,7 @@ Stats below are the first-pass values in the game. They have not been balanced b
 | Major Kraag (boss) | 1 | 26 | 13 | 2 | 9 | 9 | None |
 | Skitterling brood | 2 | 13 | 11 | 0 | 5 | 7 | Weak |
 | Ironback Hullcrusher | 2 | 22 | 12 | 2 | 8 | 8 | Strong |
-| Colonel Vex (boss) | 2 | 34 | 14 | 2 | 10 | 10 | None |
+| Colonel Vex (boss) | 2 | 34 | 14 | 2 | 8 | 11 | None |
 
 | Item | Type | Stats | Tier |
 | --- | --- | --- | --- |

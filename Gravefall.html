@@ -815,7 +815,7 @@ function foeHit(f,add){const dr=armorDr(state),ev=evasion(),d=hurt(f.dmg+add);
  return `Enemy attack ${f.dmg}${add?` + ${add} reckless`:''} − ${dr} Defense − ${ev} Evasion = ${d} damage${f.dmg+add-dr-ev<1?' (minimum 1)':''}`;}
 
 function breakdown(r,c){const a=c.stat==='might'?gear(state).melee.acc:(c.bonus||0),g=gearStatBonus(state,c.stat),b=(state.boost&&state.boost[c.stat])||0,base=CONFIG.stats[c.stat],o=r.m-base-a-g-b,sg=n=>n<0?'\u2212':'+';
- return `${r.roll} + ${LABELS[c.stat]} ${base}`+(a?` ${sg(a)} Accuracy ${Math.abs(a)}`:'')+(g?` ${sg(g)} Armor ${Math.abs(g)}`:'')+(b?` ${sg(b)} Training ${Math.abs(b)}`:'')+(o?` ${sg(o)} Bonus ${Math.abs(o)}`:'')+` = ${r.total}`;}
+ return `${r.roll} + ${LABELS[c.stat]} base ${base}`+(a?` ${sg(a)} Accuracy ${Math.abs(a)}`:'')+(g?` ${sg(g)} Armor ${Math.abs(g)}`:'')+(b?` ${sg(b)} Training ${Math.abs(b)}`:'')+(o?` ${sg(o)} Bonus ${Math.abs(o)}`:'')+` = ${r.total} (${LABELS[c.stat]} total ${r.m})`;}
 async function rollUI(c){
  const die=$('die');$('roll').classList.add('show');$('result').textContent='Rolling…';die.className='die spin';sfx('roll');
  const t=setInterval(()=>die.textContent=1+Math.floor(Math.random()*CONFIG.die),70);

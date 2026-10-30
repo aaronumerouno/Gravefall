@@ -83,7 +83,7 @@ Every risky action is one d20 roll plus a stat against a target number. A natura
 
 **Equipment.** Four gear slots are worn at once: one melee weapon, one gun, one body armor and one leg armor. Melee and gun weapons set damage and accuracy; body and leg armor set Defense (the two add together) and may also grant a flat bonus to Might, Guile or Resolve, so armor choice is part of a build, not just a damage-reduction number. Strike and Reckless blow always use the equipped melee weapon; Aimed shot always uses the equipped gun and is unavailable without one.
 
-**Story checks.** The roll is d20 + stat + modifiers against a hidden target. A success or failure each leads to its own result text, scene and effects. Effects can change Vitality, set a flag, give loot, or raise or lower a stat for the rest of the run (for example, Guile +1 for slipping in unseen).
+**Story checks.** The roll is d20 + stat + modifiers against a hidden target. A success or failure each leads to its own result text, scene and effects. Effects can change Vitality, set a flag, give loot, or raise or lower a stat for the rest of the run (for example, Guile +1 for slipping in unseen). The roll breakdown shown in the result box spells out every contributor by name (e.g. "11 + Might base 1 + Accuracy 1 + Armor 1 + Training 3 = 17 (Might total 6)") rather than just the base, since every stat now starts at the same base of 1 under character creation and a bare "Might 1" without that framing reads as a bug.
 
 **Modifiers.** The weapon's accuracy is added to every Might roll. Stat boosts and penalties from scenes ("training") are added to their stat.
 

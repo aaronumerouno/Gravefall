@@ -8,7 +8,6 @@
 <style>
 :root{--bg:#14161a;--panel:#1d2025;--line:#3a4048;--text:#d9d2c0;--dim:#8f8b80;--brass:#b08d4a;--blood:#a8352b;--good:#7d9a5a;
  --display:'Teko','Impact',sans-serif;--body:'Crimson Pro',Georgia,serif;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#e4dfd0;--panel:#d6d0bd;--line:#9b9580;--text:#1c1d20;--dim:#555248;--brass:#7a5c1f;--blood:#8c2a22;--good:#456a2c;color-scheme:light}}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
 body{margin:0;background:var(--bg);color:var(--text);font:20px/1.55 var(--body)}
@@ -53,7 +52,6 @@ h3{font:700 28px/1 var(--display);margin:0 0 4px;color:var(--brass)}
 #bgart{position:fixed;inset:0;z-index:-1;opacity:.55}
 #bgart{width:100%;height:100%;image-rendering:pixelated;animation:tw 6s ease-in-out infinite}
 @keyframes tw{50%{opacity:.35}}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) #bgart{opacity:.35}}
 #art{order:2;border:1px solid var(--line);margin-bottom:16px;background:#0e1014;position:relative;aspect-ratio:160/75;overflow:hidden}
 #art canvas{position:absolute;image-rendering:pixelated}
 #abg{left:0;top:0;width:100%;height:100%;animation:flick 7s infinite}
@@ -702,10 +700,8 @@ function flashFoe(kind,r){const el=$('afoe');if(el&&r.pass&&kind!=='guard'){el.c
 const PF=['....ssssssss','..ssmmmmmmmm','.ssmmmbbbbbb','.smmmmbbbbbb','.smmmmmmmmmm','.smddddddddd','.smhhhhhhhhh','.smTkkTTTTTT','.smTTTTTTTTT','.smTTTTTTThh','.smTTTTTTThh','.smTTTTTTTTT','.smThhhhhhhh','.smThhhhhhhh','..sThhhwwwww','..sThhhhhhhh','..sdhhhhhhhh','..ssdhhhhhhh','.ssmmdddddddd','ssmmmmddddbb','smmmmmmdddbb','smmmmmmmdddd'];
 function drawPortrait(){const c=$('pf');sprite('pf',PF,{mirror:1});c.style.width='';const x=c.getContext('2d');
  [[18,7,'#d9533f'],[19,7,'#ffd9a0'],[20,6,'#c96a5a'],[19,6,'#c96a5a'],[18,8,'#c96a5a'],[18,9,'#c96a5a'],[17,10,'#c96a5a']].forEach(([a,b,col])=>{x.fillStyle=col;x.fillRect(a,b,1,1);});}
-const mqDark=matchMedia('(prefers-color-scheme:dark)');
 function drawBg(){const c=$('bgart'),w=Math.ceil(innerWidth/5),h=Math.ceil(innerHeight/5);c.width=w;c.height=h;X=c.getContext('2d');
- const dark=document.documentElement.dataset.theme!=='light'&&(document.documentElement.dataset.theme==='dark'||mqDark.matches);
- stars(Math.floor(w*h/90),3,w,h,dark?'#d9d2c0':'#555248');disc(w-16,14,8,dark?'#2a2d33':'#9b9580');disc(w-19,12,2,dark?'#22252b':'#7a5c1f');}
+ stars(Math.floor(w*h/90),3,w,h,'#d9d2c0');disc(w-16,14,8,'#2a2d33');disc(w-19,12,2,'#22252b');}
 
 /* ===== ENGINE ===== */
 const $=id=>document.getElementById(id);
@@ -1120,7 +1116,7 @@ const mqNarrow=matchMedia('(max-width:820px)'),mqTouch=matchMedia('(hover:none) 
 function detectDevice(){const d=mqTouch.matches||mqNarrow.matches?'mobile':'desktop',h=document.documentElement;
  if(h.dataset.device!==d){h.dataset.device=d;$('packbox').open=$('histbox').open=$('actbox').open=d==='desktop';}}
 detectDevice();mqNarrow.addEventListener('change',detectDevice);mqTouch.addEventListener('change',detectDevice);
-drawBg();addEventListener('resize',drawBg);mqDark.addEventListener('change',drawBg);drawPortrait();
+drawBg();addEventListener('resize',drawBg);drawPortrait();
 if(loadSave())show();else newGame();
 buildChapters();
 </script>

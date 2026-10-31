@@ -16,6 +16,6 @@ const mqNarrow=matchMedia('(max-width:820px)'),mqTouch=matchMedia('(hover:none) 
 function detectDevice(){const d=mqTouch.matches||mqNarrow.matches?'mobile':'desktop',h=document.documentElement;
  if(h.dataset.device!==d){h.dataset.device=d;$('packbox').open=$('histbox').open=$('actbox').open=d==='desktop';}}
 detectDevice();mqNarrow.addEventListener('change',detectDevice);mqTouch.addEventListener('change',detectDevice);
-drawBg();addEventListener('resize',drawBg);mqDark.addEventListener('change',drawBg);drawPortrait();
+drawBg();addEventListener('resize',drawBg);drawPortrait();
 if(loadSave())show();else newGame();
 buildChapters();

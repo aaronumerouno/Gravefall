@@ -56,8 +56,6 @@ function flashFoe(kind,r){const el=$('afoe');if(el&&r.pass&&kind!=='guard'){el.c
 const PF=['....ssssssss','..ssmmmmmmmm','.ssmmmbbbbbb','.smmmmbbbbbb','.smmmmmmmmmm','.smddddddddd','.smhhhhhhhhh','.smTkkTTTTTT','.smTTTTTTTTT','.smTTTTTTThh','.smTTTTTTThh','.smTTTTTTTTT','.smThhhhhhhh','.smThhhhhhhh','..sThhhwwwww','..sThhhhhhhh','..sdhhhhhhhh','..ssdhhhhhhh','.ssmmdddddddd','ssmmmmddddbb','smmmmmmdddbb','smmmmmmmdddd'];
 function drawPortrait(){const c=$('pf');sprite('pf',PF,{mirror:1});c.style.width='';const x=c.getContext('2d');
  [[18,7,'#d9533f'],[19,7,'#ffd9a0'],[20,6,'#c96a5a'],[19,6,'#c96a5a'],[18,8,'#c96a5a'],[18,9,'#c96a5a'],[17,10,'#c96a5a']].forEach(([a,b,col])=>{x.fillStyle=col;x.fillRect(a,b,1,1);});}
-const mqDark=matchMedia('(prefers-color-scheme:dark)');
 function drawBg(){const c=$('bgart'),w=Math.ceil(innerWidth/5),h=Math.ceil(innerHeight/5);c.width=w;c.height=h;X=c.getContext('2d');
- const dark=document.documentElement.dataset.theme!=='light'&&(document.documentElement.dataset.theme==='dark'||mqDark.matches);
- stars(Math.floor(w*h/90),3,w,h,dark?'#d9d2c0':'#555248');disc(w-16,14,8,dark?'#2a2d33':'#9b9580');disc(w-19,12,2,dark?'#22252b':'#7a5c1f');}
+ stars(Math.floor(w*h/90),3,w,h,'#d9d2c0');disc(w-16,14,8,'#2a2d33');disc(w-19,12,2,'#22252b');}
 

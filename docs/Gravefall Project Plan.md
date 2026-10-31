@@ -23,6 +23,7 @@ Start with balance, saving and meaningful choices; they decide whether the game 
 | 5 | Give allies jobs | For example Quill heals once per fight and Brannigan lowers an enemy's Defense | Medium | Medium | Next |
 | 6 | Unique Chapter 2 art | New backdrops and sprites instead of reused Chapter 1 art and recolors | Medium | Medium | Later |
 | 7 | Settings panel | Toggles for success odds, voice speed and text size | Low | Small | Next |
+| 8 | Environmental actions | A 5th, scene-specific combat action per fight using something from that scene's description (prop-based damage, heal, or a fight-only Defense/stat bonus), with a small fumble-driven chance to backfire instead | Medium | Medium | **Done** — all 10 fights across Chapters 1–3; not yet run through `scripts/balance-sim.js` since it's a bounded, once-per-fight bonus, but worth including in the next full balance pass |
 
 **Process recommendations.** Test on real phones and note anything that looks or sounds wrong before adding features. Settle the story and the mechanics before adding more systems; the voice work was redone several times because each change built on the last.
 

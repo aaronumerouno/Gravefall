@@ -868,8 +868,16 @@ const hurt=n=>{const d=Math.max(1,n-armorDr(state)-evasion());EFFECTS.hp(state,-
 function foeHit(f,add){const dr=armorDr(state),ev=evasion(),d=hurt(f.dmg+add);
  return `Enemy attack ${f.dmg}${add?` + ${add} reckless`:''} − ${dr} Defense − ${ev} Evasion = ${d} damage${f.dmg+add-dr-ev<1?' (minimum 1)':''}`;}
 
-function breakdown(r,c){const a=c.stat==='might'?gear(state).melee.acc:(c.bonus||0),g=gearStatBonus(state,c.stat),e=envStatBonus(state,c.stat),b=(state.boost&&state.boost[c.stat])||0,base=CONFIG.stats[c.stat],charStat=base+b,o=r.m-base-a-g-e-b,sg=n=>n<0?'\u2212':'+';
- return `${r.roll} + ${LABELS[c.stat]} ${charStat}`+(g?` ${sg(g)} Armor ${Math.abs(g)}`:'')+(e?` ${sg(e)} Terrain ${Math.abs(e)}`:'')+(a?` ${sg(a)} Accuracy ${Math.abs(a)}`:'')+(o?` ${sg(o)} Bonus ${Math.abs(o)}`:'')+` = ${r.total}`;}
+function breakdown(r,c){const a=c.stat==='might'?gear(state).melee.acc:(c.bonus||0),g=gearStatBonus(state,c.stat),e=envStatBonus(state,c.stat),b=(state.boost&&state.boost[c.stat])||0,base=CONFIG.stats[c.stat],o=r.m-base-a-g-e-b,sg=n=>n<0?'\u2212':'+',
+  parts=[`${base} base`];
+ if(b)parts.push(`${sg(b)}${Math.abs(b)} training`);
+ if(g)parts.push(`${sg(g)}${Math.abs(g)} armor`);
+ if(e)parts.push(`${sg(e)}${Math.abs(e)} terrain`);
+ if(a)parts.push(`${sg(a)}${Math.abs(a)} accuracy`);
+ if(o)parts.push(`${sg(o)}${Math.abs(o)} bonus`);
+ // "Might" here is always the player's whole current Might (the same number the HUD shows) -- the
+ // parenthetical explains how it adds up, it is never a further addend on top of that number.
+ return `${r.roll} + ${LABELS[c.stat]} ${r.m} = ${r.total} (${parts.join(', ')})`;}
 async function rollUI(c){
  const die=$('die');$('roll').classList.add('show');$('result').textContent='Rolling…';die.className='die spin';sfx('roll');
  const t=setInterval(()=>die.textContent=1+Math.floor(Math.random()*CONFIG.die),70);

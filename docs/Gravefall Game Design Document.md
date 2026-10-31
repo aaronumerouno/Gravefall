@@ -217,13 +217,15 @@ Victory ends Act I: Ironside and crew set course for home, and Quill's closing l
 
 ## Technical specs
 
-The game is one self-contained HTML file of about 90 KB (roughly 930 lines and 80 KB of JavaScript), with 31 scenes (including character creation) and 10 fights. It loads no images or audio files; only two Google Fonts (Teko and Crimson Pro) come from outside, with system fallbacks.
+The game still ships as one self-contained HTML file (`Gravefall.html`, about 112 KB, 1128 lines), with 31 scenes (including character creation) and 10 fights. It loads no images or audio files; only two Google Fonts (Teko and Crimson Pro) come from outside, with system fallbacks.
 
-**Code layout.** The script is split into labelled sections so features can be added without rewrites:
+**Source layout.** `Gravefall.html` is now a *build output*, not the file to edit. The editable source lives under `src/`: `src/shell.html` (the HTML/CSS shell, with a `{{SCRIPT}}` placeholder) plus 15 numbered files in `src/js/` that are concatenated in filename order into the shell's script tag. `node tools/build.js` regenerates `Gravefall.html` from those sources; `node tools/build.js --check` verifies it's up to date without writing anything (useful before a commit). The split follows the same section boundaries the single file already had:
 
-- Rules and numbers (`CONFIG`), items (`ITEMS`, `LORE`, `DROPS`), roll modifiers (`MODIFIERS`) and scene effects (`EFFECTS`: hp, flag, give, stat).
-- Story as data (`SCENES`, with chapter scenes added by `Object.assign`) and combat result text (`TEXT` pools).
-- Art (`BG` backdrops, `SP` and `SPF` sprites), the engine (`state`, `enter`, `show`, `choose`, `act`), audio, tooltips, chapters and device detection.
+- `01-rules.js` (`CONFIG`), `02-items.js` (`ITEMS`/`DROPS`), `03-lore.js` (`LORE`), `04-modifiers.js` (`MODIFIERS`), `05-effects.js` (`EFFECTS`: hp, flag, give, stat).
+- `06-scenes-ch1.js`, `07-scenes-ch2.js`, `08-scenes-ch3.js` (`SCENES`, each chapter added by `Object.assign`), `09-text.js` (combat result `TEXT` pools).
+- `10-art.js` (`BG` backdrops, `SP`/`SPF` sprites), `11-engine.js` (`state`, `enter`, `show`, `choose`, `act`), `12-saving.js` (save/load, sanitizers, chapter locking), `13-character-creation.js`, `14-audio.js`, `15-ui-bootstrap.js` (tooltips, device detection, chapter accordion, boot).
+
+This is plain concatenation into one global-scope script, not ES modules — order matters (hence the numeric prefixes), and it stays this way on purpose: the game has to keep working via `file://` with no server, and GitHub Pages serves a single file. Edit the files in `src/js/`, then run `node tools/build.js` and commit both the source change and the regenerated `Gravefall.html` together.
 
 **State.** A single `state` object holds scene, vitality, flags, inventory, equipment, the current fight, pending loot, roll and action history, stat boosts and the chapter. Each chapter keeps its own saved state while you switch between chapters.
 
@@ -243,7 +245,7 @@ The game is one self-contained HTML file of about 90 KB (roughly 930 lines and 8
 
 ## How to extend
 
-Most additions are one entry in a data table. Keep one rule for story text: every line of dialogue names its speaker, such as "Contact!" Quill says.
+Most additions are one entry in a data table, made in the relevant file under `src/js/` (see **Source layout** above), followed by `node tools/build.js` to regenerate `Gravefall.html`. Keep one rule for story text: every line of dialogue names its speaker, such as "Contact!" Quill says.
 
 1. **Scene with choices:** add an entry to `SCENES` with `title`, `text` (paragraphs) and `choices`. A choice is either `{text, goto}` or `{text, check:{stat, dc}, win:{msg, goto, fx}, lose:{msg, goto, fx}}`. Add `bg` to reuse another scene's backdrop. `text` can also be a function of `state` (`text: s => [...]`) for a scene whose wording should change based on a flag set earlier in the run; `fx:{flag:'name'}` on a choice's `win`/`lose` sets it.
 2. **Fight:** add a scene with `fight:{name, ref, pr, pos, hp, dc, def, acc, dmg, drop, say}` and `then:'nextSceneId'`. Add `art` to reuse an existing sprite, or a new entry in `SPF` for a new look. Give `say` at least 5–6 lines — it's the enemy-specific taunt pool layered on top of the shared melee/ranged/guard result pools, and it follows the same no-repeat-until-exhausted rule, so a short `say` list cycles (and says "Again") sooner than a longer fight will want.
@@ -271,7 +273,7 @@ The game's code will live in a private Git repository on GitHub, which is the ma
 - **Releases:** tagged `MAJOR.MINOR.PATCH`, starting at `v0.1.0`. A new chapter or a save format that breaks old saves bumps MAJOR; features and content bump MINOR; fixes and balance tweaks bump PATCH. The game stays on 0.x until Chapters 1 to 3, saving and levels exist.
 - **In the game:** the version is shown in the page and in saved data, with a separate save-format number so old saves can be upgraded.
 - **Changes:** every release gets a `CHANGELOG.md` entry, and `main` always stays playable.
-- **File structure:** still one HTML file. Chapter 3 has now started (its own stated trigger for this), and the file is about 90 KB, approaching the other stated trigger (~100 KB) — the module split and build script are not done yet and should be picked up as their own piece of work before Chapter 4 adds more weight.
+- **File structure:** source is split into `src/shell.html` + `src/js/*.js` (see **Source layout** under Technical specs), reassembled into the single deployable `Gravefall.html` by `node tools/build.js`. Done, ahead of Chapter 4.
 
 ## Planned changes
 

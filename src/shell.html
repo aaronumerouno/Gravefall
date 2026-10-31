@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gravefall</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;700&family=Crimson+Pro:wght@400;600&display=swap">
+<style>
+:root{--bg:#14161a;--panel:#1d2025;--line:#3a4048;--text:#d9d2c0;--dim:#8f8b80;--brass:#b08d4a;--blood:#a8352b;--good:#7d9a5a;
+ --display:'Teko','Impact',sans-serif;--body:'Crimson Pro',Georgia,serif;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#e4dfd0;--panel:#d6d0bd;--line:#9b9580;--text:#1c1d20;--dim:#555248;--brass:#7a5c1f;--blood:#8c2a22;--good:#456a2c;color-scheme:light}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--text);font:20px/1.55 var(--body)}
+main{max-width:640px;margin:0 auto;padding:20px 18px 48px}
+h1{font:700 clamp(56px,16vw,88px)/.9 var(--display);margin:8px 0 4px;letter-spacing:.04em;color:var(--brass)}
+.sub{margin:0 0 20px;color:var(--dim);font-style:italic}
+.hud{display:grid;gap:8px;padding:14px;background:var(--panel);border-left:4px solid var(--brass)}
+.bar{height:14px;background:var(--bg);border:1px solid var(--line)}
+.bar>i{display:block;height:100%;background:var(--blood);transition:width .4s}
+.row{display:flex;justify-content:space-between;font:500 24px/1 var(--display)}
+.stats{display:flex;gap:18px;flex-wrap:wrap;font:500 22px/1 var(--display);color:var(--dim)}
+.stats b{color:var(--text)}
+#foe{display:none;margin-top:16px;padding:12px 14px;border:1px solid var(--blood)}
+#foe.show{display:grid;gap:8px}
+#foe .bar>i{background:var(--brass)}
+#text{margin:22px 0}
+#text h2{font:700 36px/1 var(--display);margin:0 0 8px}
+#text p{margin:0 0 12px;max-width:62ch}
+#roll{display:none;align-items:center;gap:16px;padding:12px 14px;margin-bottom:16px;border:1px solid var(--line)}
+#roll.show{display:flex}
+.die{flex:none;width:72px;height:80px;display:grid;place-items:center;background:var(--brass);color:#14161a;font:700 36px/1 var(--display);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.die.crit{background:var(--good)}.die.fumble{background:var(--blood);color:#d9d2c0}
+.die.spin{animation:spin .5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.die.spin{animation:none}}
+#result{margin:0;font-size:18px}
+#choices{display:grid;gap:10px}
+button{font:inherit;text-align:left;padding:12px 14px;background:var(--panel);color:var(--text);border:1px solid var(--line);cursor:pointer}
+button:hover:not(:disabled){border-color:var(--brass)}
+button:focus-visible,summary:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+button:disabled{opacity:.5;cursor:default}
+button small{display:block;color:var(--dim);font-size:16px}
+details{margin-top:24px;border:1px solid var(--line);background:var(--panel)}
+summary{padding:12px 14px;cursor:pointer;font:500 24px/1 var(--display)}
+.slot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--line)}
+.slot span{flex:1 1 160px}.slot small{display:block;color:var(--dim);font-size:16px}
+.slot button{padding:6px 10px;font-size:17px}
+.eq{color:var(--good)}
+h3{font:700 28px/1 var(--display);margin:0 0 4px;color:var(--brass)}
+.tip{cursor:help;border-bottom:1px dotted var(--dim)}
+#tip{position:fixed;z-index:20;display:none;max-width:280px;padding:10px 12px;background:var(--panel);border:1px solid var(--brass);font-size:17px;line-height:1.4}
+#bgart{position:fixed;inset:0;z-index:-1;opacity:.55}
+#bgart{width:100%;height:100%;image-rendering:pixelated;animation:tw 6s ease-in-out infinite}
+@keyframes tw{50%{opacity:.35}}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) #bgart{opacity:.35}}
+#art{order:2;border:1px solid var(--line);margin-bottom:16px;background:#0e1014;position:relative;aspect-ratio:160/75;overflow:hidden}
+#art canvas{position:absolute;image-rendering:pixelated}
+#abg{left:0;top:0;width:100%;height:100%;animation:flick 7s infinite}
+@keyframes flick{0%,93%,100%{filter:none}95%{filter:brightness(1.3)}}
+.foefig{animation:breathe 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.foefig.hit{animation:hit .4s}
+@keyframes breathe{50%{transform:scale(1.03)}}
+@keyframes hit{0%{filter:brightness(4)}100%{filter:none}}
+@media (prefers-reduced-motion:reduce){#bgart,#abg,.foefig{animation:none}}
+/* ===== HUD portrait, chapters, mobile sizing ===== */
+.hudhead{display:flex;gap:12px;align-items:center}
+.hudmain{flex:1;display:grid;gap:6px}
+#pf{width:96px;image-rendering:pixelated;border:2px solid var(--brass);background:#0e1014;flex:none}
+.who{font:500 20px/1 var(--display);color:var(--dim)}
+.chapter{margin:0 0 14px;padding:0;background:none;border:1px solid var(--brass)}
+.chapter>summary{display:flex;align-items:center;gap:10px;padding:10px 14px;font:inherit}
+.chapter>summary .chaptext{display:grid;gap:2px}
+.chapter>summary small{color:var(--dim);font-size:16px}
+.chapter>summary b{font:700 28px/1 var(--display);color:var(--brass)}
+.chapter>summary .chev{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:1px solid var(--brass);border-radius:50%;color:var(--brass);font-size:16px;transition:transform .2s ease;flex:none}
+.chapter[open]>summary .chev{transform:rotate(180deg)}
+.chapter.locked{opacity:.55}
+.chapter.locked>summary{cursor:default}
+.chapter.locked>summary .chev{display:none}
+.chapter.locked .lockmsg{color:var(--dim);font-style:italic}
+.chapbody{padding:12px}
+[data-device=mobile] .chapbody{padding:8px}
+[data-device=mobile] .hud{padding:10px;gap:6px}
+[data-device=mobile] #pf{width:64px}
+[data-device=mobile] .row{font-size:19px}
+[data-device=mobile] .stats{font-size:17px;gap:12px}
+[data-device=mobile] .bar{height:10px}
+[data-device=mobile] .opts button{min-height:36px;padding:6px 10px;font-size:15px}
+[data-device=mobile] details:not(.chapter)>summary{font-size:19px;padding:9px 12px}
+[data-device=mobile] details:not(.chapter){margin-top:14px}
+[data-device=mobile] .slot{padding:8px 10px;font-size:16px}
+[data-device=mobile] .slot small{font-size:14px}
+[data-device=mobile] .slot button{min-height:36px;font-size:15px;padding:4px 10px}
+[data-device=mobile] #hist,[data-device=mobile] #acts{font-size:14px}
+#result .ln{display:block;margin-top:8px}
+#result .calc{color:var(--dim);font-size:16px}
+.chap{margin:0 0 16px;padding:10px 14px;border:1px solid var(--brass);display:grid;gap:2px}
+.chap small{color:var(--dim);font-size:16px}
+.chap b{font:700 28px/1 var(--display);color:var(--brass)}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opts button{padding:6px 10px;font-size:17px;text-align:center}
+[data-device=mobile] .opts button{min-height:44px;padding:8px 12px}
+#result .chg{color:var(--brass);font-weight:600}
+.note{font-style:italic;color:var(--brass);border-left:3px solid var(--brass);padding-left:12px}
+#hist,#acts{margin:0;padding:0 14px 10px 36px;font-size:16px;max-height:260px;overflow:auto}
+#hist li,#acts li{margin:4px 0;color:var(--dim)}
+#histbox{order:7}#actbox{order:8}
+[data-device=desktop] #histbox,[data-device=desktop] #actbox{margin-top:16px}
+/* ===== DEVICE LAYOUTS: html[data-device] is set by detectDevice() ===== */
+.layout{display:flex;flex-direction:column}
+aside,.play{display:contents}
+.hud{order:1}#foe{order:2}#text{order:3}#roll{order:4}#choices{order:5}#packbox{order:6}
+[data-device=mobile] button{min-height:52px;padding:14px}
+[data-device=mobile] .slot button{min-height:44px;padding:8px 12px}
+[data-device=desktop] body{font-size:22px}
+[data-device=desktop] main{max-width:1040px}
+[data-device=desktop] .layout{display:grid;grid-template-columns:320px 1fr;gap:36px;align-items:start}
+[data-device=desktop] aside{display:block;position:sticky;top:16px}
+[data-device=desktop] .play{display:block}
+[data-device=desktop] #text{margin-top:0}
+[data-device=desktop] #foe,[data-device=desktop] #packbox{margin-top:16px}
+</style>
+</head>
+<body>
+<canvas id="bgart" aria-hidden="true"></canvas>
+<main>
+<h1>Gravefall</h1>
+<p class="sub">Ironwolf Company, Third Platoon. One captain, one reactor, one roll at a time.</p>
+<div id="chapters"></div>
+<div class="layout" id="layout"><aside>
+<section class="hud" aria-label="Status">
+ <div class="hudhead"><canvas id="pf" width="24" height="22"></canvas><div class="hudmain"><div class="who">Captain Dax Ironside</div><div class="row"><span>Vitality</span><span id="hpnum"></span></div><div class="bar"><i id="hpbar"></i></div></div></div>
+ <div class="stats" id="stats"></div>
+ <div class="opts"><button id="vtog"></button><button id="stog"></button><button id="vrep">Replay voice</button><button id="nsave">New game</button></div>
+</section>
+<section id="foe" aria-live="polite"><div class="row"><span id="foename"></span><span id="foenum"></span></div><div class="bar"><i id="foebar"></i></div><div class="stats" id="foestats"></div></section>
+<details id="packbox"><summary id="packsum"></summary><div id="pack"></div></details>
+<details id="histbox"><summary>Roll history</summary><ol id="hist"></ol></details>
+<details id="actbox"><summary>Action history</summary><ol id="acts" reversed></ol></details>
+</aside><div class="play"><div id="art"></div>
+<section id="text" aria-live="polite"></section>
+<section id="roll" aria-live="polite"><div class="die" id="die">–</div><p id="result"></p></section>
+<section id="choices"></section>
+</div></div>
+</main>
+<script>
+{{SCRIPT}}
+</script>
+</body>
+</html>

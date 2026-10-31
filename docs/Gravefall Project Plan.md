@@ -82,7 +82,7 @@ The old version of this section assumed the pre-overhaul baseline (Might 3/Guile
 **Risks.**
 
 - **Voice differs by device:** the narrator uses whatever voices a device has, so the sound cannot be guaranteed (accepted).
-- **Single file:** everything lives in one HTML file, now about 90 KB after Chapter 3. The Game Design Document's own stated trigger for splitting the source into modules (Chapter 3 starting, or ~100 KB) has now been reached and this hasn't been done yet; it should happen before Chapter 4 adds more. The 16 MB hosting limit is still far away.
+- **Single file:** `Gravefall.html` (now ~112 KB) is published as one file, but it's a build output — the editable source is split into `src/shell.html` + 15 files in `src/js/`, reassembled by `node tools/build.js` (see the Game Design Document's **Technical specs**). Resolved ahead of Chapter 4. The 16 MB hosting limit is still far away.
 - **Untested on real devices:** problems may only show on real phones or browsers other than the one used for checks.
 - **Reused art and stats:** Chapters 2 and 3 share Chapter 1's art (Chapter 3's enemies are Chapter 1/2 sprites recolored), so Act I may feel repetitive until it gets its own.
 - **Ten-chapter scope:** the saga is planned at ten chapters across two tonally different acts; Act I (the alien war, Chapters 1–3) is now complete, leaving seven demon-lord chapters on an Earth-like world still unwritten. That is still a large amount of story, art and balancing work ahead; building it one chapter at a time, with each one playtested and simulated before the next starts, kept Act I's steps small, and the same approach should hold for Act II.

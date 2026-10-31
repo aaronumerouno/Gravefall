@@ -61,7 +61,7 @@ function show(){
  if(state.scene==='alloc'){renderAlloc(box);return;}
  if(state.scene==='loadout'){renderLoadout(box);return;}
  if(state.pending){const id=state.pending,i=ITEMS[id];
-  box.innerHTML=`<h3 class="tip" tabindex="0" data-tip="${tipText(id)}">Loot: ${nm(id)}</h3><p>${info(i)}. Your pack holds ${state.inv.length} of ${CONFIG.bag}.</p>`;
+  box.innerHTML=`<h3 class="tip" tabindex="0" data-tip="${tipText(id)}">Loot: ${nm(id)}</h3><p>${info(i)}. Your pack holds ${state.inv.length} of ${CONFIG.bag}.</p><p class="note">${lootHint(i)}</p>`;
   const done=()=>{state.pending=null;show();};
   if(state.inv.length<CONFIG.bag)btn('Take it',()=>{state.inv.push(id);logAct('Picked up '+nm(id));done();});
   else state.inv.forEach(x=>btn(`Swap for ${nm(x)}`,()=>{logAct('Dropped '+nm(x)+' and picked up '+nm(id));dropItem(x);state.inv.push(id);done();}));
@@ -91,7 +91,9 @@ async function choose(ch){
  apply(br.fx);if(rr){showResult(rr,br.msg,before);sfx(rr.pass?(ch.sfx||{might:'smash',guile:'click',resolve:'chime'}[ch.check.stat]):'hit');}
  logAct(actLine((ch.past||`Chose to ${ch.text.charAt(0).toLowerCase()+ch.text.slice(1)}`)+(rr?(rr.pass?' and succeeded':' and failed'):''),before));
  if(state.hp<=0){const p=pickGlobal('playerFall',TEXT.playerFall);state.note=p.again?againify(p.text):p.text;state.scene='dead';}else state.scene=br.goto||state.scene;
- await sleep(ch.check?1100:0);lock(false);enter(state.scene);
+ // a check's result is worth reading before the scene changes underneath it (e.g. a door opening) --
+ // a plain goto with no roll result has nothing new on screen yet, so it can move on right away
+ await sleep(ch.check?CONFIG.sceneReadDelay:0);lock(false);enter(state.scene);
 }
 
 async function act(kind,c){
@@ -122,6 +124,9 @@ async function act(kind,c){
  else if(Math.random()<.6)m+=' '+fill(pickFresh('say',f.say).text,f,w);
  showResult(r,m,before,calc);actSfx(kind,r);flashFoe(kind,r);
  {const L={strike:['Struck','Missed'],wild:['Landed a reckless blow on','Missed a reckless blow on'],aim:['Landed an aimed shot on','Missed an aimed shot on'],guard:['Held a guard against','Lost a guard against'],env:['Used the environment against','Failed to use the environment against']}[kind],dealt=fh-f.hp;
- logAct(actLine(`${L[r.pass?0:1]} ${f.name}${dealt?` for ${dealt}`:''}${f.hp<=0?', and it fell':''}`,before));}await sleep(900);lock(false);
+ logAct(actLine(`${L[r.pass?0:1]} ${f.name}${dealt?` for ${dealt}`:''}${f.hp<=0?', and it fell':''}`,before));}
+ // a kill or a player death is the last action before the scene changes -- give the result text (and any
+ // loot) time to be read before it cuts away. Mid-fight, keep the normal, snappier round-to-round pace.
+ await sleep(state.fight?900:CONFIG.sceneReadDelay);lock(false);
  if(state.fight){show();}else enter(state.scene);
 }

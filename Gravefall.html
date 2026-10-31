@@ -144,7 +144,7 @@ aside,.play{display:contents}
 </main>
 <script>
 /* ===== RULES ===== */
-const CONFIG={die:20,maxHp:28,critHeal:3,fumbleDmg:2,bag:10,allocPoints:3,showOdds:false,voice:false,sfx:true,stats:{might:1,guile:1,resolve:1}};
+const CONFIG={die:20,maxHp:28,critHeal:3,fumbleDmg:2,bag:10,allocPoints:3,showOdds:false,voice:false,sfx:true,sceneReadDelay:2600,stats:{might:1,guile:1,resolve:1}};
 const SAVE_KEY='gravefall_save',SAVE_VER=2; /* bump SAVE_VER on any save-breaking change; old saves are then ignored, not crashed on */
 const SAGA='The Gravefall Saga',CHAPTERS={1:'Iron in the Dark',2:'The Hollow Moon',3:'The Hive’s End'};  /* add chapters here; give a scene chapter:2 to switch */
 const LABELS={might:'Might',guile:'Guile',resolve:'Resolve'};
@@ -897,6 +897,16 @@ function renderHud(){hideTip();
 }
 const info=i=>`${CAT_LABEL[i.slot]} — `+((i.slot==='melee'||i.slot==='gun')?`Damage ${i.atk}, accuracy ${i.acc>=0?'+':''}${i.acc}`:(i.slot==='body'||i.slot==='legs')?`Armor ${i.dr}`+(i.stat?`, ${statLine(i)}`:''):`Heals ${i.heal}`);
 const nm=id=>ITEMS[id].n+(ITEMS[id].tier?` (${ITEMS[id].tier})`:'');
+function lootHint(i){const cur=state.eq[i.slot]?ITEMS[state.eq[i.slot]]:null;
+ if(i.slot==='melee'||i.slot==='gun'){if(!cur)return `You have no ${CAT_LABEL[i.slot].toLowerCase()} equipped — this fills that gap.`;
+  if(i.atk>cur.atk)return `Hits harder than your ${nm(state.eq[i.slot])} (${i.atk} vs ${cur.atk} damage).`;
+  if(i.atk<cur.atk)return `Hits softer than your ${nm(state.eq[i.slot])} (${i.atk} vs ${cur.atk} damage) — only worth it for the accuracy.`;
+  return `About the same punch as your ${nm(state.eq[i.slot])} — compare the accuracy.`;}
+ if(i.slot==='body'||i.slot==='legs'){if(!cur)return `You have no ${CAT_LABEL[i.slot].toLowerCase()} equipped — this fills that gap.`;
+  if(i.dr>cur.dr)return `Tougher than your ${nm(state.eq[i.slot])} (Defense ${i.dr} vs ${cur.dr}).`;
+  if(i.dr<cur.dr)return `Less Defense than your ${nm(state.eq[i.slot])} (${i.dr} vs ${cur.dr}) — only worth it for the stat bonus.`;
+  return `Same Defense as your ${nm(state.eq[i.slot])} — compare the stat bonus.`;}
+ return `Heals ${i.heal} Vitality when used — worth keeping spare for a tougher fight ahead.`;}
 function btn(t,fn,p){const b=document.createElement('button');b.innerHTML=t;b.onclick=fn;(p||$('choices')).append(b);return b;}
 
 function renderPack(){
@@ -973,7 +983,7 @@ function show(){
  if(state.scene==='alloc'){renderAlloc(box);return;}
  if(state.scene==='loadout'){renderLoadout(box);return;}
  if(state.pending){const id=state.pending,i=ITEMS[id];
-  box.innerHTML=`<h3 class="tip" tabindex="0" data-tip="${tipText(id)}">Loot: ${nm(id)}</h3><p>${info(i)}. Your pack holds ${state.inv.length} of ${CONFIG.bag}.</p>`;
+  box.innerHTML=`<h3 class="tip" tabindex="0" data-tip="${tipText(id)}">Loot: ${nm(id)}</h3><p>${info(i)}. Your pack holds ${state.inv.length} of ${CONFIG.bag}.</p><p class="note">${lootHint(i)}</p>`;
   const done=()=>{state.pending=null;show();};
   if(state.inv.length<CONFIG.bag)btn('Take it',()=>{state.inv.push(id);logAct('Picked up '+nm(id));done();});
   else state.inv.forEach(x=>btn(`Swap for ${nm(x)}`,()=>{logAct('Dropped '+nm(x)+' and picked up '+nm(id));dropItem(x);state.inv.push(id);done();}));
@@ -1003,7 +1013,9 @@ async function choose(ch){
  apply(br.fx);if(rr){showResult(rr,br.msg,before);sfx(rr.pass?(ch.sfx||{might:'smash',guile:'click',resolve:'chime'}[ch.check.stat]):'hit');}
  logAct(actLine((ch.past||`Chose to ${ch.text.charAt(0).toLowerCase()+ch.text.slice(1)}`)+(rr?(rr.pass?' and succeeded':' and failed'):''),before));
  if(state.hp<=0){const p=pickGlobal('playerFall',TEXT.playerFall);state.note=p.again?againify(p.text):p.text;state.scene='dead';}else state.scene=br.goto||state.scene;
- await sleep(ch.check?1100:0);lock(false);enter(state.scene);
+ // a check's result is worth reading before the scene changes underneath it (e.g. a door opening) --
+ // a plain goto with no roll result has nothing new on screen yet, so it can move on right away
+ await sleep(ch.check?CONFIG.sceneReadDelay:0);lock(false);enter(state.scene);
 }
 
 async function act(kind,c){
@@ -1034,7 +1046,10 @@ async function act(kind,c){
  else if(Math.random()<.6)m+=' '+fill(pickFresh('say',f.say).text,f,w);
  showResult(r,m,before,calc);actSfx(kind,r);flashFoe(kind,r);
  {const L={strike:['Struck','Missed'],wild:['Landed a reckless blow on','Missed a reckless blow on'],aim:['Landed an aimed shot on','Missed an aimed shot on'],guard:['Held a guard against','Lost a guard against'],env:['Used the environment against','Failed to use the environment against']}[kind],dealt=fh-f.hp;
- logAct(actLine(`${L[r.pass?0:1]} ${f.name}${dealt?` for ${dealt}`:''}${f.hp<=0?', and it fell':''}`,before));}await sleep(900);lock(false);
+ logAct(actLine(`${L[r.pass?0:1]} ${f.name}${dealt?` for ${dealt}`:''}${f.hp<=0?', and it fell':''}`,before));}
+ // a kill or a player death is the last action before the scene changes -- give the result text (and any
+ // loot) time to be read before it cuts away. Mid-fight, keep the normal, snappier round-to-round pace.
+ await sleep(state.fight?900:CONFIG.sceneReadDelay);lock(false);
  if(state.fight){show();}else enter(state.scene);
 }
 /* ===== AUDIO: voice-over and sound effects. Flags: CONFIG.voice, CONFIG.sfx (also the buttons in the status panel) ===== */

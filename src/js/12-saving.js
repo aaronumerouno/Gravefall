@@ -132,6 +132,16 @@ function renderHud(){hideTip();
 }
 const info=i=>`${CAT_LABEL[i.slot]} — `+((i.slot==='melee'||i.slot==='gun')?`Damage ${i.atk}, accuracy ${i.acc>=0?'+':''}${i.acc}`:(i.slot==='body'||i.slot==='legs')?`Armor ${i.dr}`+(i.stat?`, ${statLine(i)}`:''):`Heals ${i.heal}`);
 const nm=id=>ITEMS[id].n+(ITEMS[id].tier?` (${ITEMS[id].tier})`:'');
+function lootHint(i){const cur=state.eq[i.slot]?ITEMS[state.eq[i.slot]]:null;
+ if(i.slot==='melee'||i.slot==='gun'){if(!cur)return `You have no ${CAT_LABEL[i.slot].toLowerCase()} equipped — this fills that gap.`;
+  if(i.atk>cur.atk)return `Hits harder than your ${nm(state.eq[i.slot])} (${i.atk} vs ${cur.atk} damage).`;
+  if(i.atk<cur.atk)return `Hits softer than your ${nm(state.eq[i.slot])} (${i.atk} vs ${cur.atk} damage) — only worth it for the accuracy.`;
+  return `About the same punch as your ${nm(state.eq[i.slot])} — compare the accuracy.`;}
+ if(i.slot==='body'||i.slot==='legs'){if(!cur)return `You have no ${CAT_LABEL[i.slot].toLowerCase()} equipped — this fills that gap.`;
+  if(i.dr>cur.dr)return `Tougher than your ${nm(state.eq[i.slot])} (Defense ${i.dr} vs ${cur.dr}).`;
+  if(i.dr<cur.dr)return `Less Defense than your ${nm(state.eq[i.slot])} (${i.dr} vs ${cur.dr}) — only worth it for the stat bonus.`;
+  return `Same Defense as your ${nm(state.eq[i.slot])} — compare the stat bonus.`;}
+ return `Heals ${i.heal} Vitality when used — worth keeping spare for a tougher fight ahead.`;}
 function btn(t,fn,p){const b=document.createElement('button');b.innerHTML=t;b.onclick=fn;(p||$('choices')).append(b);return b;}
 
 function renderPack(){

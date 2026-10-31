@@ -99,7 +99,7 @@ Every risky action is one d20 roll plus a stat against a target number. A natura
 
 **Damage you take:** enemy Attack (plus 2 after a missed reckless blow) minus your Defense (your armor) minus your Evasion (your Guile), never below 1.
 
-**One roll per round.** There is no separate enemy roll: when your roll fails, the enemy's attack lands. The result box shows the roll breakdown, the story line, the damage calculation and any change to Vitality or stats.
+**One roll per round.** There is no separate enemy roll: when your roll fails, the enemy's attack lands. The result box shows the roll breakdown, the story line, the damage calculation and any change to Vitality or stats, and stays visible as rounds continue within the same fight, so a hit-after-hit exchange reads as a running account rather than resetting each time. It clears the moment a new scene is entered (the next fight, the next story choice, a new chapter), so no scene opens showing a stale result from whatever happened before it.
 
 **Loot.** Small monsters drop weak items and big monsters drop strong ones. You may take it, leave it, or swap it for something in a full pack. Healing items are used from the pack: Rattlesnake Stim heals 6, Lazarus Trauma Kit heals 12. If the player doesn't yet own a melee weapon or a gun, a drop has a 60% chance of being weighted toward one that fills the gap, so an opening-kit choice isn't left waiting too long for its other weapon.
 

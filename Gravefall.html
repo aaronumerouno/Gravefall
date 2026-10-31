@@ -750,7 +750,7 @@ const isUnlocked=n=>n===1||!!(SAVES.unlocked&&SAVES.unlocked[n]);
 function goToChapter(n){
  if(!isUnlocked(n))return;
  SAVES[state.chapter]=state;stopVoice();
- if(SAVES[n]){state=SAVES[n];show();}else{state=freshState(n);enter(START[n]);}
+ if(SAVES[n]){state=SAVES[n];$('roll').classList.remove('show');$('result').textContent='';show();}else{state=freshState(n);enter(START[n]);}
  buildChapters();
 }
 function buildChapters(){const box=$('chapters'),all=()=>box.querySelectorAll('details');let lock=false;
@@ -762,7 +762,7 @@ function buildChapters(){const box=$('chapters'),all=()=>box.querySelectorAll('d
   d.querySelector('summary').addEventListener('click',e=>{if(!isUnlocked(+d.id.slice(2)))e.preventDefault();});
   d.addEventListener('toggle',()=>{if(lock||!d.open)return;lock=true;
    all().forEach(o=>{if(o!==d)o.open=false;});d.querySelector('.chapbody').append($('layout'));
-   const n=+d.id.slice(2);if(n!==state.chapter){SAVES[state.chapter]=state;stopVoice();if(SAVES[n]){state=SAVES[n];show();}else{state=freshState(n);enter(START[n]);}}
+   const n=+d.id.slice(2);if(n!==state.chapter){SAVES[state.chapter]=state;stopVoice();if(SAVES[n]){state=SAVES[n];$('roll').classList.remove('show');$('result').textContent='';show();}else{state=freshState(n);enter(START[n]);}}
    setTimeout(()=>{lock=false;},0);});
  });
  $('ch'+state.chapter).open=true;}
@@ -853,6 +853,7 @@ function loadSave(){
 function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
 
 function enter(id){state.scene=id;const f=SCENES[id].fight;state.fight=f?{...f,max:f.hp,used:{},envBoost:{},envDr:0,envUsed:false}:null;state.lp=0;
+ $('roll').classList.remove('show');$('result').textContent=''; // a new scene starts fresh -- the previous scene's last roll shouldn't linger
  if(SCENES[id].end&&id!=='dead'){SAVES.carry={inv:state.inv.slice(),eq:{...state.eq},boost:{...state.boost}};
   if(!SAVES.unlocked)SAVES.unlocked={1:1};SAVES.unlocked[state.chapter+1]=1;buildChapters();}
  show();
